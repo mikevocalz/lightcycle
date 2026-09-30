@@ -16,6 +16,7 @@ import argparse, json, math, sys
 from pathlib import Path
 
 import bpy
+from mathutils import Vector
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = json.loads((ROOT / "spec/lightcycle.spec.json").read_text())
@@ -117,8 +118,23 @@ def build_rider(j):
 
 
 def xz(name):
+    """World-space geometry centre, not the object origin.
+
+    Production bmeshes are authored in world space and several objects keep an
+    origin chosen for animation rather than for measurement. The bounding-box
+    centre is therefore the correct ergonomics probe.
+    """
     o = bpy.data.objects.get(name)
-    return None if o is None else (o.matrix_world.translation.x, o.matrix_world.translation.z)
+    if o is None:
+        return None
+    if o.type == "MESH" and o.data.vertices:
+        corners = [o.matrix_world @ Vector(c) for c in o.bound_box]
+        return (
+            sum(p.x for p in corners) / len(corners),
+            sum(p.z for p in corners) / len(corners),
+        )
+    p = o.matrix_world.translation
+    return (p.x, p.z)
 
 
 def wheel_clear(j):
@@ -200,7 +216,12 @@ def report(j, arm_state, leg_state):
 
 
 def main():
-    argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
+    if "--" in sys.argv:
+        argv = sys.argv[sys.argv.index("--") + 1:]
+    else:
+        custom = {"--hip-x", "--hip-z", "--grip", "--peg", "--save"}
+        positions = [i for i, value in enumerate(sys.argv) if value in custom]
+        argv = sys.argv[min(positions):] if positions else []
     ap = argparse.ArgumentParser()
     ap.add_argument("--hip-x", type=float, default=0.02)
     ap.add_argument("--hip-z", type=float, default=0.62)
@@ -217,7 +238,7 @@ def main():
         out = ROOT / "assets/source/lightcycle_rider_check.blend"
         bpy.ops.wm.save_as_mainfile(filepath=str(out))
         print(f"saved {out}")
-    sys.exit(0 if not fails else 0)  # reporting tool; never fails the build
+    sys.exit(0 if not fails else 1)
 
 
 main()
