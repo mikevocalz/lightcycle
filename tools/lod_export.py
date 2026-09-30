@@ -25,6 +25,25 @@ TARGETS = {
 }
 
 
+def apply_render_modifiers():
+    """Bake the source bevel stack before LOD measurement/decimation.
+
+    LOD budgets must describe what ships, not the pre-bevel control cage.
+    Collision proxies remain untouched and are hidden from render export.
+    """
+    for o in bpy.context.scene.objects:
+        if o.type != "MESH" or o.name.startswith("COL_"):
+            continue
+        if not o.modifiers:
+            continue
+        bpy.ops.object.select_all(action="DESELECT")
+        o.select_set(True)
+        bpy.context.view_layer.objects.active = o
+        for mod in list(o.modifiers):
+            bpy.ops.object.modifier_apply(modifier=mod.name)
+        o.select_set(False)
+
+
 def tri_count():
     total = 0
     for o in bpy.context.scene.objects:
@@ -103,6 +122,7 @@ def main():
     ap.add_argument("--lod", type=int, choices=range(4), required=True)
     args = ap.parse_args(argv)
 
+    apply_render_modifiers()
     target = TARGETS[args.lod]
     before = tri_count()
     after = before
