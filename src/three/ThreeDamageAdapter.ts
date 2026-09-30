@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { damageRuntime } from '../runtime/damage.ts'
+import { DAMAGE_NODES, damageRuntime } from '../runtime/damage.ts'
 import type { Player } from '../state/cycleStore.ts'
 
 /**
@@ -18,12 +18,7 @@ export function applyThreeDamage(
     const node = root.getObjectByName(name)
     if (node) node.visible = state.derezProgress < 0.78
   }
-  for (const name of [
-    'LC_Damage_Nose_L', 'LC_Damage_Nose_R',
-    'LC_Damage_Panel_L1', 'LC_Damage_Panel_L2',
-    'LC_Damage_Panel_R1', 'LC_Damage_Panel_R2',
-    'LC_Damage_Rear_L', 'LC_Damage_Rear_R', 'LC_Damage_ReactorCover',
-  ]) {
+  for (const name of DAMAGE_NODES) {
     if (!detached.has(name)) {
       const node = root.getObjectByName(name)
       if (node) node.visible = true
