@@ -9,7 +9,13 @@
   "userDecision": "Match visible reference shape; preserve current wheels",
   "visualAcceptance": "pending; no human approval; blocking final completion/merge",
   "localTechnical": "pass",
-  "remoteCI": "in progress; inspect PR checks for current commit",
+  "remoteCI": {
+    "status": "pass",
+    "testedCommit": "58ac572a23cee1239e8d3a2c8c8ff9d58430a22e",
+    "run": "https://github.com/mikevocalz/lightcycle/actions/runs/36754410085",
+    "receipt": "docs/review/ci-run.json",
+    "scope": "Full production verification; subsequent handoff-only commit does not change model/runtime/check sources. Inspect latest PR checks before merge."
+  },
   "pullRequest": "https://github.com/mikevocalz/lightcycle/pull/2",
   "handoff": "docs/HANDOFF.md",
   "taskLedger": "docs/handoff/TASKS.json",
@@ -27,13 +33,13 @@
     "Rest-pose, steering-pivot, texture wiring, KTX2 preview and collision-visibility fixes",
     "Required local technical pipeline and final renders",
     "Actual browser six colors/lights-off/one-GLB check",
-    "Committed, pushed and opened draft PR #2"
+    "Committed, pushed and opened draft PR #2",
+    "Full remote production CI passed, including 20 renders and artifact upload"
   ],
   "remaining": [
     "Human reference-fidelity review and any requested primary-body revisions",
     "Wheel UV/normal shading review",
-    "Conditional merge only with human visual approval and green technical checks",
-    "Remote CI must pass before merge"
+    "Conditional merge only with human visual approval and green technical checks"
   ],
   "limitations": [
     "No hardware FPS/native Viro host verification",

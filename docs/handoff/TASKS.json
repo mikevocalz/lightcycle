@@ -184,9 +184,16 @@
         "runtime_regression",
         "final_matrix"
       ],
-      "next": "Draft PR #2 is open and pushed. Inspect remote CI and wait for explicit visual approval; do not merge automatically."
+      "next": "Draft PR #2 is pushed. Full production CI passed on 58ac572a23cee1239e8d3a2c8c8ff9d58430a22e. Final handoff update only changes documentation/evidence. Explicit human visual approval and latest green PR checks remain required before merge."
     }
   ],
   "activeProcesses": [],
-  "pullRequest": "https://github.com/mikevocalz/lightcycle/pull/2"
+  "pullRequest": "https://github.com/mikevocalz/lightcycle/pull/2",
+  "remoteCI": {
+    "status": "pass",
+    "testedCommit": "58ac572a23cee1239e8d3a2c8c8ff9d58430a22e",
+    "run": "https://github.com/mikevocalz/lightcycle/actions/runs/36754410085",
+    "receipt": "docs/review/ci-run.json",
+    "scope": "Full production verification; subsequent handoff-only commit does not change model/runtime/check sources. Inspect latest PR checks before merge."
+  }
 }

@@ -48,7 +48,13 @@
     }
   },
   "technicalLocal": "pass",
-  "remoteCI": "pending PR",
+  "remoteCI": {
+    "status": "pass",
+    "testedCommit": "58ac572a23cee1239e8d3a2c8c8ff9d58430a22e",
+    "run": "https://github.com/mikevocalz/lightcycle/actions/runs/36754410085",
+    "receipt": "docs/review/ci-run.json",
+    "scope": "Full production verification; subsequent handoff-only commit does not change model/runtime/check sources. Inspect latest PR checks before merge."
+  },
   "visualAcceptance": "pending; no human approval",
   "checks": {
     "typecheck": "pass",

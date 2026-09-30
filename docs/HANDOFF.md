@@ -66,6 +66,8 @@ Wheel geometry/parent/pivot regression passes17 meshes/22 nodes/109712 triangles
 max position delta1.33e-7m. Normal drift up to3.65° and changed UVs remain explicit
 shading-review items; do not claim byte-identical shading.
 
+Remote production CI **passed** on `58ac572a23cee1239e8d3a2c8c8ff9d58430a22e`: [run 36754410085](https://github.com/mikevocalz/lightcycle/actions/runs/36754410085). The clean Linux run rebuilt and validated canonical/packed/LOD assets, passed runtime, texture, wheel and rider/canopy checks, rendered all 20 QA views and uploaded production evidence. [Retained receipt](review/ci-run.json). The final checkpoint commit changes handoff documentation/evidence only; inspect latest PR checks before merge.
+
 ## Unfinished gates and exact next action
 
 1. **Visual fidelity remains open.** Inspect the comparison honestly. Primary
@@ -76,7 +78,7 @@ shading-review items; do not claim byte-identical shading.
    request changes, refine those primary shapes, rebuild and regenerate affected
    evidence. Do not add decorative detail to hide a wrong silhouette.
 3. Draft PR #2 is committed, pushed and open. Keep it draft/unmerged while visual
-   review or remote CI is pending. Inspect current PR check state on resume. Merge
+   review is pending. Full production CI passed; inspect current PR check state on resume. Merge
    only after both technical checks and explicit human visual confirmation.
 4. Native Viro/Quest/PICO host/device behavior and FPS remain unverified because
    no native host or headset is present. Rive is a binding interface, not .riv art.
