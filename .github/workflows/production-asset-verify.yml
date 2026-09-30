@@ -1,0 +1,101 @@
+name: production-asset-verify
+
+on:
+  push:
+    branches:
+      - main
+      - 'finish/**'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lightcycle-verify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node 26
+        uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+          cache: npm
+
+      - name: Install JS dependencies
+        run: npm ci
+
+      - name: Install Blender 5.2.1
+        shell: bash
+        run: |
+          set -euxo pipefail
+          curl -fL https://download.blender.org/release/Blender5.2/blender-5.2.1-linux-x64.tar.xz -o "$RUNNER_TEMP/blender.tar.xz"
+          mkdir -p "$RUNNER_TEMP/blender"
+          tar -xJf "$RUNNER_TEMP/blender.tar.xz" -C "$RUNNER_TEMP/blender" --strip-components=1
+          echo "$RUNNER_TEMP/blender" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/blender/blender" --version
+
+      - name: Install native gltfpack 1.3
+        shell: bash
+        run: |
+          set -euxo pipefail
+          curl -fL https://github.com/zeux/meshoptimizer/releases/download/v1.3/gltfpack-ubuntu.zip -o "$RUNNER_TEMP/gltfpack.zip"
+          mkdir -p "$RUNNER_TEMP/gltfpack"
+          unzip -j -o "$RUNNER_TEMP/gltfpack.zip" -d "$RUNNER_TEMP/gltfpack"
+          chmod +x "$RUNNER_TEMP/gltfpack/gltfpack"
+          echo "$RUNNER_TEMP/gltfpack" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/gltfpack/gltfpack" -h >/dev/null
+
+      - name: Python syntax gate
+        run: python3 -m compileall -q tools
+
+      - name: TypeScript and runtime tests
+        run: |
+          npm run typecheck
+          npm test
+
+      - name: Build canonical production GLB
+        run: npm run build:glb
+
+      - name: Validate canonical contract
+        run: npm run validate
+
+      - name: Rider ergonomics
+        run: npm run rider
+
+      - name: Pack runtime GLB with KTX2
+        run: npm run pack
+
+      - name: Build and validate LOD0-LOD3
+        run: npm run lods
+
+      - name: Static asset budgets
+        run: npm run profile
+
+      - name: Lights-off and color QA smoke matrix
+        run: npm run qa:ci
+
+      - name: Upload production evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lightcycle-production-evidence-${{ github.sha }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            assets/source/lightcycle_blockout.blend
+            assets/export/lightcycle.glb
+            assets/export/lightcycle.runtime.glb
+            assets/export/lightcycle.lod*.glb
+            assets/export/manifest.json
+            assets/export/performance.json
+            assets/textures/generated/**
+            assets/render/**
