@@ -3,11 +3,10 @@
 
     blender --background --python tools/build_lightcycle.py
 
-What this produces today is a dimensionally-correct BLOCKOUT: every contractual
-node exists with the right parent and the right pivot, wearing the real material
-library at real PBR values. The hard-surface modelling replaces the proxy mesh
-inside each node without touching a single name, so the adapters, the validator
-and the manifest keep working throughout.
+What this produces is the canonical production hierarchy: every contractual node
+exists with the right parent, material, and physical pivot. Hard-surface builders
+replace proxy geometry without touching names, so adapters, validation, animation,
+and the manifest stay stable throughout production.
 
 Verified against Blender 5.2.1 LTS. Socket names are the 5.x ones ('Coat Weight',
 'Transmission Weight'); the 'Clearcoat *' names of older releases do not exist.
@@ -16,6 +15,7 @@ import json, math, sys
 from pathlib import Path
 
 import bpy
+from mathutils import Vector
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import geo  # noqa: E402 - real hard-surface builders, dispatched per node name
@@ -210,6 +210,48 @@ COL_PROXY = {
     "COL_LC_RiderZone": ((0.05, 0, 0.70), (0.55, 0.20, 0.16)),
 }
 
+def production_pivot(name: str):
+    """World-space origin for nodes animated directly rather than through a parent.
+
+    Production bmeshes are authored in world coordinates. Without moving the mesh
+    data back around the physical pivot and placing the object origin there, a
+    perfectly named reactor ring or canopy panel rotates around world (0,0,0).
+    """
+    half_w = D["width"] / 2
+    if name == "LC_Reactor_Core" or name.startswith(("LC_Reactor_Ring_", "LC_Gyro_")):
+        return (0.30, 0.0, AXLE_Z - 0.06)
+    if name.startswith("LC_Canopy_") and name in {"LC_Canopy_L", "LC_Canopy_R"}:
+        side = 1 if name.endswith("_L") else -1
+        y = side * half_w * 0.86 * 0.62
+        return (0.62, y, 0.755)
+    if name.startswith("LC_DeployArm_"):
+        side = 1 if name.endswith("_L") else -1
+        y = side * half_w * 0.73 * 0.72
+        return (0.44, y, 0.735)
+    damage = {
+        "LC_Damage_Nose_L": (-0.655, half_w * 0.86 * 1.10, 0.50),
+        "LC_Damage_Nose_R": (-0.655, -half_w * 0.86 * 1.10, 0.50),
+        "LC_Damage_Panel_L1": (-0.155, half_w * 0.86 * 1.10, 0.49),
+        "LC_Damage_Panel_L2": (0.155, half_w * 0.86 * 1.10, 0.49),
+        "LC_Damage_Panel_R1": (-0.155, -half_w * 0.86 * 1.10, 0.49),
+        "LC_Damage_Panel_R2": (0.155, -half_w * 0.86 * 1.10, 0.49),
+        "LC_Damage_Rear_L": (0.610, half_w * 0.86 * 1.10, 0.49),
+        "LC_Damage_Rear_R": (0.610, -half_w * 0.86 * 1.10, 0.49),
+        "LC_Damage_ReactorCover": (0.30, half_w * 0.82, 0.40),
+    }
+    return damage.get(name)
+
+
+def set_mesh_origin_world(obj, pivot):
+    """Move an object's origin to a world pivot without moving visible geometry."""
+    if pivot is None or obj.type != "MESH":
+        return
+    p = Vector(pivot)
+    for v in obj.data.vertices:
+        v.co -= p
+    obj.location = p
+
+
 EMPTY_AT = {
     # Pivots that must sit on real hardware, not the world origin: wheel spin
     # happens about the axle and the reactor rings counter-rotate about the core.
@@ -235,6 +277,7 @@ def make_mesh(entry, mats):
             o = geo.L.obj_from_bm(bm, n)
             o.data.shade_smooth()
             geo.L.bevel_obj(o, width=0.0022, segments=2, angle_deg=32.0)
+            set_mesh_origin_world(o, production_pivot(n))
             o["lc_geometry"] = "production"
             return o
 
