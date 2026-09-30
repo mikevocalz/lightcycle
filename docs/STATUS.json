@@ -97,14 +97,19 @@
       "item": "reference pack path fixed",
       "where": "docs/references/",
       "detail": "The master doc pointed at references/07_generated_hybrid_concept.png, a file and directory that never existed in the handoff. The three generated concepts are now committed under docs/references/ and the doc points at them."
+    },
+    {
+      "item": "production geometry pipeline + both wheel assemblies",
+      "where": "tools/geo/",
+      "detail": "Per-node-name dispatch so production geometry replaces proxies incrementally. Hubless wheels: revolved tyre section, stator with radial webs, roller bearings, ventilated brake disc, caliper, suspension, rear drive, steering yoke. 18 nodes, 25,688 -> 47,288 tris."
     }
   ],
   "partial": [
     {
       "item": "the model itself",
-      "state": "BLOCKOUT, not AAA",
-      "detail": "Every contractual node exists at the right size and pivot, wearing the real material library, but the mesh inside each node is a primitive proxy. It does not yet pass the doc 18 gate and is not close. The hard-surface modelling is the remaining bulk of the work; it replaces proxy meshes in place without touching any name, so the adapters, validator and manifest keep working throughout.",
-      "next": "Model in this order, since each unblocks the next visual judgement: front wheel assembly, reactor, chassis shells, cockpit, canopy."
+      "state": "18 of 78 mesh nodes production, 60 proxy",
+      "detail": "Both wheel assemblies are finished hard-surface geometry built via tools/geo/. The remaining 60 mesh nodes are still blockout proxies, so the asset does NOT yet pass the lights-off gate. tools/geo/ dispatches per node name, so each assembly can be finished without touching the contract.",
+      "next": "Central reactor (tools/geo/reactor.py), then chassis shells, cockpit, canopy, damage panels."
     },
     {
       "item": "LOD chain",
@@ -130,12 +135,10 @@
     }
   ],
   "notStarted": [
-    "ViroLightCycleMaterialAdapter (deliverable 8) - research agent still running",
     "six-color runtime preview selector (10)",
     "Rive HUD/leaderboard color binding (11)",
     "runtime Light Ribbon (12)",
-    "damage/derezz implementation (14)",
-    "rider proxy, and the ergonomics check that depends on it"
+    "damage/derezz implementation (14)"
   ],
   "verified": [
     "tsc --noEmit: clean",
@@ -146,7 +149,8 @@
     "GLB animation names are exactly ['LC_WheelSpin', 'LC_ReactorIdle']",
     "tools/rider_proxy.py: 4/4 contact points reachable and matched, rear-wheel clearance ok, canopy clears the rider",
     "src/viro/adapter.test.ts: 5/5 - no material-name collision between players, energy is Constant+Add, colours differ, lightsOff drops out of the bloom pass and does not leak across players",
-    "npm run pack: 581,904 -> 233,528 bytes, validator 0 errors on the packed GLB, all 102 named nodes survive -kn"
+    "npm run pack: 581,904 -> 233,528 bytes, validator 0 errors on the packed GLB, all 102 named nodes survive -kn",
+    "npm run rider still ALL PASS after the wheel geometry change"
   ],
   "decisionsMade": [
     {
