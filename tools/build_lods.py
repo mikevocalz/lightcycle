@@ -20,19 +20,31 @@ def run(cmd):
         raise SystemExit(r.returncode)
 
 
+def pack_lod(gltfpack: str, lod: int):
+    src = ROOT / f"assets/export/lightcycle.lod{lod}.glb"
+    out = ROOT / f"assets/export/lightcycle.lod{lod}.runtime.glb"
+    run([gltfpack, "-i", str(src), "-o", str(out), "-kn", "-tc"])
+    run([sys.executable, str(VALIDATOR), str(out)])
+    print(f"LOD{lod} runtime -> {out}")
+
+
 def main():
     blender = shutil.which("blender")
     if not blender:
         raise SystemExit("blender not on PATH")
     if not BLEND.exists():
         raise SystemExit(f"{BLEND} missing; run npm run build:glb first")
+    gltfpack = shutil.which("gltfpack")
+    if not gltfpack:
+        raise SystemExit("gltfpack not on PATH; runtime LODs require native KTX2 packing")
 
     for lod in range(4):
         out = ROOT / f"assets/export/lightcycle.lod{lod}.glb"
         run([blender, "-b", str(BLEND), "-P", str(EXPORTER), "--", "--lod", str(lod)])
         run([sys.executable, str(VALIDATOR), str(out)])
+        pack_lod(gltfpack, lod)
 
-    print("LOD CHAIN OK: LOD0..LOD3 exported and node/clip contract validated")
+    print("LOD CHAIN OK: LOD0..LOD3 exported, KTX2-packed, and contract validated")
 
 
 if __name__ == "__main__":
