@@ -32,6 +32,11 @@ jobs:
       - name: Install JS dependencies
         run: npm ci
 
+      - name: Install Blender headless EGL dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libegl1 libgl1
+
       - name: Install Blender 5.2.1
         shell: bash
         run: |
