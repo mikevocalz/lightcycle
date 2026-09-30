@@ -489,7 +489,7 @@ def push_tracks():
 
 
 def author_clips(made: dict):
-    """All 18 declared clips, driven by real pivots.
+    """Author the 18 renderer-neutral clips plus Viro composite compatibility clips.
 
     Nothing here scales the bike or fakes motion with a morph - the doc forbids
     it and the modular hierarchy exists precisely so it is not needed.
@@ -586,6 +586,101 @@ def author_clips(made: dict):
         key(M[nm], "LC_Derez", "location", 2, [(1, 0.0), (30, 0.10 + 0.02 * i)])
         key(M[nm], "LC_Derez", "rotation_euler", AXIS["y"], [(1, 0.0), (30, 1.1 + 0.2 * i)])
     key(M["LC_Reactor_Core"], "LC_Derez", "scale", 0, [(1, 1.0), (14, 1.6), (30, 0.02)])
+
+    # --- Viro single-active-animation compatibility ----------------------
+    # ViroReact 3.x exposes named GLB clips but does not layer/blend several
+    # embedded animations at once. These renderer-compatibility tracks combine
+    # the same real pivots into the common gameplay states while preserving the
+    # original 18 independent clips for Three.js and other capable runtimes.
+    def viro_drive(track, frames=48, wheel_turns=1.0, ring_gain=2.0,
+                   gyro_turns=0.45, steer=0.0):
+        for w in wheels:
+            spin(w, track, wheel_turns, frames)
+        for r, t in rings:
+            spin(r, track, t * ring_gain, frames)
+        for g, ax in gyros:
+            spin(g, track, gyro_turns, frames, axis=ax)
+        if steer:
+            key(yoke, track, "rotation_euler", AXIS["z"],
+                [(1, steer), (frames, steer)], interp="LINEAR")
+
+    # Stationary reactor life.
+    for r, t in rings:
+        spin(r, "LC_Viro_Idle", t * 0.45, 96)
+    for g, ax in gyros:
+        spin(g, "LC_Viro_Idle", 0.12, 96, axis=ax)
+    key(M["LC_Reactor_Core"], "LC_Viro_Idle", "scale", 0,
+        [(1, 1.0), (48, 1.015), (96, 1.0)])
+
+    viro_drive("LC_Viro_Drive")
+    viro_drive("LC_Viro_DriveSteerLeft", steer=0.42)
+    viro_drive("LC_Viro_DriveSteerRight", steer=-0.42)
+
+    # Brake combines wheel/reactor motion with the physical suspension dive.
+    viro_drive("LC_Viro_Brake", frames=30, wheel_turns=0.55, ring_gain=0.65, gyro_turns=0.12)
+    for sp in susp:
+        key(sp, "LC_Viro_Brake", "location", 2,
+            [(1, 0.0), (8, -0.028), (20, -0.018), (30, 0.0)])
+    key(root, "LC_Viro_Brake", "rotation_euler", AXIS["y"],
+        [(1, 0.0), (9, -0.055), (30, 0.0)])
+
+    # Boost transitions keep wheel motion present while reactor/core ramp.
+    for track, frames, wt, rg in (
+        ("LC_Viro_BoostEnter", 18, 1.4, 2.8),
+        ("LC_Viro_BoostLoop", 24, 3.0, 5.0),
+        ("LC_Viro_BoostExit", 22, 1.3, 1.8),
+    ):
+        viro_drive(track, frames=frames, wheel_turns=wt, ring_gain=rg, gyro_turns=rg * 0.18)
+    key(M["LC_Reactor_Core"], "LC_Viro_BoostEnter", "scale", 0, [(1, 1.0), (18, 1.22)])
+    key(M["LC_Reactor_Core"], "LC_Viro_BoostLoop", "scale", 0,
+        [(1, 1.22), (12, 1.30), (24, 1.22)])
+    key(M["LC_Reactor_Core"], "LC_Viro_BoostExit", "scale", 0, [(1, 1.22), (22, 1.0)])
+
+    # High-speed mode: the single clip owns driving plus the real canopy hinges.
+    for track, frames, closed0, closed1 in (
+        ("LC_Viro_HighSpeedEnter", 36, 0.0, 1.0),
+        ("LC_Viro_HighSpeedLoop", 48, 1.0, 1.0),
+        ("LC_Viro_HighSpeedExit", 30, 1.0, 0.0),
+    ):
+        viro_drive(track, frames=frames, wheel_turns=2.4, ring_gain=3.2, gyro_turns=0.85)
+        for nm, sgn in (("LC_Canopy_L", 1), ("LC_Canopy_R", -1)):
+            key(M[nm], track, "rotation_euler", AXIS["x"],
+                [(1, -1.15 * sgn * closed0), (frames, -1.15 * sgn * closed1)], interp="LINEAR")
+        for nm, sgn in (("LC_DeployArm_L", 1), ("LC_DeployArm_R", -1)):
+            key(M[nm], track, "rotation_euler", AXIS["y"],
+                [(1, 0.62 * sgn * closed0), (frames, 0.62 * sgn * closed1)], interp="LINEAR")
+        key(M["LC_RearCanopy"], track, "location", 0,
+            [(1, -0.115 * closed0), (frames, -0.115 * closed1)], interp="LINEAR")
+
+    # Damage keeps the drivetrain alive while sacrificial panels loosen.
+    viro_drive("LC_Viro_Damage", frames=26, wheel_turns=0.45, ring_gain=0.4, gyro_turns=0.10)
+    for nm in ("LC_Damage_Panel_L1", "LC_Damage_Panel_R2", "LC_Damage_Nose_L"):
+        key(M[nm], "LC_Viro_Damage", "rotation_euler", AXIS["y"],
+            [(1, 0.0), (10, 0.22), (26, 0.16)])
+        key(M[nm], "LC_Viro_Damage", "location", 2,
+            [(1, 0.0), (10, 0.012), (26, 0.008)])
+
+    viro_drive("LC_Viro_Crash", frames=34, wheel_turns=0.35, ring_gain=0.25, gyro_turns=0.06)
+    key(root, "LC_Viro_Crash", "rotation_euler", AXIS["x"],
+        [(1, 0.0), (12, 0.9), (34, 1.55)])
+    key(root, "LC_Viro_Crash", "location", 2,
+        [(1, 0.0), (8, 0.14), (34, -0.05)])
+    for sp in susp:
+        key(sp, "LC_Viro_Crash", "location", 2,
+            [(1, 0.0), (10, -0.035), (34, -0.02)])
+
+    for i, nm in enumerate(("LC_Damage_Nose_L", "LC_Damage_Nose_R", "LC_Damage_Panel_L1",
+                            "LC_Damage_Panel_L2", "LC_Damage_Panel_R1", "LC_Damage_Panel_R2",
+                            "LC_Damage_Rear_L", "LC_Damage_Rear_R", "LC_Damage_ReactorCover")):
+        d = 0.16 + 0.03 * i
+        key(M[nm], "LC_Viro_Derez", "location", 1,
+            [(1, 0.0), (30, d * (1 if i % 2 else -1))])
+        key(M[nm], "LC_Viro_Derez", "location", 2,
+            [(1, 0.0), (30, 0.10 + 0.02 * i)])
+        key(M[nm], "LC_Viro_Derez", "rotation_euler", AXIS["y"],
+            [(1, 0.0), (30, 1.1 + 0.2 * i)])
+    key(M["LC_Reactor_Core"], "LC_Viro_Derez", "scale", 0,
+        [(1, 1.0), (14, 1.6), (30, 0.02)])
 
     push_tracks()
 
