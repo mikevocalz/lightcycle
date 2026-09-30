@@ -1,0 +1,5 @@
+node_modules/
+assets/render/*.png
+assets/export/*.glb
+assets/export/manifest.json
+*.blend1

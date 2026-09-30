@@ -1,0 +1,636 @@
+{
+ "specVersion": "1.0.0",
+ "_note": "Flat list; parent builds the tree. Names are contractual - CI fails if any 'required' node disappears or is renamed. 'mat' keys index spec/lightcycle.spec.json materials.",
+ "nodes": [
+  {
+   "name": "LC_ROOT",
+   "parent": null,
+   "kind": "empty",
+   "required": true
+  },
+  {
+   "name": "LC_Chassis",
+   "parent": "LC_ROOT",
+   "kind": "empty"
+  },
+  {
+   "name": "LC_Body_Core",
+   "parent": "LC_Chassis",
+   "kind": "mesh",
+   "mat": "MAT_LC_GRAPHITE"
+  },
+  {
+   "name": "LC_Body_Spine",
+   "parent": "LC_Chassis",
+   "kind": "mesh",
+   "mat": "MAT_LC_GRAPHITE"
+  },
+  {
+   "name": "LC_Belly",
+   "parent": "LC_Chassis",
+   "kind": "mesh",
+   "mat": "MAT_LC_GRAPHITE"
+  },
+  {
+   "name": "LC_Nose_Shell_L",
+   "parent": "LC_Chassis",
+   "kind": "mesh",
+   "mat": "MAT_LC_BLACK_CLEARCOAT"
+  },
+  {
+   "name": "LC_Nose_Shell_R",
+   "parent": "LC_Chassis",
+   "kind": "mesh",
+   "mat": "MAT_LC_BLACK_CLEARCOAT"
+  },
+  {
+   "name": "LC_Mid_Shell_L",
+   "parent": "LC_Chassis",
+   "kind": "mesh",
+   "mat": "MAT_LC_BLACK_CLEARCOAT"
+  },
+  {
+   "name": "LC_Mid_Shell_R",
+   "parent": "LC_Chassis",
+   "kind": "mesh",
+   "mat": "MAT_LC_BLACK_CLEARCOAT"
+  },
+  {
+   "name": "LC_Rear_Shell_L",
+   "parent": "LC_Chassis",
+   "kind": "mesh",
+   "mat": "MAT_LC_BLACK_CLEARCOAT"
+  },
+  {
+   "name": "LC_Rear_Shell_R",
+   "parent": "LC_Chassis",
+   "kind": "mesh",
+   "mat": "MAT_LC_BLACK_CLEARCOAT"
+  },
+  {
+   "name": "LC_Underbody",
+   "parent": "LC_Chassis",
+   "kind": "mesh",
+   "mat": "MAT_LC_GRAPHITE"
+  },
+  {
+   "name": "LC_Armor_L",
+   "parent": "LC_Chassis",
+   "kind": "mesh",
+   "mat": "MAT_LC_CARBON"
+  },
+  {
+   "name": "LC_Armor_R",
+   "parent": "LC_Chassis",
+   "kind": "mesh",
+   "mat": "MAT_LC_CARBON"
+  },
+  {
+   "name": "LC_FrontAssembly",
+   "parent": "LC_ROOT",
+   "kind": "empty"
+  },
+  {
+   "name": "LC_Wheel_Front",
+   "parent": "LC_FrontAssembly",
+   "kind": "empty",
+   "spin": "x",
+   "required": true
+  },
+  {
+   "name": "LC_Wheel_Front_OuterRing",
+   "parent": "LC_Wheel_Front",
+   "kind": "mesh",
+   "mat": "MAT_LC_RUBBER",
+   "required": true
+  },
+  {
+   "name": "LC_Wheel_Front_InnerRing",
+   "parent": "LC_Wheel_Front",
+   "kind": "mesh",
+   "mat": "MAT_LC_MILLED_METAL",
+   "required": true
+  },
+  {
+   "name": "LC_Wheel_Front_Bearing",
+   "parent": "LC_Wheel_Front",
+   "kind": "mesh",
+   "mat": "MAT_LC_BRUSHED_METAL",
+   "required": true
+  },
+  {
+   "name": "LC_Wheel_Front_EnergyRing",
+   "parent": "LC_Wheel_Front",
+   "kind": "mesh",
+   "mat": "MAT_LC_EMISSIVE_PRIMARY",
+   "required": true
+  },
+  {
+   "name": "LC_Wheel_Front_BrakeDisc",
+   "parent": "LC_Wheel_Front",
+   "kind": "mesh",
+   "mat": "MAT_LC_BRUSHED_METAL"
+  },
+  {
+   "name": "LC_Wheel_Front_Caliper_L",
+   "parent": "LC_FrontAssembly",
+   "kind": "mesh",
+   "mat": "MAT_LC_BRUSHED_METAL"
+  },
+  {
+   "name": "LC_Wheel_Front_Caliper_R",
+   "parent": "LC_FrontAssembly",
+   "kind": "mesh",
+   "mat": "MAT_LC_BRUSHED_METAL"
+  },
+  {
+   "name": "LC_Wheel_Front_Suspension",
+   "parent": "LC_FrontAssembly",
+   "kind": "mesh",
+   "mat": "MAT_LC_MILLED_METAL"
+  },
+  {
+   "name": "LC_RearAssembly",
+   "parent": "LC_ROOT",
+   "kind": "empty"
+  },
+  {
+   "name": "LC_Wheel_Rear",
+   "parent": "LC_RearAssembly",
+   "kind": "empty",
+   "spin": "x",
+   "required": true
+  },
+  {
+   "name": "LC_Wheel_Rear_OuterRing",
+   "parent": "LC_Wheel_Rear",
+   "kind": "mesh",
+   "mat": "MAT_LC_RUBBER",
+   "required": true
+  },
+  {
+   "name": "LC_Wheel_Rear_InnerRing",
+   "parent": "LC_Wheel_Rear",
+   "kind": "mesh",
+   "mat": "MAT_LC_MILLED_METAL",
+   "required": true
+  },
+  {
+   "name": "LC_Wheel_Rear_Bearing",
+   "parent": "LC_Wheel_Rear",
+   "kind": "mesh",
+   "mat": "MAT_LC_BRUSHED_METAL",
+   "required": true
+  },
+  {
+   "name": "LC_Wheel_Rear_EnergyRing",
+   "parent": "LC_Wheel_Rear",
+   "kind": "mesh",
+   "mat": "MAT_LC_EMISSIVE_PRIMARY",
+   "required": true
+  },
+  {
+   "name": "LC_Wheel_Rear_BrakeDisc",
+   "parent": "LC_Wheel_Rear",
+   "kind": "mesh",
+   "mat": "MAT_LC_BRUSHED_METAL"
+  },
+  {
+   "name": "LC_Wheel_Rear_Caliper_L",
+   "parent": "LC_RearAssembly",
+   "kind": "mesh",
+   "mat": "MAT_LC_BRUSHED_METAL"
+  },
+  {
+   "name": "LC_Wheel_Rear_Caliper_R",
+   "parent": "LC_RearAssembly",
+   "kind": "mesh",
+   "mat": "MAT_LC_BRUSHED_METAL"
+  },
+  {
+   "name": "LC_Wheel_Rear_Suspension",
+   "parent": "LC_RearAssembly",
+   "kind": "mesh",
+   "mat": "MAT_LC_MILLED_METAL"
+  },
+  {
+   "name": "LC_SteeringYoke",
+   "parent": "LC_FrontAssembly",
+   "kind": "mesh",
+   "mat": "MAT_LC_MILLED_METAL",
+   "steer": "y"
+  },
+  {
+   "name": "LC_RearDrive",
+   "parent": "LC_RearAssembly",
+   "kind": "mesh",
+   "mat": "MAT_LC_BRUSHED_METAL"
+  },
+  {
+   "name": "LC_Reactor",
+   "parent": "LC_ROOT",
+   "kind": "empty"
+  },
+  {
+   "name": "LC_Reactor_Core",
+   "parent": "LC_Reactor",
+   "kind": "mesh",
+   "mat": "MAT_LC_EMISSIVE_CORE",
+   "required": true
+  },
+  {
+   "name": "LC_Reactor_Ring_A",
+   "parent": "LC_Reactor",
+   "kind": "mesh",
+   "mat": "MAT_LC_MILLED_METAL",
+   "spin": "x",
+   "required": true
+  },
+  {
+   "name": "LC_Reactor_Ring_B",
+   "parent": "LC_Reactor",
+   "kind": "mesh",
+   "mat": "MAT_LC_MILLED_METAL",
+   "spin": "x",
+   "required": true
+  },
+  {
+   "name": "LC_Reactor_Ring_C",
+   "parent": "LC_Reactor",
+   "kind": "mesh",
+   "mat": "MAT_LC_MILLED_METAL",
+   "spin": "x",
+   "required": true
+  },
+  {
+   "name": "LC_Gyro_X",
+   "parent": "LC_Reactor",
+   "kind": "mesh",
+   "mat": "MAT_LC_BRUSHED_METAL",
+   "spin": "x",
+   "required": true
+  },
+  {
+   "name": "LC_Gyro_Y",
+   "parent": "LC_Reactor",
+   "kind": "mesh",
+   "mat": "MAT_LC_BRUSHED_METAL",
+   "spin": "y",
+   "required": true
+  },
+  {
+   "name": "LC_Gyro_Z",
+   "parent": "LC_Reactor",
+   "kind": "mesh",
+   "mat": "MAT_LC_BRUSHED_METAL",
+   "spin": "z",
+   "required": true
+  },
+  {
+   "name": "LC_Reactor_Housing",
+   "parent": "LC_Reactor",
+   "kind": "mesh",
+   "mat": "MAT_LC_BRUSHED_METAL"
+  },
+  {
+   "name": "LC_Reactor_Energy",
+   "parent": "LC_Reactor",
+   "kind": "mesh",
+   "mat": "MAT_LC_EMISSIVE_REACTOR"
+  },
+  {
+   "name": "LC_Cockpit",
+   "parent": "LC_ROOT",
+   "kind": "empty"
+  },
+  {
+   "name": "LC_Handlebar_L",
+   "parent": "LC_Cockpit",
+   "kind": "mesh",
+   "mat": "MAT_LC_BRUSHED_METAL"
+  },
+  {
+   "name": "LC_Handlebar_R",
+   "parent": "LC_Cockpit",
+   "kind": "mesh",
+   "mat": "MAT_LC_BRUSHED_METAL"
+  },
+  {
+   "name": "LC_Control_L",
+   "parent": "LC_Cockpit",
+   "kind": "mesh",
+   "mat": "MAT_LC_BRUSHED_METAL"
+  },
+  {
+   "name": "LC_Control_R",
+   "parent": "LC_Cockpit",
+   "kind": "mesh",
+   "mat": "MAT_LC_BRUSHED_METAL"
+  },
+  {
+   "name": "LC_ChestSupport",
+   "parent": "LC_Cockpit",
+   "kind": "mesh",
+   "mat": "MAT_LC_GRAPHITE"
+  },
+  {
+   "name": "LC_ShinRest_L",
+   "parent": "LC_Cockpit",
+   "kind": "mesh",
+   "mat": "MAT_LC_GRAPHITE"
+  },
+  {
+   "name": "LC_ShinRest_R",
+   "parent": "LC_Cockpit",
+   "kind": "mesh",
+   "mat": "MAT_LC_GRAPHITE"
+  },
+  {
+   "name": "LC_FootRest_L",
+   "parent": "LC_Cockpit",
+   "kind": "mesh",
+   "mat": "MAT_LC_MILLED_METAL"
+  },
+  {
+   "name": "LC_FootRest_R",
+   "parent": "LC_Cockpit",
+   "kind": "mesh",
+   "mat": "MAT_LC_MILLED_METAL"
+  },
+  {
+   "name": "LC_RiderMount",
+   "parent": "LC_Cockpit",
+   "kind": "mesh",
+   "mat": "MAT_LC_MILLED_METAL"
+  },
+  {
+   "name": "LC_CockpitDisplay",
+   "parent": "LC_Cockpit",
+   "kind": "mesh",
+   "mat": "MAT_LC_SMOKED_GLASS"
+  },
+  {
+   "name": "LC_RearCanopy",
+   "parent": "LC_ROOT",
+   "kind": "empty"
+  },
+  {
+   "name": "LC_Canopy_Center",
+   "parent": "LC_RearCanopy",
+   "kind": "mesh",
+   "mat": "MAT_LC_BLACK_CLEARCOAT"
+  },
+  {
+   "name": "LC_Canopy_L",
+   "parent": "LC_RearCanopy",
+   "kind": "mesh",
+   "mat": "MAT_LC_BLACK_CLEARCOAT",
+   "hinge": "z",
+   "required": true
+  },
+  {
+   "name": "LC_Canopy_R",
+   "parent": "LC_RearCanopy",
+   "kind": "mesh",
+   "mat": "MAT_LC_BLACK_CLEARCOAT",
+   "hinge": "z",
+   "required": true
+  },
+  {
+   "name": "LC_BackSupport",
+   "parent": "LC_RearCanopy",
+   "kind": "mesh",
+   "mat": "MAT_LC_CARBON"
+  },
+  {
+   "name": "LC_DeployArm_L",
+   "parent": "LC_RearCanopy",
+   "kind": "mesh",
+   "mat": "MAT_LC_MILLED_METAL",
+   "hinge": "x"
+  },
+  {
+   "name": "LC_DeployArm_R",
+   "parent": "LC_RearCanopy",
+   "kind": "mesh",
+   "mat": "MAT_LC_MILLED_METAL",
+   "hinge": "x"
+  },
+  {
+   "name": "LC_CanopyEnergy",
+   "parent": "LC_RearCanopy",
+   "kind": "mesh",
+   "mat": "MAT_LC_EMISSIVE_SECONDARY"
+  },
+  {
+   "name": "LC_Emission",
+   "parent": "LC_ROOT",
+   "kind": "empty"
+  },
+  {
+   "name": "LC_Emit_BodyPrimary",
+   "parent": "LC_Emission",
+   "kind": "mesh",
+   "mat": "MAT_LC_EMISSIVE_PRIMARY"
+  },
+  {
+   "name": "LC_Emit_BodySecondary",
+   "parent": "LC_Emission",
+   "kind": "mesh",
+   "mat": "MAT_LC_EMISSIVE_SECONDARY"
+  },
+  {
+   "name": "LC_Emit_FrontWheel",
+   "parent": "LC_Emission",
+   "kind": "mesh",
+   "mat": "MAT_LC_EMISSIVE_PRIMARY"
+  },
+  {
+   "name": "LC_Emit_RearWheel",
+   "parent": "LC_Emission",
+   "kind": "mesh",
+   "mat": "MAT_LC_EMISSIVE_PRIMARY"
+  },
+  {
+   "name": "LC_Emit_Reactor",
+   "parent": "LC_Emission",
+   "kind": "mesh",
+   "mat": "MAT_LC_EMISSIVE_REACTOR"
+  },
+  {
+   "name": "LC_Emit_Cockpit",
+   "parent": "LC_Emission",
+   "kind": "mesh",
+   "mat": "MAT_LC_EMISSIVE_SECONDARY"
+  },
+  {
+   "name": "LC_Emit_Rear",
+   "parent": "LC_Emission",
+   "kind": "mesh",
+   "mat": "MAT_LC_EMISSIVE_PRIMARY"
+  },
+  {
+   "name": "LC_Emit_TrailPort",
+   "parent": "LC_Emission",
+   "kind": "mesh",
+   "mat": "MAT_LC_EMISSIVE_CORE"
+  },
+  {
+   "name": "LC_Damage",
+   "parent": "LC_ROOT",
+   "kind": "empty"
+  },
+  {
+   "name": "LC_Damage_Nose_L",
+   "parent": "LC_Damage",
+   "kind": "mesh",
+   "mat": "MAT_LC_BLACK_CLEARCOAT",
+   "detachable": true
+  },
+  {
+   "name": "LC_Damage_Nose_R",
+   "parent": "LC_Damage",
+   "kind": "mesh",
+   "mat": "MAT_LC_BLACK_CLEARCOAT",
+   "detachable": true
+  },
+  {
+   "name": "LC_Damage_Panel_L1",
+   "parent": "LC_Damage",
+   "kind": "mesh",
+   "mat": "MAT_LC_BLACK_CLEARCOAT",
+   "detachable": true
+  },
+  {
+   "name": "LC_Damage_Panel_L2",
+   "parent": "LC_Damage",
+   "kind": "mesh",
+   "mat": "MAT_LC_BLACK_CLEARCOAT",
+   "detachable": true
+  },
+  {
+   "name": "LC_Damage_Panel_R1",
+   "parent": "LC_Damage",
+   "kind": "mesh",
+   "mat": "MAT_LC_BLACK_CLEARCOAT",
+   "detachable": true
+  },
+  {
+   "name": "LC_Damage_Panel_R2",
+   "parent": "LC_Damage",
+   "kind": "mesh",
+   "mat": "MAT_LC_BLACK_CLEARCOAT",
+   "detachable": true
+  },
+  {
+   "name": "LC_Damage_Rear_L",
+   "parent": "LC_Damage",
+   "kind": "mesh",
+   "mat": "MAT_LC_CARBON",
+   "detachable": true
+  },
+  {
+   "name": "LC_Damage_Rear_R",
+   "parent": "LC_Damage",
+   "kind": "mesh",
+   "mat": "MAT_LC_CARBON",
+   "detachable": true
+  },
+  {
+   "name": "LC_Damage_ReactorCover",
+   "parent": "LC_Damage",
+   "kind": "mesh",
+   "mat": "MAT_LC_BRUSHED_METAL",
+   "detachable": true
+  },
+  {
+   "name": "LC_FX_TrailOrigin",
+   "parent": "LC_ROOT",
+   "kind": "empty",
+   "required": true
+  },
+  {
+   "name": "LC_FX_Boost",
+   "parent": "LC_ROOT",
+   "kind": "empty",
+   "required": true
+  },
+  {
+   "name": "LC_FX_Reactor",
+   "parent": "LC_ROOT",
+   "kind": "empty"
+  },
+  {
+   "name": "LC_FX_FrontWheel",
+   "parent": "LC_ROOT",
+   "kind": "empty"
+  },
+  {
+   "name": "LC_FX_RearWheel",
+   "parent": "LC_ROOT",
+   "kind": "empty"
+  },
+  {
+   "name": "LC_FX_Spark_FL",
+   "parent": "LC_ROOT",
+   "kind": "empty"
+  },
+  {
+   "name": "LC_FX_Spark_FR",
+   "parent": "LC_ROOT",
+   "kind": "empty"
+  },
+  {
+   "name": "LC_FX_Spark_RL",
+   "parent": "LC_ROOT",
+   "kind": "empty"
+  },
+  {
+   "name": "LC_FX_Spark_RR",
+   "parent": "LC_ROOT",
+   "kind": "empty"
+  },
+  {
+   "name": "LC_FX_CrashCenter",
+   "parent": "LC_ROOT",
+   "kind": "empty",
+   "required": true
+  },
+  {
+   "name": "LC_FX_DerezCenter",
+   "parent": "LC_ROOT",
+   "kind": "empty",
+   "required": true
+  },
+  {
+   "name": "LC_FX_Impact_L",
+   "parent": "LC_ROOT",
+   "kind": "empty"
+  },
+  {
+   "name": "LC_FX_Impact_R",
+   "parent": "LC_ROOT",
+   "kind": "empty"
+  },
+  {
+   "name": "COL_LC_Body",
+   "parent": "LC_ROOT",
+   "kind": "proxy"
+  },
+  {
+   "name": "COL_LC_FrontWheel",
+   "parent": "LC_ROOT",
+   "kind": "proxy"
+  },
+  {
+   "name": "COL_LC_RearWheel",
+   "parent": "LC_ROOT",
+   "kind": "proxy"
+  },
+  {
+   "name": "COL_LC_RiderZone",
+   "parent": "LC_ROOT",
+   "kind": "proxy"
+  }
+ ]
+}

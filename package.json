@@ -1,0 +1,21 @@
+{
+  "name": "lightcycle",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build:glb": "blender --background --python tools/build_lightcycle.py",
+    "validate": "python3 tools/validate_glb.py assets/export/lightcycle.glb --manifest assets/export/manifest.json",
+    "render:lightsoff": "blender --background --python tools/render_matrix.py -- --lights-off"
+  },
+  "dependencies": {
+    "three": "^0.186.1",
+    "zustand": "^5.0.15"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "@types/three": "^0.186.0",
+    "typescript": "^5.9.0"
+  }
+}
