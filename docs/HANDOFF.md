@@ -1,7 +1,7 @@
 # LIGHT CYCLE — HANDOFF / RESUME POINT
 
 **Repo:** https://github.com/mikevocalz/lightcycle (public)
-**Latest commit:** `db58125` on `main`
+**Latest commit:** `003a83d` on `main`
 **Updated:** 2026-09-30
 
 This file is the resume contract. It is kept truthful on purpose — if something
@@ -58,6 +58,7 @@ names in `tools/geo/__init__.py:build_node`, rebuild, validate, render, commit.
 | Viro material adapter | Constant+Add recipe, 5/5 tests |
 | Zustand store | players keyed by id, no `useState` |
 | Rider ergonomics | 4/4 contacts, `npm run rider` ALL PASS |
+| **All 18 animation clips** | **exact spec match, 83 channels, 0 validator warnings** |
 | XR LOD budget | Quest 2/3 figures in `spec.xrBudget` |
 | **Front + rear wheel assemblies** | **production geometry, 18 nodes** |
 | **Central reactor** | **production geometry, 9 nodes** |
@@ -74,7 +75,7 @@ names in `tools/geo/__init__.py:build_node`, rebuild, validate, render, commit.
 | 7 | PBR texture package | NOT STARTED (needs UVs) |
 | 8 | Neutral emissive masks | NOT STARTED |
 | 9 | High-poly → runtime bake | NOT STARTED |
-| 10 | 16 of 18 animation clips | only `LC_WheelSpin`, `LC_ReactorIdle` exist |
+
 | 11 | LOD1 / LOD2 / LOD3 | NOT STARTED (LOD0 only) |
 | 12 | Light Ribbon runtime | NOT STARTED |
 | 13 | Damage runtime | NOT STARTED |
@@ -93,17 +94,18 @@ names in `tools/geo/__init__.py:build_node`, rebuild, validate, render, commit.
 - Packed runtime: `assets/export/lightcycle.runtime.glb`
 - Geometry builders: `tools/geo/{_lib,wheels,reactor}.py`, dispatch in `tools/geo/__init__.py`
 
-## CLIPS
+## CLIPS — ALL 18 DONE
 
-Done: `LC_WheelSpin`, `LC_ReactorIdle`
-Remaining 16: `LC_Idle`, `LC_ReactorAcceleration`, `LC_SteerLeft`, `LC_SteerRight`,
-`LC_LeanLeft`, `LC_LeanRight`, `LC_Brake`, `LC_BoostEnter`, `LC_BoostLoop`,
-`LC_BoostExit`, `LC_HighSpeedTransform`, `LC_HighSpeedReverse`,
-`LC_ReactorOverload`, `LC_Damage`, `LC_Crash`, `LC_Derez`
+Authored in `tools/build_lightcycle.py:author_clips()`. Keys accumulate into one
+Action per (object, clip) pair, then push to NLA. The clip name lives on the
+**NLA track** — Blender refuses two Actions the same name, and
+`export_merge_animation='NLA_TRACK'` folds same-named tracks into one glTF
+animation. Naming the Action instead produces `LC_WheelSpin_Rear`-style names the
+validator rejects.
 
-A clip spanning several nodes carries its name on the **NLA track**, with
-`export_merge_animation='NLA_TRACK'`. Naming the Action instead produces
-`LC_WheelSpin_Rear`-style names the validator rejects.
+The transformation clips drive `LC_Canopy_L/R` about X and `LC_DeployArm_L/R`
+about Y, plus a forward slide on `LC_RearCanopy`. **When the cockpit geometry
+lands, re-check those hinge axes against the real pivots and adjust the angles.**
 
 ---
 

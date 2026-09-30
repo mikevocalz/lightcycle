@@ -102,14 +102,24 @@
       "item": "production geometry pipeline + both wheel assemblies",
       "where": "tools/geo/",
       "detail": "Per-node-name dispatch so production geometry replaces proxies incrementally. Hubless wheels: revolved tyre section, stator with radial webs, roller bearings, ventilated brake disc, caliper, suspension, rear drive, steering yoke. 18 nodes, 25,688 -> 47,288 tris."
+    },
+    {
+      "item": "central reactor geometry",
+      "where": "tools/geo/reactor.py",
+      "detail": "Nested I-section rings on bearing lands, three orthogonal gimbals with pivot bosses, containment shroud with fastener circle, finned side plates, 14 overlapping aperture blades, faceted core with retaining claws. Reads as hardware with emissions off."
+    },
+    {
+      "item": "all 18 animation clips",
+      "where": "tools/build_lightcycle.py:author_clips()",
+      "detail": "Exact spec match, 83 channels, 0 validator warnings on canonical and packed. Real pivots only - no global scale, no morph fakery."
     }
   ],
   "partial": [
     {
       "item": "the model itself",
-      "state": "18 of 78 mesh nodes production, 60 proxy",
-      "detail": "Both wheel assemblies are finished hard-surface geometry built via tools/geo/. The remaining 60 mesh nodes are still blockout proxies, so the asset does NOT yet pass the lights-off gate. tools/geo/ dispatches per node name, so each assembly can be finished without touching the contract.",
-      "next": "Central reactor (tools/geo/reactor.py), then chassis shells, cockpit, canopy, damage panels."
+      "state": "27 of 78 mesh nodes production, 51 proxy",
+      "detail": "Both wheel assemblies and the central reactor are finished hard-surface geometry. The 51 remaining mesh nodes - body shells, cockpit, canopy, damage panels - are still blockout proxies, and the shells are the blocker on the lights-off gate.",
+      "next": "tools/geo/chassis.py (13 body nodes), then cockpit.py (18), then damage panels."
     },
     {
       "item": "LOD chain",
@@ -120,11 +130,6 @@
       "item": "QA matrix",
       "state": "4 of 8 views rendered, 1 of 6 colors",
       "where": "assets/render/"
-    },
-    {
-      "item": "animation clips",
-      "state": "2 of 18",
-      "detail": "Only the two the blockout can honestly carry are authored. The other 16 warn as absent in the validator and need real geometry - especially LC_HighSpeedTransform, which the doc requires be driven by real pivots and hinges rather than a global morph."
     }
   ],
   "blocked": [
@@ -150,7 +155,9 @@
     "tools/rider_proxy.py: 4/4 contact points reachable and matched, rear-wheel clearance ok, canopy clears the rider",
     "src/viro/adapter.test.ts: 5/5 - no material-name collision between players, energy is Constant+Add, colours differ, lightsOff drops out of the bloom pass and does not leak across players",
     "npm run pack: 581,904 -> 233,528 bytes, validator 0 errors on the packed GLB, all 102 named nodes survive -kn",
-    "npm run rider still ALL PASS after the wheel geometry change"
+    "npm run rider still ALL PASS after the wheel geometry change",
+    "GLB animations are an exact match for the spec's 18 clips, 83 channels",
+    "validator: 0 errors AND 0 warnings on both canonical and packed GLB"
   ],
   "decisionsMade": [
     {

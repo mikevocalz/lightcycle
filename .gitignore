@@ -4,3 +4,4 @@ assets/export/*.glb
 assets/source/lightcycle_rider_check.blend
 assets/export/manifest.json
 *.blend1
+tools/geo/__pycache__/
