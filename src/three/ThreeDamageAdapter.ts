@@ -13,7 +13,7 @@ export function applyThreeDamage(
   destroyedProgress = 0,
 ): ReturnType<typeof damageRuntime> {
   const state = damageRuntime(player, destroyedProgress)
-  const detached = new Set(state.detachedNodes)
+  const detached = new Set<string>(state.detachedNodes)
   for (const name of state.detachedNodes) {
     const node = root.getObjectByName(name)
     if (node) node.visible = state.derezProgress < 0.78
