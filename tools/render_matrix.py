@@ -27,7 +27,7 @@ VIEWS = {  # (camera location, look-at) in metres
     "front":    ((-4.4, 0.0, 0.85), (0.0, 0, 0.52)),
     "top":      ((0.0, 0.0, 4.6), (0.0, 0, 0.5)),
     "reactor":  ((0.05, -1.05, 0.62), (0.30, 0, 0.46)),
-    "wheel":    ((-1.35, -1.25, 0.70), (-0.96, 0, 0.46)),
+    "wheel":    ((-1.62, -1.72, 0.86), (-0.96, 0, 0.46)),
 }
 
 
@@ -93,7 +93,7 @@ def studio(lights_off: bool):
 def camera(view: str):
     loc, target = VIEWS[view]
     cam_data = bpy.data.cameras.new("QA_Cam")
-    cam_data.lens = 85 if view in ("reactor", "wheel") else 50
+    cam_data.lens = 85 if view == "reactor" else (62 if view == "wheel" else 50)
     cam = bpy.data.objects.new("QA_Cam", cam_data)
     cam.location = loc
     d = Vector(target) - Vector(loc)

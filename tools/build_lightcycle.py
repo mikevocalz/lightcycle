@@ -17,6 +17,9 @@ from pathlib import Path
 
 import bpy
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import geo  # noqa: E402 - real hard-surface builders, dispatched per node name
+
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = json.loads((ROOT / "spec/lightcycle.spec.json").read_text())
 NODES = json.loads((ROOT / "spec/lightcycle.nodes.json").read_text())["nodes"]
@@ -224,6 +227,17 @@ EMPTY_AT = {
 
 def make_mesh(entry, mats):
     n = entry["name"]
+
+    # Production geometry first; anything without a builder keeps its proxy.
+    if entry["kind"] == "mesh":
+        bm = geo.build_node(n, D, wheel_x)
+        if bm is not None:
+            o = geo.L.obj_from_bm(bm, n)
+            o.data.shade_smooth()
+            geo.L.bevel_obj(o, width=0.0022, segments=2, angle_deg=32.0)
+            o["lc_geometry"] = "production"
+            return o
+
     if entry["kind"] == "proxy":
         loc, s = COL_PROXY[n]
         bpy.ops.mesh.primitive_cube_add(size=2, location=loc)
@@ -267,10 +281,12 @@ def build():
             o = bpy.context.object
         else:
             o = make_mesh(entry, mats)
-            if entry.get("mat"):
+            if entry.get("mat") and not o.data.materials:
                 o.data.materials.append(mats[entry["mat"]])
             o.data.name = f"{n}_MESH"
-            bpy.ops.object.shade_smooth()
+            if o.get("lc_geometry") != "production":
+                bpy.context.view_layer.objects.active = o
+                bpy.ops.object.shade_smooth()
 
         # Blender renames on collision at assignment time, so a silent '.001' here
         # would break the node contract downstream. Fail loudly instead.
@@ -295,8 +311,11 @@ def build():
             made[entry["name"]].matrix_parent_inverse = made[entry["parent"]].matrix_world.inverted()
 
     bpy.context.view_layer.update()
+    prod = sum(1 for o in made.values() if o.get("lc_geometry") == "production")
     tris = sum(len(o.data.loop_triangles) for o in made.values()
                if o.type == "MESH" and (o.data.calc_loop_triangles() or True))
+    print(f"production geometry: {prod} nodes | proxy: "
+          f"{sum(1 for o in made.values() if o.type == 'MESH') - prod}")
     return made, tris
 
 
