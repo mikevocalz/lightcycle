@@ -96,7 +96,9 @@ def export(path: Path):
 
 
 def main():
-    argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
+    # Blender may consume the standalone "--" before the Python script sees
+    # sys.argv. Locate our option directly instead of depending on that sentinel.
+    argv = sys.argv[sys.argv.index("--lod"):] if "--lod" in sys.argv else []
     ap = argparse.ArgumentParser()
     ap.add_argument("--lod", type=int, choices=range(4), required=True)
     args = ap.parse_args()
