@@ -600,7 +600,7 @@ def export(path: Path):
         export_animation_mode="ACTIONS",
         export_merge_animation="NLA_TRACK",  # one glTF clip per track name, not per Action
         export_nla_strips=True,
-        export_apply=False,
+        export_apply=True,           # bake production bevels into runtime geometry
         export_yup=True,
         export_cameras=False,
         export_lights=False,
