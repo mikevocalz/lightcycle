@@ -10,7 +10,7 @@ const colors = document.querySelector('#colors')
 const scene = new THREE.Scene()
 scene.background = new THREE.Color('#05070a')
 const camera = new THREE.PerspectiveCamera(42, innerWidth / innerHeight, 0.01, 100)
-camera.position.set(-3.4, -3.6, 1.8)
+camera.position.set(-3.4, 1.8, -3.6)
 
 const renderer = new THREE.WebGLRenderer({ antialias: true })
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2))
@@ -20,7 +20,7 @@ renderer.toneMappingExposure = 1.15
 host.append(renderer.domElement)
 
 const controls = new OrbitControls(camera, renderer.domElement)
-controls.target.set(0, 0, 0.48)
+controls.target.set(0, 0.48, 0)
 controls.enableDamping = true
 
 scene.add(new THREE.HemisphereLight('#d8e5ff', '#08090a', 1.8))
