@@ -1,7 +1,7 @@
 # LIGHT CYCLE — HANDOFF / RESUME POINT
 
 **Repo:** https://github.com/mikevocalz/lightcycle (public)
-**Latest commit:** `88b368f` on `main`
+**Latest commit:** `db58125` on `main`
 **Updated:** 2026-09-30
 
 This file is the resume contract. It is kept truthful on purpose — if something
@@ -13,9 +13,10 @@ next session more than it saves.
 ## ONE-LINE STATE
 
 The engineering foundation and pipeline are complete and green. The **model is
-partially migrated to production geometry: 18 of 78 mesh nodes are finished
-(both wheel assemblies); 60 are still blockout proxies.** It does not yet pass
-the lights-off quality gate.
+partially migrated to production geometry: 27 of 78 mesh nodes are finished
+(both wheel assemblies + the central reactor); 51 are still blockout proxies.**
+It does not yet pass the lights-off quality gate — the body shells are the
+remaining blocker on that.
 
 ---
 
@@ -59,16 +60,16 @@ names in `tools/geo/__init__.py:build_node`, rebuild, validate, render, commit.
 | Rider ergonomics | 4/4 contacts, `npm run rider` ALL PASS |
 | XR LOD budget | Quest 2/3 figures in `spec.xrBudget` |
 | **Front + rear wheel assemblies** | **production geometry, 18 nodes** |
+| **Central reactor** | **production geometry, 9 nodes** |
 
 ## INCOMPLETE — THE ACTUAL REMAINING WORK
 
 | # | Item | State |
 |---|---|---|
-| 1 | Central reactor geometry | PROXY. Next task. |
-| 2 | Chassis + nose/mid/rear shells | PROXY |
-| 3 | Cockpit + rider contact surfaces | PROXY |
-| 4 | Articulated canopy | PROXY |
-| 5 | Damage panel geometry | PROXY |
+| 1 | Chassis + nose/mid/rear shells | PROXY. **Next task — the main blocker on the lights-off gate.** |
+| 2 | Cockpit + rider contact surfaces | PROXY |
+| 3 | Articulated canopy | PROXY |
+| 4 | Damage panel geometry | PROXY |
 | 6 | UV unwrap | NOT STARTED (needs final geometry) |
 | 7 | PBR texture package | NOT STARTED (needs UVs) |
 | 8 | Neutral emissive masks | NOT STARTED |
@@ -88,9 +89,9 @@ names in `tools/geo/__init__.py:build_node`, rebuild, validate, render, commit.
 ## CURRENT FILES
 
 - Blender source: `assets/source/lightcycle_blockout.blend` (name is now stale — it is a hybrid)
-- Canonical export: `assets/export/lightcycle.glb` — 102 nodes, 47,288 tris
+- Canonical export: `assets/export/lightcycle.glb` — 102 nodes, 49,712 tris
 - Packed runtime: `assets/export/lightcycle.runtime.glb`
-- Geometry builders: `tools/geo/_lib.py`, `tools/geo/wheels.py`, `tools/geo/__init__.py`
+- Geometry builders: `tools/geo/{_lib,wheels,reactor}.py`, dispatch in `tools/geo/__init__.py`
 
 ## CLIPS
 
@@ -114,7 +115,9 @@ A clip spanning several nodes carries its name on the **NLA track**, with
 4. **Render engine strings** are `BLENDER_EEVEE`, `BLENDER_WORKBENCH`, `CYCLES`. `BLENDER_EEVEE_NEXT` raises. AgX look is `AgX - Base Contrast`.
 5. **gltfpack default deletes 5 contractual nodes.** Always `-kn`. Blender's `export_gltfpack_kn` defaults False, and its `export_use_gltfpack` writes to a `gltfpacked/` subdir while swallowing `CalledProcessError`.
 6. **npm gltfpack cannot do KTX2 at all** (Node/WASM, no BasisU). Use the native build.
-7. **`tools/geo/_lib.py:revolve`** authors profiles as (lateral, radius); lateral must lie ALONG the spin axis or rings collapse to ribbons.
+7. **`_lib.revolve`/`radial` take a NAMED spin axis** and map (lateral, radius) onto it. Lateral must lie ALONG the axis or rings collapse to ribbons.
+7b. **Bike axes in Blender: length X (nose at -X), up Z, lateral Y.** Wheels and reactor rings spin about **Y**. Spinning them about X mounts them sideways — a ring seen edge-on in a dark render still looks like a tyre, so this survived three renders undetected. Author wheel/reactor parts in a part-local frame and let the dispatcher place them.
+7c. **Verify geometry by printing world bounds, not by looking at a render.** Both the axle-height and the axis bug were invisible in renders and obvious in one line of bounds.
 8. **Viro has no emissive property**, and `Viro3DObject` cannot address a named sub-node from JS. Material name is the only runtime handle.
 9. The local Blender has `io_scene_gfbanm` + BlenderMCP addons that throw a harmless `unregister_class` traceback on every headless exit. Ignore it.
 
@@ -128,26 +131,30 @@ A clip spanning several nodes carries its name on the **NLA track**, with
 
 ## NEXT TASK
 
-**Build the central reactor in production geometry.** It is the designated hero
-detail and the doc requires it to be interesting with emissions OFF.
+**Build the chassis and body shells in production geometry** — `tools/geo/chassis.py`
+for the 13 body nodes, then `tools/geo/cockpit.py` for the 18 cockpit/canopy nodes.
 
-Create `tools/geo/reactor.py` and register these in `tools/geo/__init__.py`:
-`LC_Reactor_Core`, `LC_Reactor_Ring_A/B/C`, `LC_Gyro_X/Y/Z`,
-`LC_Reactor_Housing`, `LC_Reactor_Energy`.
+The shells are the remaining blocker on the lights-off gate: the wheels and
+reactor now read as machined hardware, but the body is still a featureless slab
+of boxes and it drags the whole asset down.
 
-Needs nested precision rings, magnetic support yokes, a suspended core, bearing
-races, aperture shutters, containment structure and cooling fins. Reuse
-`_lib.revolve` and `_lib.radial`.
+They need thin layered panels with real gaps and a visible underlying structure —
+not solid blocks. Panel thickness 2–6mm, chamfered edges, recessed fasteners,
+service access, and a cutout over the reactor so it is visible from the side.
+Keep the centre body narrow so the two wheel masses dominate.
+
+Then: damage panels, UVs, textures, the remaining 16 clips, LODs, runtime systems.
 
 ### Exact next commands
 
 ```bash
 cd ~/lightcycle
 npm run check                      # confirm green baseline first
-# author tools/geo/reactor.py, register node names in tools/geo/__init__.py
+# author tools/geo/<assembly>.py, register node names in tools/geo/__init__.py
 npm run build:glb
 npm run validate
-blender -b assets/source/lightcycle_blockout.blend -P tools/render_matrix.py -- --lights-off --view reactor --samples 64
+blender -b assets/source/lightcycle_blockout.blend -P tools/render_matrix.py -- --lights-off --view side --samples 56
+# macro shots of enclosed parts need --isolate, e.g. --view reactor --isolate LC_Reactor
 npm run rider                      # must stay ALL PASS
 git add -A && git commit && git push
 ```
