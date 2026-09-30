@@ -19,6 +19,7 @@ from mathutils import Vector
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import geo  # noqa: E402 - real hard-surface builders, dispatched per node name
+from rest_pose import capture_rest_pose, restore_rest_pose
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = json.loads((ROOT / "spec/lightcycle.spec.json").read_text())
@@ -151,6 +152,7 @@ def build_materials() -> dict:
             put("Emission Strength", 0.0)
             mat["lc_mat_role"] = "physical"
 
+        attach_texture_maps(mat, name, b)
         mats[name] = mat
     return mats
 
@@ -172,7 +174,7 @@ def wheel_x(name: str) -> float:
 def placement(entry: dict):
     """-> (primitive, location, rotation_euler, size) for one blockout proxy."""
     n = entry["name"]
-    half_w = D["width"] / 2
+    half_w = D.get("mechanicalWidth", D["width"]) / 2
 
     if "_Wheel_" in n or n.endswith(("_BrakeDisc",)):
         x, z = wheel_x(n), AXLE_Z
@@ -291,7 +293,9 @@ def production_pivot(name: str):
     data back around the physical pivot and placing the object origin there, a
     perfectly named reactor ring or canopy panel rotates around world (0,0,0).
     """
-    half_w = D["width"] / 2
+    half_w = D.get("mechanicalWidth", D["width"]) / 2
+    if name == "LC_SteeringYoke":
+        return (-HALF_WB, 0.0, AXLE_Z + HUB_R + 0.09)
     if name == "LC_Reactor_Core" or name.startswith(("LC_Reactor_Ring_", "LC_Gyro_")):
         return (0.30, 0.0, AXLE_Z - 0.06)
     if name.startswith("LC_Canopy_") and name in {"LC_Canopy_L", "LC_Canopy_R"}:
@@ -722,7 +726,10 @@ def export(path: Path):
 
 if __name__ == "__main__":
     made, tris = build()
+    capture_rest_pose(made.values())
     author_clips(made)
+    restore_rest_pose(made.values())
+    bpy.context.view_layer.update()
     blend = ROOT / "assets/source/lightcycle_blockout.blend"
     blend.parent.mkdir(parents=True, exist_ok=True)
     bpy.ops.wm.save_as_mainfile(filepath=str(blend))

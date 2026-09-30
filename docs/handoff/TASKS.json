@@ -1,0 +1,191 @@
+{
+  "schemaVersion": 1,
+  "updated": "2026-09-30",
+  "objective": "Fix current Light Cycle body to approved reference while preserving engineering; keep durable per-part handoffs.",
+  "branch": "art/reference-body-redesign",
+  "productionBase": "c5d0039fcbaafa0d77f37c97525ca0f8be079f13",
+  "primaryReference": "docs/references/00_generated_hybrid_concept.png.png",
+  "visualApproval": {
+    "status": "pending",
+    "blockingForMerge": true,
+    "evidence": "docs/review/reference-comparison.png"
+  },
+  "tasks": [
+    {
+      "id": "audit",
+      "status": "complete",
+      "owner": "parent + audit subagents",
+      "files": [],
+      "dependsOn": [],
+      "next": "Audited current production main, references, environment, runtime and geometry; preserved historical status."
+    },
+    {
+      "id": "handoff",
+      "status": "complete",
+      "owner": "parent",
+      "files": [
+        "AGENTS.md",
+        "docs/HANDOFF.md",
+        "docs/STATUS.json",
+        "docs/handoff/TASKS.json"
+      ],
+      "dependsOn": [],
+      "next": "All parts have durable handoffs; continue updating at every checkpoint."
+    },
+    {
+      "id": "baseline",
+      "status": "complete",
+      "owner": "parent",
+      "files": [],
+      "dependsOn": [],
+      "next": "Current base rebuilt; four baseline renders in assets/render/baseline; canonical/texture checks pass, backups in /private/tmp/lightcycle-baseline.*"
+    },
+    {
+      "id": "qa_tools",
+      "status": "complete",
+      "owner": "reference_geometry_audit",
+      "files": [
+        "tools/render_matrix.py"
+      ],
+      "dependsOn": [],
+      "next": "Pass8 implemented and locally verified; see docs/review/verification.json. Recheck after relevant source changes."
+    },
+    {
+      "id": "comparison_tools",
+      "status": "complete",
+      "owner": "argent_environment_inspector",
+      "files": [
+        "tools/compose_comparison.py",
+        "docs/handoff/QA.md"
+      ],
+      "dependsOn": [],
+      "next": "Pass8 implemented and locally verified; see docs/review/verification.json. Recheck after relevant source changes."
+    },
+    {
+      "id": "texture_preview",
+      "status": "complete",
+      "owner": "runtime_contract_audit",
+      "files": [
+        "tools/build_lightcycle.py",
+        "preview/main.js",
+        "tools/check_texture_contract.py"
+      ],
+      "dependsOn": [],
+      "next": "Pass8 implemented and locally verified; see docs/review/verification.json. Recheck after relevant source changes."
+    },
+    {
+      "id": "primary_body",
+      "status": "awaiting_visual_review",
+      "owner": "parent",
+      "files": [
+        "tools/geo/chassis.py"
+      ],
+      "dependsOn": [
+        "baseline"
+      ],
+      "next": "Pass8 built and six clay/full matrix/comparison inspected. Reference fidelity, panel continuity and final art quality remain unapproved."
+    },
+    {
+      "id": "clay_gate",
+      "status": "awaiting_visual_review",
+      "owner": "parent",
+      "files": [],
+      "dependsOn": [
+        "primary_body",
+        "qa_tools"
+      ],
+      "next": "Pass8 built and six clay/full matrix/comparison inspected. Reference fidelity, panel continuity and final art quality remain unapproved."
+    },
+    {
+      "id": "cockpit_tail",
+      "status": "complete",
+      "owner": "argent_environment_inspector",
+      "files": [
+        "tools/geo/cockpit.py"
+      ],
+      "dependsOn": [
+        "clay_gate"
+      ],
+      "next": "Pass8 implemented and locally verified; see docs/review/verification.json. Recheck after relevant source changes."
+    },
+    {
+      "id": "energy_damage",
+      "status": "complete",
+      "owner": "reference_geometry_audit",
+      "files": [
+        "tools/geo/emission.py",
+        "tools/geo/damage.py"
+      ],
+      "dependsOn": [
+        "primary_body"
+      ],
+      "next": "Pass8 implemented and locally verified; see docs/review/verification.json. Recheck after relevant source changes."
+    },
+    {
+      "id": "materials_lights_off",
+      "status": "awaiting_visual_review",
+      "owner": null,
+      "files": [],
+      "dependsOn": [
+        "clay_gate",
+        "texture_preview",
+        "cockpit_tail",
+        "energy_damage"
+      ],
+      "next": "Pass8 built and six clay/full matrix/comparison inspected. Reference fidelity, panel continuity and final art quality remain unapproved."
+    },
+    {
+      "id": "canonical_lods",
+      "status": "complete",
+      "owner": "parent",
+      "files": [],
+      "dependsOn": [
+        "materials_lights_off"
+      ],
+      "next": "Pass8 implemented and locally verified; see docs/review/verification.json. Recheck after relevant source changes."
+    },
+    {
+      "id": "runtime_regression",
+      "status": "complete",
+      "owner": null,
+      "files": [],
+      "dependsOn": [
+        "canonical_lods"
+      ],
+      "next": "Pass8 implemented and locally verified; see docs/review/verification.json. Recheck after relevant source changes."
+    },
+    {
+      "id": "final_matrix",
+      "status": "complete",
+      "owner": "parent",
+      "files": [],
+      "dependsOn": [
+        "canonical_lods",
+        "comparison_tools"
+      ],
+      "next": "Pass8 implemented and locally verified; see docs/review/verification.json. Recheck after relevant source changes."
+    },
+    {
+      "id": "human_visual_review",
+      "status": "pending",
+      "owner": "user",
+      "files": [],
+      "dependsOn": [
+        "final_matrix"
+      ],
+      "next": "Explicit human confirmation of reference fidelity; blocking final merge."
+    },
+    {
+      "id": "publish_pr",
+      "status": "pending",
+      "owner": "parent",
+      "files": [],
+      "dependsOn": [
+        "runtime_regression",
+        "final_matrix"
+      ],
+      "next": "Commit/push/open draft PR with retained evidence; remote CI and human visual gate required before merge."
+    }
+  ],
+  "activeProcesses": []
+}

@@ -1,5 +1,10 @@
 # Light Cycle
 
+Active work: **reference-driven body redesign; visual acceptance pending**.
+Read [docs/HANDOFF.md](docs/HANDOFF.md) for the exact continuation point and
+[docs/handoff/TASKS.json](docs/handoff/TASKS.json) for all workstreams. The user
+brief is preserved in [docs/REDESIGN_REQUEST.md](docs/REDESIGN_REQUEST.md).
+
 One canonical modular `lightcycle.glb`. Six runtime energy colors layered over it.
 Three.js on the web, ViroReact in XR, Zustand for state.
 
@@ -8,12 +13,8 @@ The rule everything else serves, from `docs/LIGHTCYCLE_MASTER_REFERENCE_AND_BUIL
 > If all emissive lighting is switched off, does the bike still look like an
 > exceptionally detailed, believable AAA science-fiction vehicle?
 
-Two ways to ask it: `npm run pack           # gltfpack -kn -tc -> lightcycle.runtime.glb (60% smaller)
-npm run rider          # ergonomics check against a prone rider proxy
-npm run check          # build + validate + pack + typecheck + tests
-npm run render:lightsoff` in Blender, and `adapter.lightsOff()`
-at runtime. Both zero every emissive channel and leave the machine to stand on its
-materials.
+Use `npm run render:lightsoff` in Blender and `adapter.lightsOff()` at runtime.
+Both zero every emissive channel and leave the machine to stand on its materials.
 
 ## Where things live
 
@@ -48,7 +49,7 @@ npm run rider          # ergonomics check against a prone rider proxy
 npm run lods           # LOD0..LOD3 + validation
 npm run profile        # static GLB / LOD budget report
 npm run qa:ci          # CI-sized render matrix
-npm run qa:matrix      # full six-color/eight-view matrix
+npm run qa:matrix      # six colors × nine views, plus nine lights-off
 npm run preview        # serve the one-GLB color preview
 npm run render:lightsoff
 blender -b assets/source/lightcycle_blockout.blend -P tools/render_matrix.py -- --color gold --view reactor
@@ -62,9 +63,10 @@ emissive textures, exports the canonical GLB, packs KTX2/BasisU runtime output,
 builds LOD0–LOD3, runs rider ergonomics, validates node/material/clip contracts,
 runs Three/Viro/runtime tests, and renders a QA smoke matrix.
 
-The remaining checks are hardware-specific XR qualification and human art-direction
-review, not unfinished blockout geometry. See `docs/STATUS.json` and
-`docs/HANDOFF.md` for the exact verified state.
+The body is undergoing a substantial reference-driven redesign. Clay silhouette,
+lights-off quality and human visual confirmation are blocking gates, followed by
+fresh technical validation. Hardware XR qualification remains separate. See
+`docs/STATUS.json` and `docs/HANDOFF.md` for the exact checkpoint.
 
 ## Contract
 
@@ -100,3 +102,11 @@ the canonical GLB. `ViroMaterials` is one global name-keyed registry, so each
 player mints uniquely-suffixed names or two bikes share a colour. Clearcoat,
 anisotropy, transmission and IOR are absent — the XR build reads flatter than
 the web one. See `src/viro/ViroLightCycleMaterialAdapter.ts`.
+
+## Current reference-body review
+
+The pass8 candidate and all-part resume instructions are in [HANDOFF](docs/HANDOFF.md).
+See the [reference comparison](docs/review/reference-comparison.png) and
+[verification record](docs/review/verification.json). Local technical checks pass;
+visual acceptance is pending. Do not interpret the historical production status
+as approval of this body. Continue through `docs/handoff/TASKS.json` after context loss.

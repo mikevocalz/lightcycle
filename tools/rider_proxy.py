@@ -241,4 +241,5 @@ def main():
     sys.exit(0 if not fails else 1)
 
 
-main()
+if __name__ == "__main__":
+    main()

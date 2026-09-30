@@ -1,0 +1,511 @@
+{
+  "revision": "body-pass8",
+  "tool": "Argent Chromium CDP",
+  "steps": [
+    {
+      "color": "red",
+      "evidence": [
+        "docs/review/browser-red.png"
+      ],
+      "check": [
+        {
+          "status": "RED \u00b7 same GLB, materials only",
+          "loaded": true,
+          "proxies": [
+            {
+              "name": "COL_LC_Body",
+              "visible": false
+            },
+            {
+              "name": "COL_LC_FrontWheel",
+              "visible": false
+            },
+            {
+              "name": "COL_LC_RearWheel",
+              "visible": false
+            },
+            {
+              "name": "COL_LC_RiderZone",
+              "visible": false
+            }
+          ],
+          "materials": [
+            {
+              "name": "MAT_LC_EMISSIVE_PRIMARY",
+              "colors": [
+                "ff291a"
+              ],
+              "intensities": [
+                3
+              ]
+            },
+            {
+              "name": "MAT_LC_EMISSIVE_SECONDARY",
+              "colors": [
+                "ff291a"
+              ],
+              "intensities": [
+                1.6
+              ]
+            },
+            {
+              "name": "MAT_LC_EMISSIVE_REACTOR",
+              "colors": [
+                "ff291a"
+              ],
+              "intensities": [
+                4.5
+              ]
+            },
+            {
+              "name": "MAT_LC_EMISSIVE_CORE",
+              "colors": [
+                "fff0e8"
+              ],
+              "intensities": [
+                9
+              ]
+            }
+          ],
+          "glbRequests": 1,
+          "draws": 150,
+          "triangles": 595032
+        }
+      ]
+    },
+    {
+      "color": "gold",
+      "evidence": [
+        "docs/review/browser-gold.png"
+      ],
+      "check": [
+        {
+          "status": "GOLD \u00b7 same GLB, materials only",
+          "loaded": true,
+          "proxies": [
+            {
+              "name": "COL_LC_Body",
+              "visible": false
+            },
+            {
+              "name": "COL_LC_FrontWheel",
+              "visible": false
+            },
+            {
+              "name": "COL_LC_RearWheel",
+              "visible": false
+            },
+            {
+              "name": "COL_LC_RiderZone",
+              "visible": false
+            }
+          ],
+          "materials": [
+            {
+              "name": "MAT_LC_EMISSIVE_PRIMARY",
+              "colors": [
+                "ffc13d"
+              ],
+              "intensities": [
+                3
+              ]
+            },
+            {
+              "name": "MAT_LC_EMISSIVE_SECONDARY",
+              "colors": [
+                "ffc13d"
+              ],
+              "intensities": [
+                1.6
+              ]
+            },
+            {
+              "name": "MAT_LC_EMISSIVE_REACTOR",
+              "colors": [
+                "ffc13d"
+              ],
+              "intensities": [
+                4.5
+              ]
+            },
+            {
+              "name": "MAT_LC_EMISSIVE_CORE",
+              "colors": [
+                "fff3bd"
+              ],
+              "intensities": [
+                9
+              ]
+            }
+          ],
+          "glbRequests": 1,
+          "draws": 150,
+          "triangles": 595032
+        }
+      ]
+    },
+    {
+      "color": "purple",
+      "evidence": [
+        "docs/review/browser-purple.png"
+      ],
+      "check": [
+        {
+          "status": "PURPLE \u00b7 same GLB, materials only",
+          "loaded": true,
+          "proxies": [
+            {
+              "name": "COL_LC_Body",
+              "visible": false
+            },
+            {
+              "name": "COL_LC_FrontWheel",
+              "visible": false
+            },
+            {
+              "name": "COL_LC_RearWheel",
+              "visible": false
+            },
+            {
+              "name": "COL_LC_RiderZone",
+              "visible": false
+            }
+          ],
+          "materials": [
+            {
+              "name": "MAT_LC_EMISSIVE_PRIMARY",
+              "colors": [
+                "b65cff"
+              ],
+              "intensities": [
+                3
+              ]
+            },
+            {
+              "name": "MAT_LC_EMISSIVE_SECONDARY",
+              "colors": [
+                "b65cff"
+              ],
+              "intensities": [
+                1.6
+              ]
+            },
+            {
+              "name": "MAT_LC_EMISSIVE_REACTOR",
+              "colors": [
+                "b65cff"
+              ],
+              "intensities": [
+                4.5
+              ]
+            },
+            {
+              "name": "MAT_LC_EMISSIVE_CORE",
+              "colors": [
+                "f3e5ff"
+              ],
+              "intensities": [
+                9
+              ]
+            }
+          ],
+          "glbRequests": 1,
+          "draws": 150,
+          "triangles": 595032
+        }
+      ]
+    },
+    {
+      "color": "green",
+      "evidence": [
+        "docs/review/browser-green.png"
+      ],
+      "check": [
+        {
+          "status": "GREEN \u00b7 same GLB, materials only",
+          "loaded": true,
+          "proxies": [
+            {
+              "name": "COL_LC_Body",
+              "visible": false
+            },
+            {
+              "name": "COL_LC_FrontWheel",
+              "visible": false
+            },
+            {
+              "name": "COL_LC_RearWheel",
+              "visible": false
+            },
+            {
+              "name": "COL_LC_RiderZone",
+              "visible": false
+            }
+          ],
+          "materials": [
+            {
+              "name": "MAT_LC_EMISSIVE_PRIMARY",
+              "colors": [
+                "31ff83"
+              ],
+              "intensities": [
+                3
+              ]
+            },
+            {
+              "name": "MAT_LC_EMISSIVE_SECONDARY",
+              "colors": [
+                "31ff83"
+              ],
+              "intensities": [
+                1.6
+              ]
+            },
+            {
+              "name": "MAT_LC_EMISSIVE_REACTOR",
+              "colors": [
+                "31ff83"
+              ],
+              "intensities": [
+                4.5
+              ]
+            },
+            {
+              "name": "MAT_LC_EMISSIVE_CORE",
+              "colors": [
+                "e7fff0"
+              ],
+              "intensities": [
+                9
+              ]
+            }
+          ],
+          "glbRequests": 1,
+          "draws": 150,
+          "triangles": 595032
+        }
+      ]
+    },
+    {
+      "color": "white",
+      "evidence": [
+        "docs/review/browser-white.png"
+      ],
+      "check": [
+        {
+          "status": "WHITE \u00b7 same GLB, materials only",
+          "loaded": true,
+          "proxies": [
+            {
+              "name": "COL_LC_Body",
+              "visible": false
+            },
+            {
+              "name": "COL_LC_FrontWheel",
+              "visible": false
+            },
+            {
+              "name": "COL_LC_RearWheel",
+              "visible": false
+            },
+            {
+              "name": "COL_LC_RiderZone",
+              "visible": false
+            }
+          ],
+          "materials": [
+            {
+              "name": "MAT_LC_EMISSIVE_PRIMARY",
+              "colors": [
+                "eaf8ff"
+              ],
+              "intensities": [
+                3
+              ]
+            },
+            {
+              "name": "MAT_LC_EMISSIVE_SECONDARY",
+              "colors": [
+                "eaf8ff"
+              ],
+              "intensities": [
+                1.6
+              ]
+            },
+            {
+              "name": "MAT_LC_EMISSIVE_REACTOR",
+              "colors": [
+                "eaf8ff"
+              ],
+              "intensities": [
+                4.5
+              ]
+            },
+            {
+              "name": "MAT_LC_EMISSIVE_CORE",
+              "colors": [
+                "ffffff"
+              ],
+              "intensities": [
+                9
+              ]
+            }
+          ],
+          "glbRequests": 1,
+          "draws": 150,
+          "triangles": 595032
+        }
+      ]
+    },
+    {
+      "color": "off",
+      "evidence": [
+        "docs/review/browser-off.png"
+      ],
+      "check": [
+        {
+          "status": "LIGHTS OFF \u2014 \u00a718 material validation",
+          "loaded": true,
+          "proxies": [
+            {
+              "name": "COL_LC_Body",
+              "visible": false
+            },
+            {
+              "name": "COL_LC_FrontWheel",
+              "visible": false
+            },
+            {
+              "name": "COL_LC_RearWheel",
+              "visible": false
+            },
+            {
+              "name": "COL_LC_RiderZone",
+              "visible": false
+            }
+          ],
+          "materials": [
+            {
+              "name": "MAT_LC_EMISSIVE_PRIMARY",
+              "colors": [
+                "eaf8ff"
+              ],
+              "intensities": [
+                0
+              ]
+            },
+            {
+              "name": "MAT_LC_EMISSIVE_SECONDARY",
+              "colors": [
+                "eaf8ff"
+              ],
+              "intensities": [
+                0
+              ]
+            },
+            {
+              "name": "MAT_LC_EMISSIVE_REACTOR",
+              "colors": [
+                "eaf8ff"
+              ],
+              "intensities": [
+                0
+              ]
+            },
+            {
+              "name": "MAT_LC_EMISSIVE_CORE",
+              "colors": [
+                "ffffff"
+              ],
+              "intensities": [
+                0
+              ]
+            }
+          ],
+          "glbRequests": 1,
+          "draws": 150,
+          "triangles": 595032
+        }
+      ]
+    },
+    {
+      "color": "blue",
+      "evidence": [
+        "docs/review/browser-blue.png"
+      ],
+      "check": [
+        {
+          "status": "BLUE \u00b7 same GLB, materials only",
+          "loaded": true,
+          "proxies": [
+            {
+              "name": "COL_LC_Body",
+              "visible": false
+            },
+            {
+              "name": "COL_LC_FrontWheel",
+              "visible": false
+            },
+            {
+              "name": "COL_LC_RearWheel",
+              "visible": false
+            },
+            {
+              "name": "COL_LC_RiderZone",
+              "visible": false
+            }
+          ],
+          "materials": [
+            {
+              "name": "MAT_LC_EMISSIVE_PRIMARY",
+              "colors": [
+                "00c8ff"
+              ],
+              "intensities": [
+                3
+              ]
+            },
+            {
+              "name": "MAT_LC_EMISSIVE_SECONDARY",
+              "colors": [
+                "00c8ff"
+              ],
+              "intensities": [
+                1.6
+              ]
+            },
+            {
+              "name": "MAT_LC_EMISSIVE_REACTOR",
+              "colors": [
+                "00c8ff"
+              ],
+              "intensities": [
+                4.5
+              ]
+            },
+            {
+              "name": "MAT_LC_EMISSIVE_CORE",
+              "colors": [
+                "e7fcff"
+              ],
+              "intensities": [
+                9
+              ]
+            }
+          ],
+          "glbRequests": 1,
+          "draws": 150,
+          "triangles": 595032
+        }
+      ]
+    }
+  ],
+  "runtime_sha256": "3179f2c1b8bb7edcec79fdb1ca6ba40f1a30c296b7f64fdbea8a0a496e8e670b",
+  "checks": {
+    "sixColors": "red inspected separately plus blue/gold/purple/green/white here",
+    "off": "all four intensities zero",
+    "glbRequests": 1,
+    "collisionProxiesHidden": 4,
+    "KTX2": "local Basis decoder JS/WASM loaded"
+  }
+}

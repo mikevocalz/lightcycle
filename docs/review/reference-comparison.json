@@ -1,0 +1,172 @@
+{
+  "schema_version": 1,
+  "purpose": "Evidence layout only; no vehicle retouching or generated replacement pixels",
+  "output": "/Users/mikevocalz/lightcycle/assets/render/reference-comparison.png",
+  "output_sha256": "bae4cd4f231a5bfe8f5adbf8f978b0d11a0c66eace9b4e5bacebda04130a56eb",
+  "dimensions": [
+    2008,
+    1832
+  ],
+  "rows": 4,
+  "columns": 3,
+  "color": "red",
+  "alternate_color": "blue",
+  "sources": [
+    {
+      "row": 1,
+      "column": 1,
+      "label": "Reference side crop",
+      "kind": "reference_crop",
+      "path": "/Users/mikevocalz/lightcycle/docs/references/00_generated_hybrid_concept.png.png",
+      "sha256": "6e461b478d3ecb07e7b3664bf6d1e53d662b33cd5432ab8049b8fddd5995b764",
+      "dimensions": [
+        1448,
+        1086
+      ],
+      "crop_normalized": [
+        0.13,
+        0.1,
+        0.85,
+        0.43
+      ],
+      "crop_pixels": [
+        188,
+        109,
+        1231,
+        467
+      ]
+    },
+    {
+      "row": 1,
+      "column": 2,
+      "label": "New side | red",
+      "kind": "render",
+      "path": "/Users/mikevocalz/lightcycle/assets/render/reference-review/side_red.png",
+      "sha256": "bb2bd576c7444efa8a8a139b93a0a22d16da89a5fe4929447921d01b225ecb8e",
+      "dimensions": [
+        1280,
+        720
+      ]
+    },
+    {
+      "row": 1,
+      "column": 3,
+      "label": "Front three-quarter | red",
+      "kind": "render",
+      "path": "/Users/mikevocalz/lightcycle/assets/render/reference-review/front34_red.png",
+      "sha256": "085f92261b7b8c41e64416c8f53b2988afe211c086e4ade9c7ce1531d641058f",
+      "dimensions": [
+        1280,
+        720
+      ]
+    },
+    {
+      "row": 2,
+      "column": 1,
+      "label": "Front | red",
+      "kind": "render",
+      "path": "/Users/mikevocalz/lightcycle/assets/render/reference-review/front_red.png",
+      "sha256": "0d543c19f3df0c330543cc8bae78f9d69c09b244013dd6dde7d097d48572d332",
+      "dimensions": [
+        1280,
+        720
+      ]
+    },
+    {
+      "row": 2,
+      "column": 2,
+      "label": "Top | red",
+      "kind": "render",
+      "path": "/Users/mikevocalz/lightcycle/assets/render/reference-review/top_red.png",
+      "sha256": "d968c9ab740eea87e2f0acf4029c93f83d7924df49dfa253735d9f6acbf4ae25",
+      "dimensions": [
+        1280,
+        720
+      ]
+    },
+    {
+      "row": 2,
+      "column": 3,
+      "label": "Rear | red",
+      "kind": "render",
+      "path": "/Users/mikevocalz/lightcycle/assets/render/reference-review/rear_red.png",
+      "sha256": "86887771e817060e24f71a8829b8b7cc3b7271833389bb6c672608c352ea2f6c",
+      "dimensions": [
+        1280,
+        720
+      ]
+    },
+    {
+      "row": 3,
+      "column": 1,
+      "label": "Front wheel detail | red",
+      "kind": "render",
+      "path": "/Users/mikevocalz/lightcycle/assets/render/reference-review/wheel_red.png",
+      "sha256": "075ab64d23649f5ff0f7b75908eaef0c21cf43b5152926c0302dd18da418990f",
+      "dimensions": [
+        1280,
+        720
+      ]
+    },
+    {
+      "row": 3,
+      "column": 2,
+      "label": "Reactor detail | red",
+      "kind": "render",
+      "path": "/Users/mikevocalz/lightcycle/assets/render/reference-review/reactor_red.png",
+      "sha256": "3654ac5eddda7b7f9e894e7bc0d0da2ea1a2a62db76f4589e94f5fc886235326",
+      "dimensions": [
+        1280,
+        720
+      ]
+    },
+    {
+      "row": 3,
+      "column": 3,
+      "label": "Rear wheel detail | red",
+      "kind": "render",
+      "path": "/Users/mikevocalz/lightcycle/assets/render/reference-review/rear-wheel_red.png",
+      "sha256": "bf506507fd77cca9bf90205deeeb517b8d2a624efad54e0e02ed87cb655712b6",
+      "dimensions": [
+        1280,
+        720
+      ]
+    },
+    {
+      "row": 4,
+      "column": 1,
+      "label": "Lights off | side",
+      "kind": "render",
+      "path": "/Users/mikevocalz/lightcycle/assets/render/reference-review/side_lightsoff.png",
+      "sha256": "012601fa68c736b6fb3cf19d96b95f01ae342514ac195f52a89076968bb3100c",
+      "dimensions": [
+        1280,
+        720
+      ]
+    },
+    {
+      "row": 4,
+      "column": 2,
+      "label": "Lights off | front three-quarter",
+      "kind": "render",
+      "path": "/Users/mikevocalz/lightcycle/assets/render/reference-review/front34_lightsoff.png",
+      "sha256": "399a1e021d82f690a2d9081bd19608b4d83b473631e8c9d070a7fc79cfa586a8",
+      "dimensions": [
+        1280,
+        720
+      ]
+    },
+    {
+      "row": 4,
+      "column": 3,
+      "label": "Alternate energy | blue",
+      "kind": "render",
+      "path": "/Users/mikevocalz/lightcycle/assets/render/reference-review/front34_blue.png",
+      "sha256": "d57f9a36b8ceeea9b35d2bac186e49627f1ea4dbd69ef60df73ba0db9d232740",
+      "dimensions": [
+        1280,
+        720
+      ]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+Info: Saved as "rest-test.blend"
+INFO Draco is available, use library at /Applications/Blender.app/Contents/Resources/5.2/scripts/addons_core/io_scene_gltf2/libbf_intern_draco_bridge.dylib
+INFO MeshOptimizer is available, use library at /Applications/Blender.app/Contents/Resources/5.2/scripts/addons_core/io_scene_gltf2/libbf_intern_meshopt_bridge.dylib
+13:41:50 | INFO: Starting glTF 2.0 export
+13:41:50 | INFO: Extracting primitive: LC_SteeringYoke_MESH
+13:41:50 | INFO: Primitives created: 1
+13:41:57 | INFO: Finished glTF 2.0 export in 6.650572776794434 s
+00:07.413  blend            | Read blend: "/var/folders/37/s0s6qm2x3cx1mdsr_fv0y1pr0000gn/T/lightcycle-rest-x5h6t0la/rest-test.blend"
+
+{"check": "rest_pose_and_animation_export", "result": "pass", "restored_nodes": 102, "exported_clips": 33, "canopy_transition_nodes_verified": 5, "yoke_pivot": [-0.96, 0, 0.82], "shared_assets_modified": false}
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit

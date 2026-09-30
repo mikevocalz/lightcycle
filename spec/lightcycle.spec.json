@@ -6,9 +6,9 @@
   "forwardAxis": "-X",
   "unit": "meter",
   "dimensions_m": {
-    "_note": "Locked against a 50th-percentile prone rider proxy by tools/rider_proxy.py, not eyeballed. All four contact points solve with reachable two-link IK and the canopy clears. Re-run rider_proxy.py after moving any contact point.",
+    "_note": "Locked against a 50th-percentile prone rider proxy by tools/rider_proxy.py, not eyeballed. All four contact points solve with reachable two-link IK and the canopy clears. Re-run rider_proxy.py after moving any contact point. Body width follows reference shoulder proportions. mechanicalWidth preserves solved contact/actuator/pivot placement; wheel geometry and centers unchanged.",
     "length": 2.95,
-    "width": 0.46,
+    "width": 0.66,
     "height": 0.98,
     "wheelbase": 1.92,
     "wheelOuterDiameter": 0.92,
@@ -42,7 +42,8 @@
       },
       "legOutboardY": 0.21,
       "legOutboardWhy": "Shin centreline must clear the rear wheel's 0.30 m section width; at hip breadth (0.175) the shin passes through the tyre."
-    }
+    },
+    "mechanicalWidth": 0.46
   },
   "materials": {
     "MAT_LC_GRAPHITE": {

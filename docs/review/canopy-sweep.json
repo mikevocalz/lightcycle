@@ -1,0 +1,112 @@
+{
+  "schema": "lightcycle.canopy-rider-sweep.v1",
+  "result": "pass",
+  "source_sha256": {
+    "tools/check_canopy_sweep.py": "c8d5edbde588acb1fa5de45cee59da558e357a2f5d756a3cb9e3545ccdb863a0",
+    "tools/build_lightcycle.py": "e9bae71f9eb054ab2b7515860a04074068fcdbf145fb9d32ef201b48c2723ed0",
+    "tools/rest_pose.py": "1e509226d18551fd22c1037fa9aa585c1553e4e98de0b31aa90c1f7741e76823",
+    "tools/rider_proxy.py": "9e04da2034076390bdf3ccdc5e53329ad1a49fe6e803646a0d1f342748bca091",
+    "tools/geo/cockpit.py": "b6167b98abc7e978075711298afecda067c1477342ef2f327fa39d4e13b84509",
+    "tools/geo/chassis.py": "eb8bee27ad658d07ed189356bc7e910181d8f65eb7855b0b7ac8cfbb7499bbda",
+    "tools/geo/_lib.py": "cb65a48e0620c7e1e9038e12ccac5ba1624e1c281b82721f7eee09b3f2699a7c",
+    "spec/lightcycle.spec.json": "9747ae04df87496fc64994402c427c966746178199e5c344ede13b660e4e904f",
+    "spec/lightcycle.nodes.json": "a0864078c78a00df28dbd925fa543341b2156f96a2b1dd3e0aa55ffe554ccd2c"
+  },
+  "required_clearance_mm": 2.0,
+  "geometry_input": "loaded_source_blend",
+  "source_blend": "/Users/mikevocalz/lightcycle/assets/source/lightcycle_blockout.blend",
+  "source_blend_sha256": "5d031623a66d7e45393d59b1952c3ba45c069b9debf8a3f37c913c9450045e32",
+  "rider_proxy": "authoritative solver, conservative capsule volumes",
+  "sampled_frames": 136,
+  "surface_samples": {
+    "LC_Canopy_Center": 5852,
+    "LC_Canopy_L": 4482,
+    "LC_Canopy_R": 4482,
+    "LC_BackSupport": 2252,
+    "LC_DeployArm_L": 2420,
+    "LC_DeployArm_R": 2420,
+    "LC_CanopyEnergy": 5104
+  },
+  "closest_by_node": {
+    "LC_Canopy_Center": {
+      "margin_m": 0.14779916464631232,
+      "limb": "thigh_R",
+      "clip": "LC_HighSpeedReverse",
+      "frame": 16,
+      "point": [
+        0.4427012912929058,
+        -0.05761034041643143,
+        0.8572268486022949
+      ]
+    },
+    "LC_Canopy_L": {
+      "margin_m": 0.005454332382400798,
+      "limb": "thigh_L",
+      "clip": "LC_HighSpeedTransform",
+      "frame": 36,
+      "point": [
+        0.4807079030821721,
+        0.20623296348875067,
+        0.7659103900877468
+      ]
+    },
+    "LC_Canopy_R": {
+      "margin_m": 0.005442832452419263,
+      "limb": "thigh_R",
+      "clip": "LC_HighSpeedTransform",
+      "frame": 36,
+      "point": [
+        0.4806393689165513,
+        -0.2061989934090243,
+        0.7659314015013148
+      ]
+    },
+    "LC_BackSupport": {
+      "margin_m": 0.07829392136525944,
+      "limb": "thigh_R",
+      "clip": "REST",
+      "frame": 1,
+      "point": [
+        0.43476924300193787,
+        -0.05795625224709511,
+        0.7130019664764404
+      ]
+    },
+    "LC_DeployArm_L": {
+      "margin_m": 0.005489926953816143,
+      "limb": "thigh_L",
+      "clip": "LC_HighSpeedTransform",
+      "frame": 36,
+      "point": [
+        0.43797202230529175,
+        0.15011889534071088,
+        0.7482005323958891
+      ]
+    },
+    "LC_DeployArm_R": {
+      "margin_m": 0.008025061202026798,
+      "limb": "thigh_R",
+      "clip": "REST",
+      "frame": 1,
+      "point": [
+        0.4399999975867104,
+        -0.12988799810409546,
+        0.7162189744412899
+      ]
+    },
+    "LC_CanopyEnergy": {
+      "margin_m": 0.15877651531415943,
+      "limb": "thigh_R",
+      "clip": "LC_Viro_HighSpeedEnter",
+      "frame": 20,
+      "point": [
+        0.44321801513433456,
+        -0.05330698937177658,
+        0.8681857585906982
+      ]
+    }
+  },
+  "failed_nodes": [],
+  "shared_assets_modified": false,
+  "scope": "Rider clearance only; not body self-collision or a continuous-collision proof."
+}

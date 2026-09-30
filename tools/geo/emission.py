@@ -8,27 +8,57 @@ import math
 from mathutils import Matrix
 
 from . import _lib as L
-from .chassis import _box
+from .chassis import _box, _interp, nose_surface, rear_surface, sill_surface, coaming_surface, skin
 
 
-def _strip_pair(bm, x: float, z: float, hx: float, y: float, hz: float):
-    for side in (-1, 1):
-        _box(bm, (x, side * y, z), (hx, 0.003, hz))
+def _nose_energy_u(dims, v):
+    """Two long angular strokes; the shell supplies compound depth, not a wavy path."""
+    z=.125+.815*v
+    if z <= .709:
+        x=-.678+(.260)*((z-.125)/(.709-.125))
+    else:
+        x=-.418-.417*((z-.709)/(.941-.709))
+    front=nose_surface(dims,1,0,v)[0]
+    back=nose_surface(dims,1,1,v)[0]
+    return max(.11,min(.88,(x-front)/max(.001,back-front)))
 
 
 def body_primary(dims: dict):
     bm = L.new_bm()
-    y = (dims["width"] / 2) * 0.99
-    for x, hx in ((-0.46, 0.18), (-0.02, 0.20), (0.42, 0.17)):
-        _strip_pair(bm, x, 0.555, hx, y, 0.009)
+    for side in (-1, 1):
+        def shape(s, across, side=side):
+            v = 0.025 + 0.91 * s
+            center_u = _nose_energy_u(dims, v)
+            front = nose_surface(dims, side, 0.0, v)
+            back = nose_surface(dims, side, 1.0, v)
+            span = back[0] - front[0]
+            # Preserve the band's perceived width through the sharp shoulder
+            # diagonal; a constant U width becomes a tiny LED at the crown.
+            v0, v1 = max(0.025, v - 0.002), min(0.935, v + 0.002)
+            p0 = nose_surface(dims, side, _nose_energy_u(dims, v0), v0)
+            p1 = nose_surface(dims, side, _nose_energy_u(dims, v1), v1)
+            slope = (p1[0] - p0[0]) / max(0.0001, p1[2] - p0[2])
+            width = _interp([(0.025, 0.042), (0.55, 0.056),
+                             (0.78, 0.060), (0.935, 0.035)], v)
+            half_u = width * 0.5 * math.hypot(1, slope) / max(span, 0.001)
+            half_u = min(half_u, center_u - 0.02, 0.98 - center_u)
+            u = center_u + (2 * across - 1) * half_u
+            x, y, z = nose_surface(dims, side, u, v)
+            return x, y + side * 0.0045, z
+        skin(bm, shape, 64, 4, 0.003, (0, -side, 0))
     return bm
 
 
 def body_secondary(dims: dict):
     bm = L.new_bm()
-    y = (dims["width"] / 2) * 0.94
-    for x, hx in ((-0.30, 0.14), (0.10, 0.18), (0.48, 0.10)):
-        _strip_pair(bm, x, 0.395, hx, y, 0.004)
+    for side in (-1, 1):
+        def sill(u, v, side=side):
+            # Follow the carbon sill, below the complete reactor aperture.
+            shell_u = 0.08 + 0.83 * u
+            shell_v = 0.40 + 0.16 * v
+            x, y, z = sill_surface(dims, side, shell_u, shell_v)
+            return x, y + side * 0.004, z
+        skin(bm, sill, 48, 2, 0.002, (0, -side, 0))
     return bm
 
 
@@ -48,24 +78,32 @@ def wheel_marker(dims: dict, front: bool):
 
 def reactor(dims: dict):
     bm = L.new_bm()
-    y = (dims["width"] / 2) * 0.80
+    # Perimeter energy rings emphasize the housing; no strip crosses the core.
     for side in (-1, 1):
-        for x in (0.235, 0.300, 0.365):
-            _box(bm, (x, side * y, 0.40), (0.008, 0.003, 0.075))
+        y = side * 0.184
+        L.revolve(bm, [(y - 0.002, 0.205), (y + 0.002, 0.205),
+                       (y + 0.002, 0.213), (y - 0.002, 0.213)],
+                  segments=96, axis="y", center=(0.30, 0.0, 0.40))
     return bm
 
 
 def cockpit(dims: dict):
     bm = L.new_bm()
-    for side in (-1, 1):
-        _box(bm, (-0.515, side * 0.038, 0.665), (0.038, 0.004, 0.003))
+    for side in (-1,1):
+        def insert(u,v,side=side):
+            x,y,z=coaming_surface(dims,side,.018+.96*u,.52+.14*v)
+            return x,y,z+.003
+        skin(bm,insert,48,4,.002,(0,0,-1))
     return bm
 
 
 def rear(dims: dict):
     bm = L.new_bm()
     for side in (-1, 1):
-        _box(bm, (0.830, side * 0.072, 0.585), (0.018, 0.012, 0.024))
+        def shape(u, v, side=side):
+            x, y, z = rear_surface(dims, side, 0.40 + 0.55 * u, 0.72 + 0.10 * v)
+            return x, y + side * 0.004, z
+        skin(bm, shape, 30, 2, 0.0025, (0, -side, 0))
     return bm
 
 

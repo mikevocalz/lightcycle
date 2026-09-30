@@ -1,60 +1,49 @@
-"""Detachable production damage-panel geometry.
+"""Independent sacrificial skins following the shared compound body surfaces.
 
-The base vehicle remains intact; these nodes are thin sacrificial outer skins
-with their own pivots so LC_Damage and LC_Derez can move them independently.
+Node names and physical origins are assigned by the canonical builder. These
+patches remain separate meshes; none bridges or covers the reactor opening.
 """
-import math
-
-from mathutils import Matrix
-
 from . import _lib as L
-from .chassis import _box, _bolt, _bolt_row
+from .chassis import mid_surface, nose_surface, rear_surface, skin
 
 
-def _y(dims: dict, side: int, factor: float = 1.10) -> float:
-    return side * (dims["width"] / 2) * 0.86 * factor
-
-
-def _panel(dims: dict, x: float, side: int, z: float, hx: float, hz: float,
-           seam: bool = True):
+def _patch(dims, side, surface, u0, u1, v0, v1, nu=24, nv=20):
     bm = L.new_bm()
-    y = _y(dims, side)
-    _box(bm, (x, y, z), (hx, 0.002, hz))
-    if seam:
-        rot = Matrix.Rotation(math.pi / 2, 4, "X")
-        count = max(3, int(hx / 0.035))
-        _bolt_row(bm, (x - hx * 0.80, y + side * 0.004, z + hz * 0.78),
-                  (x + hx * 0.80, y + side * 0.004, z + hz * 0.78),
-                  count, rot=rot, r=0.004, depth=0.005, segments=8)
-        _bolt_row(bm, (x - hx * 0.80, y + side * 0.004, z - hz * 0.78),
-                  (x + hx * 0.80, y + side * 0.004, z - hz * 0.78),
-                  count, rot=rot, r=0.004, depth=0.005, segments=8)
+
+    def shape(u, v):
+        x, y, z = surface(dims, side, u0 + (u1 - u0) * u, v0 + (v1 - v0) * v)
+        # A narrow, consistent panel reveal rather than a floating flat plate.
+        return x, y + side * 0.0035, z
+
+    skin(bm, shape, nu, nv, 0.0025, (0, -side, 0))
     return bm
 
 
 def nose(dims: dict, side: int):
-    return _panel(dims, -0.655, side, 0.50, 0.078, 0.082)
+    # Broad access skin on the trailing wedge, clear of the front energy band.
+    return _patch(dims, side, nose_surface, 0.64, 0.94, 0.10, 0.55, 24, 24)
 
 
 def mid(dims: dict, side: int, which: int):
-    x = -0.155 if which == 1 else 0.155
-    return _panel(dims, x, side, 0.49, 0.120, 0.074)
+    # The shared surface's circular boundary defines the aperture; preserving
+    # its parameterization prevents a damage skin from sealing the opening.
+    u0, u1 = (0.06, 0.43) if which == 1 else (0.48, 0.92)
+    return _patch(dims, side, mid_surface, u0, u1, 0.09, 0.90, 16, 28)
 
 
 def rear(dims: dict, side: int):
-    return _panel(dims, 0.610, side, 0.49, 0.090, 0.075)
+    return _patch(dims, side, rear_surface, 0.08, 0.86, 0.10, 0.62, 28, 14)
 
 
 def reactor_cover(dims: dict):
+    """Detachable peripheral housing bezel with a completely open center.
+
+    Keep the existing positive-Y cover ownership and pivot. The inner radius
+    clears the 0.20 m housing; the outer radius remains inside the 0.238 m body
+    aperture. The core and all concentric machinery stay visible through it.
+    """
     bm = L.new_bm()
-    y = (dims["width"] / 2) * 0.82
-    for z in (0.30, 0.50):
-        _box(bm, (0.30, y, z), (0.125, 0.003, 0.010))
-    for x in (0.20, 0.40):
-        _box(bm, (x, y, 0.40), (0.010, 0.003, 0.090))
-    for dx in (-0.075, 0.075):
-        for dz in (-0.060, 0.060):
-            _bolt(bm, (0.30 + dx, y + 0.004, 0.40 + dz),
-                  rot=Matrix.Rotation(math.pi / 2, 4, "X"),
-                  r=0.005, depth=0.006, segments=8)
+    L.revolve(bm, [(0.184, 0.216), (0.191, 0.216),
+                   (0.191, 0.232), (0.184, 0.232)],
+              segments=96, axis="y", center=(0.30, 0.0, 0.40))
     return bm

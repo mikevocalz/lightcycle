@@ -1,0 +1,349 @@
+{
+  "source": "/Users/mikevocalz/lightcycle/assets/source/lightcycle_blockout.blend",
+  "sourceSha256": "5d031623a66d7e45393d59b1952c3ba45c069b9debf8a3f37c913c9450045e32",
+  "checkerSha256": "046314a169f2025d7d2110d07dd8948dc220d38c9834a91b217e98231d5ab0bb",
+  "method": "evaluated shell vertex envelope sampling",
+  "parts": {
+    "LC_Body_Core": {
+      "bounds": [
+        [
+          -0.5,
+          0.5899999737739563
+        ],
+        [
+          -0.11995379626750946,
+          0.11995379626750946
+        ],
+        [
+          0.12516522407531738,
+          0.4860602617263794
+        ]
+      ],
+      "vertices": 2128,
+      "tireEnvelopeHits": 0,
+      "tireExamples": [],
+      "reactorEnvelopeHits": 0
+    },
+    "LC_Body_Spine": {
+      "bounds": [
+        [
+          -0.44999998807907104,
+          0.5699999928474426
+        ],
+        [
+          -0.14489613473415375,
+          0.14489613473415375
+        ],
+        [
+          0.4735739231109619,
+          0.7438722252845764
+        ]
+      ],
+      "vertices": 2864,
+      "tireEnvelopeHits": 0,
+      "tireExamples": [],
+      "reactorEnvelopeHits": 0
+    },
+    "LC_Belly": {
+      "bounds": [
+        [
+          -0.6000000238418579,
+          0.6100000143051147
+        ],
+        [
+          -0.16493646800518036,
+          0.16493646800518036
+        ],
+        [
+          0.11115363985300064,
+          0.17745085060596466
+        ]
+      ],
+      "vertices": 1064,
+      "tireEnvelopeHits": 0,
+      "tireExamples": [],
+      "reactorEnvelopeHits": 0
+    },
+    "LC_Underbody": {
+      "bounds": [
+        [
+          -0.6200000047683716,
+          0.6100000143051147
+        ],
+        [
+          -0.14694340527057648,
+          0.14694340527057648
+        ],
+        [
+          0.09210088849067688,
+          0.14940372109413147
+        ]
+      ],
+      "vertices": 1562,
+      "tireEnvelopeHits": 0,
+      "tireExamples": [],
+      "reactorEnvelopeHits": 0
+    },
+    "LC_RiderMount": {
+      "bounds": [
+        [
+          -0.10499999672174454,
+          0.375
+        ],
+        [
+          -0.05699651688337326,
+          0.05699651688337326
+        ],
+        [
+          0.4660648703575134,
+          0.6969805955886841
+        ]
+      ],
+      "vertices": 790,
+      "tireEnvelopeHits": 0,
+      "tireExamples": [],
+      "reactorEnvelopeHits": 0
+    },
+    "LC_Canopy_Center": {
+      "bounds": [
+        [
+          0.4950000047683716,
+          1.1150000095367432
+        ],
+        [
+          -0.10480733215808868,
+          0.10480733215808868
+        ],
+        [
+          0.8569400906562805,
+          0.9759167432785034
+        ]
+      ],
+      "vertices": 1172,
+      "tireEnvelopeHits": 0,
+      "tireExamples": [],
+      "reactorEnvelopeHits": 0
+    },
+    "LC_Canopy_L": {
+      "bounds": [
+        [
+          0.49512189626693726,
+          1.1150000095367432
+        ],
+        [
+          0.048187531530857086,
+          0.189098060131073
+        ],
+        [
+          0.8350061178207397,
+          0.9659640789031982
+        ]
+      ],
+      "vertices": 898,
+      "tireEnvelopeHits": 0,
+      "tireExamples": [],
+      "reactorEnvelopeHits": 0
+    },
+    "LC_Canopy_R": {
+      "bounds": [
+        [
+          0.49512189626693726,
+          1.1150000095367432
+        ],
+        [
+          -0.189098060131073,
+          -0.04818752408027649
+        ],
+        [
+          0.8350061178207397,
+          0.9659640789031982
+        ]
+      ],
+      "vertices": 898,
+      "tireEnvelopeHits": 0,
+      "tireExamples": [],
+      "reactorEnvelopeHits": 0
+    },
+    "LC_BackSupport": {
+      "bounds": [
+        [
+          0.3720000088214874,
+          0.5080000162124634
+        ],
+        [
+          -0.05795625224709511,
+          0.05795625224709511
+        ],
+        [
+          0.6921485066413879,
+          0.7407848238945007
+        ]
+      ],
+      "vertices": 452,
+      "tireEnvelopeHits": 0,
+      "tireExamples": [],
+      "reactorEnvelopeHits": 0
+    },
+    "LC_Nose_Shell_L": {
+      "bounds": [
+        [
+          -1.2328861951828003,
+          -0.0250557791441679
+        ],
+        [
+          2.5162198653561063e-06,
+          0.3251185119152069
+        ],
+        [
+          0.125,
+          0.9518454670906067
+        ]
+      ],
+      "vertices": 4869,
+      "tireEnvelopeHits": 0,
+      "tireExamples": [],
+      "reactorEnvelopeHits": 0
+    },
+    "LC_Nose_Shell_R": {
+      "bounds": [
+        [
+          -1.2328861951828003,
+          -0.02505577728152275
+        ],
+        [
+          -0.3251185119152069,
+          -2.5163117243209854e-06
+        ],
+        [
+          0.125,
+          0.9518454670906067
+        ]
+      ],
+      "vertices": 4869,
+      "tireEnvelopeHits": 0,
+      "tireExamples": [],
+      "reactorEnvelopeHits": 0
+    },
+    "LC_Mid_Shell_L": {
+      "bounds": [
+        [
+          -0.2849999964237213,
+          0.550000011920929
+        ],
+        [
+          0.05204148218035698,
+          0.31200000643730164
+        ],
+        [
+          0.14499999582767487,
+          0.8869603276252747
+        ]
+      ],
+      "vertices": 3475,
+      "tireEnvelopeHits": 0,
+      "tireExamples": [],
+      "reactorEnvelopeHits": 0
+    },
+    "LC_Mid_Shell_R": {
+      "bounds": [
+        [
+          -0.2849999964237213,
+          0.550000011920929
+        ],
+        [
+          -0.31200000643730164,
+          -0.05204147845506668
+        ],
+        [
+          0.14499999582767487,
+          0.8869603276252747
+        ]
+      ],
+      "vertices": 3475,
+      "tireEnvelopeHits": 0,
+      "tireExamples": [],
+      "reactorEnvelopeHits": 0
+    },
+    "LC_Rear_Shell_L": {
+      "bounds": [
+        [
+          0.5350000262260437,
+          1.1150000095367432
+        ],
+        [
+          0.0992254689335823,
+          0.29971179366111755
+        ],
+        [
+          0.16500000655651093,
+          0.933951735496521
+        ]
+      ],
+      "vertices": 1561,
+      "tireEnvelopeHits": 0,
+      "tireExamples": [],
+      "reactorEnvelopeHits": 0
+    },
+    "LC_Rear_Shell_R": {
+      "bounds": [
+        [
+          0.5350000262260437,
+          1.1150000095367432
+        ],
+        [
+          -0.29971179366111755,
+          -0.0992254689335823
+        ],
+        [
+          0.16500000655651093,
+          0.933951735496521
+        ]
+      ],
+      "vertices": 1561,
+      "tireEnvelopeHits": 0,
+      "tireExamples": [],
+      "reactorEnvelopeHits": 0
+    },
+    "LC_Armor_L": {
+      "bounds": [
+        [
+          -0.550000011920929,
+          0.7300000190734863
+        ],
+        [
+          0.16176088154315948,
+          0.1922953873872757
+        ],
+        [
+          0.13891462981700897,
+          0.2175997793674469
+        ]
+      ],
+      "vertices": 904,
+      "tireEnvelopeHits": 0,
+      "tireExamples": [],
+      "reactorEnvelopeHits": 0
+    },
+    "LC_Armor_R": {
+      "bounds": [
+        [
+          -0.550000011920929,
+          0.7300000190734863
+        ],
+        [
+          -0.1922953873872757,
+          -0.16176088154315948
+        ],
+        [
+          0.13891462981700897,
+          0.2175997793674469
+        ]
+      ],
+      "vertices": 904,
+      "tireEnvelopeHits": 0,
+      "tireExamples": [],
+      "reactorEnvelopeHits": 0
+    }
+  },
+  "failures": []
+}

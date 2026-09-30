@@ -1,0 +1,81 @@
+{
+  "revision": "body-pass8",
+  "date": "2026-09-30",
+  "source_and_outputs": {
+    "assets/source/lightcycle_blockout.blend": {
+      "sha256": "5d031623a66d7e45393d59b1952c3ba45c069b9debf8a3f37c913c9450045e32",
+      "bytes": 1854400
+    },
+    "assets/export/lightcycle.glb": {
+      "sha256": "6b3425f4488801abe73884b1df045b150668a0cd00ae6fb05d55bb2a306fb6a0",
+      "bytes": 23950296
+    },
+    "assets/export/lightcycle.runtime.glb": {
+      "sha256": "3179f2c1b8bb7edcec79fdb1ca6ba40f1a30c296b7f64fdbea8a0a496e8e670b",
+      "bytes": 7550672
+    },
+    "assets/export/lightcycle.lod0.glb": {
+      "sha256": "8674d3b781e73ef96385989a425d28d2df3c19741cfbe50ad30bbe4bd51f3399",
+      "bytes": 23949336
+    },
+    "assets/export/lightcycle.lod0.runtime.glb": {
+      "sha256": "3179f2c1b8bb7edcec79fdb1ca6ba40f1a30c296b7f64fdbea8a0a496e8e670b",
+      "bytes": 7550672
+    },
+    "assets/export/lightcycle.lod1.glb": {
+      "sha256": "4066a88a6398714cc5a12fc529ad48b7dda9a34f093f149fe9571bf953eaecb7",
+      "bytes": 18949944
+    },
+    "assets/export/lightcycle.lod1.runtime.glb": {
+      "sha256": "58de1cb7287271a72b453470b91a85ba1e2851a517f23f53d316dd2b25f8e8e2",
+      "bytes": 5076828
+    },
+    "assets/export/lightcycle.lod2.glb": {
+      "sha256": "2e0382c1b1bf52ba7a31269625ee49c59bbef2510146ab7946ad1db362c3259d",
+      "bytes": 16493860
+    },
+    "assets/export/lightcycle.lod2.runtime.glb": {
+      "sha256": "ee209015b251773c1cab23f0602ef2458d3b58afff464129c6b4d7beafa7f121",
+      "bytes": 3630680
+    },
+    "assets/export/lightcycle.lod3.glb": {
+      "sha256": "d49da93b9f253cdfce5a25146e48cdf8dfae1fd7b2b67df20525852423c3ee9f",
+      "bytes": 15260316
+    },
+    "assets/export/lightcycle.lod3.runtime.glb": {
+      "sha256": "134bd35f68de2f9e8ce2773f468bff3ee98b1b5af9aa15fa5db35830649979ce",
+      "bytes": 3112800
+    }
+  },
+  "technicalLocal": "pass",
+  "remoteCI": "pending PR",
+  "visualAcceptance": "pending; no human approval",
+  "checks": {
+    "typecheck": "pass",
+    "tests": "Three6/6; Viro5/5 and composites; runtime trail/damage/Rive/ribbon pass",
+    "canonical": "102 nodes, 11 materials, 33 clips; zero errors/warnings",
+    "packed": "102 named contractual nodes plus 78 optimizer children; zero errors/warnings",
+    "rider": "contacts and static body capsule sampling pass",
+    "canopy": "136 sampled poses; 2mm minimum requirement passed",
+    "shell": "17 parts; sampled tire/reactor/ground envelopes pass",
+    "rest": "102 restored nodes; 33 clips; 5 canopy transition channels",
+    "textures": "canonical+packed+all4plain/packedLODs passed",
+    "qa_ci": "20 captures",
+    "qa_matrix": "63 captures",
+    "clay": "six views",
+    "comparison": "4x3; latest white board",
+    "browser": "Argent: six colors, four neutral channels, off intensity0, one GLB request, four hidden proxies"
+  },
+  "wheel": {
+    "geometry": "pass",
+    "maxPositionDelta": 1.3328003749250113e-07,
+    "normalAngleMax": 3.6455854138749335,
+    "shadingReviewRequired": true
+  },
+  "limitations": [
+    "No hardware FPS/native Viro host verification",
+    "Sampled collision guards are not continuous body/canopy self-collision proof",
+    "Reference surface fidelity and wheel shading await visual review",
+    "Runtime browser renders extra transmission passes; static triangles are not total GPU workload"
+  ]
+}

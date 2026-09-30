@@ -1,0 +1,128 @@
+{
+  "schema": "lightcycle.static-performance.v1",
+  "note": "Static geometry/file-budget evidence only; not hardware FPS evidence.",
+  "assets": [
+    {
+      "path": "assets/export/lightcycle.glb",
+      "bytes": 23950296,
+      "triangles": 298668,
+      "nodes": 102,
+      "meshes": 78,
+      "materials": 11,
+      "animations": 33
+    },
+    {
+      "path": "assets/export/lightcycle.lod0.glb",
+      "bytes": 23949336,
+      "triangles": 298668,
+      "nodes": 102,
+      "meshes": 78,
+      "materials": 11,
+      "animations": 33
+    },
+    {
+      "path": "assets/export/lightcycle.lod1.glb",
+      "bytes": 18949944,
+      "triangles": 143658,
+      "nodes": 102,
+      "meshes": 78,
+      "materials": 11,
+      "animations": 33
+    },
+    {
+      "path": "assets/export/lightcycle.lod2.glb",
+      "bytes": 16493860,
+      "triangles": 68460,
+      "nodes": 102,
+      "meshes": 78,
+      "materials": 11,
+      "animations": 33
+    },
+    {
+      "path": "assets/export/lightcycle.lod3.glb",
+      "bytes": 15260316,
+      "triangles": 29436,
+      "nodes": 102,
+      "meshes": 78,
+      "materials": 11,
+      "animations": 33
+    },
+    {
+      "path": "assets/export/lightcycle.lod0.runtime.glb",
+      "bytes": 7550672,
+      "triangles": 297526,
+      "nodes": 180,
+      "meshes": 75,
+      "materials": 11,
+      "animations": 33
+    },
+    {
+      "path": "assets/export/lightcycle.lod1.runtime.glb",
+      "bytes": 5076828,
+      "triangles": 142713,
+      "nodes": 180,
+      "meshes": 75,
+      "materials": 11,
+      "animations": 33
+    },
+    {
+      "path": "assets/export/lightcycle.lod2.runtime.glb",
+      "bytes": 3630680,
+      "triangles": 67515,
+      "nodes": 180,
+      "meshes": 75,
+      "materials": 11,
+      "animations": 33
+    },
+    {
+      "path": "assets/export/lightcycle.lod3.runtime.glb",
+      "bytes": 3112800,
+      "triangles": 28491,
+      "nodes": 180,
+      "meshes": 75,
+      "materials": 11,
+      "animations": 33
+    },
+    {
+      "path": "assets/export/lightcycle.runtime.glb",
+      "bytes": 7550672,
+      "triangles": 297526,
+      "nodes": 180,
+      "meshes": 75,
+      "materials": 11,
+      "animations": 33
+    }
+  ],
+  "checks": [
+    {
+      "check": "LOD0 hero >= 180,000 tris",
+      "pass": true,
+      "actual": 298668,
+      "limit": 180000
+    },
+    {
+      "check": "LOD0 hero <= 300,000 tris",
+      "pass": true,
+      "actual": 298668,
+      "limit": 300000
+    },
+    {
+      "check": "LOD1 <= 150,000 tris",
+      "pass": true,
+      "actual": 143658,
+      "limit": 150000
+    },
+    {
+      "check": "LOD2 <= 70,000 tris",
+      "pass": true,
+      "actual": 68460,
+      "limit": 70000
+    },
+    {
+      "check": "LOD3 <= 30,000 tris",
+      "pass": true,
+      "actual": 29436,
+      "limit": 30000
+    }
+  ]
+}

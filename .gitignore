@@ -8,3 +8,7 @@ tools/geo/__pycache__/
 assets/textures/generated/
 assets/export/lightcycle.lod*.glb
 assets/export/performance.json
+.DS_Store
+tools/__pycache__/
+assets/evidence/
+assets/render/

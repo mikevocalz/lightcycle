@@ -1,4 +1,16 @@
+> Current user direction (2026-09-30): latest white board is
+> `docs/references/00_generated_hybrid_concept.png.png`. Match its visible body
+> proportions while preserving current wheels; printed dimensions are not adopted.
+> See `docs/HANDOFF.md` for pass8 review status. Earlier reference priority below
+> is historical where it conflicts with this update.
+
 # TRON LIGHT CYCLE — MASTER REFERENCE + BUILD PROMPT
+
+> Current art direction: [REDESIGN_REQUEST.md](REDESIGN_REQUEST.md) supersedes
+> older body-design guidance and completion claims. The user-attached board
+> [reference 02](references/02_generated_hybrid_concept.png) is the primary visual
+> target; reference fidelity is a blocking gate. All five local reference files
+> remain available. See [HANDOFF.md](HANDOFF.md) for the active checkpoint.
 
 **Target:** a realistic current-generation AAA / PS5-style Light Cycle that blends the **1982 Syd Mead DNA** with the **mechanical realism and physicality of TRON: Ares**.
 
@@ -151,15 +163,19 @@ Source:
 
 ## I. Generated hybrid direction from this design pass
 
-**Use for:** mood only — the final asset must become substantially more physically grounded and less concept-render-clean than this image.
+**Current use:** the user-selected board 02 is the primary visual authority for
+the body redesign. Other views support silhouette, width and rider integration.
+Keep the established engineering dimensions while matching the large surfaces.
 
 ![Generated hybrid concept 1](references/01_generated_hybrid_concept.png)
 ![Generated hybrid concept 2](references/02_generated_hybrid_concept.png)
 ![Generated hybrid concept 3](references/03_generated_hybrid_concept.png)
 
-> Path corrected. The handoff pack shipped three generated concepts at the top
-> level, not a single `07_...` file, and the `references/` directory it named did
-> not exist. These are those three images.
+![Rider side reference](references/05_generated_hybrid_concept.png)
+![Rider multiview board](references/06_generated_hybrid_concept.png)
+
+> Five local reference files are preserved. The current user-supplied board
+> matches 02; new render approval must still be recorded separately.
 
 ---
 
