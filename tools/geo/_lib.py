@@ -5,7 +5,7 @@ edges - rather than scaled primitives. The point is that the asset reads as
 machined with every emissive switched off, and the thing that sells that is edge
 highlights catching light, which needs actual bevels and actual panel breaks.
 
-Wheel axis is +X throughout; profiles are authored as (y, z) = (lateral, radius).
+Bike length is +X, lateral is +Y, up is +Z in Blender; wheel/reactor spin axis is +Y.
 """
 import math
 
