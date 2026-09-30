@@ -660,6 +660,15 @@ def author_clips(made: dict):
         key(M[nm], "LC_Viro_Damage", "location", 2,
             [(1, 0.0), (10, 0.012), (26, 0.008)])
 
+    # A loopable damaged state holds the loosened panels while wheels/reactor
+    # keep moving. This avoids replaying the damage impact every loop.
+    viro_drive("LC_Viro_DamagedLoop", frames=48, wheel_turns=0.40, ring_gain=0.32, gyro_turns=0.08)
+    for nm in ("LC_Damage_Panel_L1", "LC_Damage_Panel_R2", "LC_Damage_Nose_L"):
+        key(M[nm], "LC_Viro_DamagedLoop", "rotation_euler", AXIS["y"],
+            [(1, 0.16), (48, 0.16)], interp="LINEAR")
+        key(M[nm], "LC_Viro_DamagedLoop", "location", 2,
+            [(1, 0.008), (48, 0.008)], interp="LINEAR")
+
     viro_drive("LC_Viro_Crash", frames=34, wheel_turns=0.35, ring_gain=0.25, gyro_turns=0.06)
     key(root, "LC_Viro_Crash", "rotation_euler", AXIS["x"],
         [(1, 0.0), (12, 0.9), (34, 1.55)])
