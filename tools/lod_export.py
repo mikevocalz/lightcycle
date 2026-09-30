@@ -101,7 +101,7 @@ def main():
     argv = sys.argv[sys.argv.index("--lod"):] if "--lod" in sys.argv else []
     ap = argparse.ArgumentParser()
     ap.add_argument("--lod", type=int, choices=range(4), required=True)
-    args = ap.parse_args()
+    args = ap.parse_args(argv)
 
     target = TARGETS[args.lod]
     before = tri_count()
