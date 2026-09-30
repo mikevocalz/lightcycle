@@ -42,24 +42,29 @@ both renderer adapters all read them. Editing a name anywhere else is a bug.
 npm run build:glb     # Blender -> assets/export/lightcycle.glb
 npm run validate      # contract check + manifest
 npm run typecheck
-node src/three/adapter.test.ts
-npm run pack           # gltfpack -kn -tc -> lightcycle.runtime.glb (60% smaller)
+npm test
+npm run pack           # gltfpack -kn -tc -> runtime GLB
 npm run rider          # ergonomics check against a prone rider proxy
-npm run check          # build + validate + pack + typecheck + tests
+npm run lods           # LOD0..LOD3 + validation
+npm run profile        # static GLB / LOD budget report
+npm run qa:ci          # CI-sized render matrix
+npm run qa:matrix      # full six-color/eight-view matrix
+npm run preview        # serve the one-GLB color preview
 npm run render:lightsoff
 blender -b assets/source/lightcycle_blockout.blend -P tools/render_matrix.py -- --color gold --view reactor
 ```
 
 ## State of the asset
 
-The geometry is a **blockout**. Every contractual node exists at the right size
-and pivot wearing the real material library, and the whole pipeline runs end to
-end — but the mesh inside each node is still a primitive proxy, and it does not
-pass the §18 gate yet.
+The render asset is **production geometry**: 74 production render mesh nodes plus
+4 intentional invisible collision proxies. CI generates UVs and neutral PBR /
+emissive textures, exports the canonical GLB, packs KTX2/BasisU runtime output,
+builds LOD0–LOD3, runs rider ergonomics, validates node/material/clip contracts,
+runs Three/Viro/runtime tests, and renders a QA smoke matrix.
 
-That is the point of the structure: modelling replaces the proxy mesh inside a
-node without touching its name, so the adapters, the validator and the manifest
-keep working the whole way through. See `docs/STATUS.json`.
+The remaining checks are hardware-specific XR qualification and human art-direction
+review, not unfinished blockout geometry. See `docs/STATUS.json` and
+`docs/HANDOFF.md` for the exact verified state.
 
 ## Contract
 
