@@ -65,9 +65,14 @@ def attach_texture_maps(mat, name: str, bsdf):
         return node
 
     if SPEC["materials"][name].get("emissive"):
-        mask = tex("emissive_mask", "Non-Color")
-        if mask:
-            links.new(mask.outputs["Color"], bsdf.inputs["Emission Color"])
+        # Emissive regions are already isolated by dedicated geometry/material
+        # slots, so the slot itself is the live mask. Keep the generated neutral
+        # PNG in the texture package for provenance/atlas workflows, but do not
+        # wire white into Emission Color: that would override Blender QA tints
+        # and runtime emissiveFactor/player color.
+        mask_path = TEX_ROOT / f"{stem}_emissive_mask.png"
+        if mask_path.exists():
+            mat["lc_emissive_mask_path"] = str(mask_path.relative_to(ROOT))
         return
 
     base = tex("basecolor", "sRGB")
