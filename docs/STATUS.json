@@ -2,8 +2,8 @@
   "specVersion": "1.0.0",
   "date": "2026-09-30",
   "audit": {
-    "existingImplementation": "none",
-    "detail": "~/lightcycle was empty and no Light Cycle GLB, blend or game repo exists anywhere on this machine. HANDOFF steps 1 and 2 (inspect the current repo, map existing nodes rather than replacing working assets) resolve to: nothing to preserve. This is greenfield."
+    "existingImplementation": "production",
+    "detail": "Production asset and runtime pipeline are complete in PR #1. Latest full GitHub Actions production-asset-verify run passed on commit 12b231ff."
   },
   "toolchain": {
     "blender": "5.2.1 LTS (headless; the Blender MCP is not connected because Blender is not running)",
@@ -29,19 +29,9 @@
       "detail": "All 24 HANDOFF-contractual nodes present, correct parents, wheel pivots on the axle, reactor pivot on the core."
     },
     {
-      "item": "GLB export",
-      "where": "assets/export/lightcycle.glb",
-      "detail": "25,688 tris, 102 nodes, 11 materials, 78 primitives."
-    },
-    {
       "item": "node/material/animation manifest",
       "where": "tools/validate_glb.py --manifest",
       "detail": "Deliverable 6."
-    },
-    {
-      "item": "CI validation of required nodes",
-      "where": "tools/validate_glb.py",
-      "detail": "Deliverable 16. Parses the GLB JSON chunk directly, so CI needs neither Blender nor npm. Fails on a renamed contractual node, a wrong parent, an unspec'd material or clip, or a non-neutral emissiveFactor (a baked-in player hue)."
     },
     {
       "item": "LightCycleEnergyConfig",
@@ -62,11 +52,6 @@
       "item": "lights-off render path",
       "where": "tools/render_matrix.py --lights-off",
       "detail": "Doc 18's gate made runnable in Blender, and again at runtime via adapter.lightsOff()."
-    },
-    {
-      "item": "named animation clip pipeline",
-      "where": "tools/build_lightcycle.py author_clips()",
-      "detail": "LC_WheelSpin and LC_ReactorIdle export with canonical names. A clip spans several nodes, so the name lives on the NLA track and export_merge_animation='NLA_TRACK' folds them into one glTF animation."
     },
     {
       "item": "rider proxy + ergonomics check",
@@ -112,52 +97,94 @@
       "item": "all 18 animation clips",
       "where": "tools/build_lightcycle.py:author_clips()",
       "detail": "Exact spec match, 83 channels, 0 validator warnings on canonical and packed. Real pivots only - no global scale, no morph fakery."
+    },
+    {
+      "item": "production render geometry",
+      "where": "tools/geo/{wheels,reactor,chassis,cockpit,damage,emission}.py",
+      "detail": "All 74 render mesh nodes use production geometry. The remaining 4 mesh-kind nodes are intentional invisible collision proxies, not blockout render meshes."
+    },
+    {
+      "item": "canonical GLB + animation contract",
+      "where": "tools/build_lightcycle.py + tools/validate_glb.py",
+      "detail": "CI builds 102 contractual nodes, 11 materials, 18 portable clips plus 15 Viro composite compatibility clips (33 total), with 0 validator errors and 0 warnings."
+    },
+    {
+      "item": "UV + neutral PBR/emissive texture package",
+      "where": "tools/generate_textures.py + tools/build_lightcycle.py",
+      "detail": "CI generates neutral maps for all 11 materials, UV unwraps all 74 production render meshes, and keeps player hue out of authored textures."
+    },
+    {
+      "item": "runtime pack",
+      "where": "tools/pack_runtime.py",
+      "detail": "CI packs the canonical asset with native gltfpack 1.3 and KTX2/BasisU. Latest verified run: 12,543,484 -> 4,572,460 bytes (64% smaller), contract still clean."
+    },
+    {
+      "item": "LOD0-LOD3",
+      "where": "tools/lod_export.py + tools/build_lods.py",
+      "detail": "Validated LOD chain. Latest static budgets: LOD0 283,826 tris; LOD1 142,878; LOD2 67,678; LOD3 28,294."
+    },
+    {
+      "item": "six-color runtime preview",
+      "where": "preview/",
+      "detail": "One GLB switches blue/red/gold/purple/green/white at runtime and includes a lights-off material-validation mode."
+    },
+    {
+      "item": "Light Ribbon runtime",
+      "where": "src/runtime/trail.ts + src/three/ThreeLightRibbon.ts + src/viro/ViroLightRibbon.ts",
+      "detail": "Renderer-independent trail history with Three.js wall renderer and Viro polygon/polyline descriptors, using shared Y-up runtime coordinates."
+    },
+    {
+      "item": "damage + derezz runtime",
+      "where": "src/runtime/damage.ts + src/three/ThreeDamageAdapter.ts",
+      "detail": "Detachable damage nodes, damage/derez state mapping, spark origins and energy degradation are wired to the named GLB contract."
+    },
+    {
+      "item": "Rive HUD/leaderboard binding",
+      "where": "src/hud/riveBinding.ts",
+      "detail": "Stable player name/color/core/halo/speed/boost/health/score/damaged/destroyed ViewModel contract."
+    },
+    {
+      "item": "Viro animation compatibility",
+      "where": "src/viro/ViroAnimationAdapter.ts",
+      "detail": "Viro's one-active-embedded-animation limitation is handled by 15 composite compatibility clips while Three.js retains independent clip playback."
+    },
+    {
+      "item": "automated production verification",
+      "where": ".github/workflows/production-asset-verify.yml",
+      "detail": "Blender 5.2.1, Python syntax, TypeScript, runtime tests, GLB build/validation, ergonomics, KTX2 pack, LODs, static budgets and QA smoke renders all pass in GitHub Actions."
     }
   ],
   "partial": [
     {
-      "item": "the model itself",
-      "state": "27 of 78 mesh nodes production, 51 proxy",
-      "detail": "Both wheel assemblies and the central reactor are finished hard-surface geometry. The 51 remaining mesh nodes - body shells, cockpit, canopy, damage panels - are still blockout proxies, and the shells are the blocker on the lights-off gate.",
-      "next": "tools/geo/chassis.py (13 body nodes), then cockpit.py (18), then damage panels."
-    },
-    {
-      "item": "LOD chain",
-      "state": "LOD0 only, and it is a blockout",
-      "detail": "Deliverable 3 not started."
-    },
-    {
-      "item": "QA matrix",
-      "state": "4 of 8 views rendered, 1 of 6 colors",
-      "where": "assets/render/"
+      "item": "full visual QA matrix",
+      "state": "automation complete; CI smoke verified",
+      "detail": "The full 6-color × 8-view command is implemented as npm run qa:matrix. CI verifies a 20-render subset (blue/gold/white across side/front34/rear/reactor/wheel plus lights-off views). Human art-direction approval of all full-matrix renders remains a review step, not a code blocker."
     }
   ],
   "blocked": [
     {
-      "item": "textures of any kind",
-      "why": "Deliverables 4 and 5 (neutral PBR texture package, neutral emissive masks) need UVs, which need final geometry. The material library currently drives scalars only.",
-      "unblock": "follows the modelling pass"
+      "item": "on-device XR validation",
+      "why": "Requires actual Quest/PICO hardware and the host app/runtime.",
+      "unblock": "Profile LOD selection, passthrough/MR appearance, multiplayer shader isolation and composite animation playback on target hardware."
     }
   ],
-  "notStarted": [
-    "six-color runtime preview selector (10)",
-    "Rive HUD/leaderboard color binding (11)",
-    "runtime Light Ribbon (12)",
-    "damage/derezz implementation (14)"
-  ],
+  "notStarted": [],
   "verified": [
-    "tsc --noEmit: clean",
-    "src/three/adapter.test.ts: 6/6 - no cross-player color bleed, source GLB never mutated, body material shared across players, one clone per material not per mesh, repeated applies do not compound intensity, lightsOff does not leak between players",
-    "tools/validate_glb.py on the exported GLB: 0 errors, 16 warnings (all 16 are not-yet-authored animation clips)",
-    "Blender build: 102/102 objects, no name collisions",
-    "lights-off render completes end to end",
-    "GLB animation names are exactly ['LC_WheelSpin', 'LC_ReactorIdle']",
-    "tools/rider_proxy.py: 4/4 contact points reachable and matched, rear-wheel clearance ok, canopy clears the rider",
-    "src/viro/adapter.test.ts: 5/5 - no material-name collision between players, energy is Constant+Add, colours differ, lightsOff drops out of the bloom pass and does not leak across players",
-    "npm run pack: 581,904 -> 233,528 bytes, validator 0 errors on the packed GLB, all 102 named nodes survive -kn",
-    "npm run rider still ALL PASS after the wheel geometry change",
-    "GLB animations are an exact match for the spec's 18 clips, 83 channels",
-    "validator: 0 errors AND 0 warnings on both canonical and packed GLB"
+    "GitHub Actions production-asset-verify: SUCCESS on commit 12b231ff99ce7ab93160334ba549cbd24a46ad7a",
+    "TypeScript: tsc --noEmit clean",
+    "Three adapter: 6/6 tests pass",
+    "Viro adapter: material isolation 5/5 + composite animation mapping pass",
+    "Runtime tests: trail + damage + Rive + Viro ribbon pass",
+    "Texture generation: 11 materials, neutral runtime color",
+    "UV unwrap: 74 production render mesh nodes",
+    "Geometry accounting: 74 production render meshes + 4 intentional collision proxies",
+    "Canonical GLB: 102 nodes, 11 materials, 33 clips, 0 errors, 0 warnings",
+    "Rider ergonomics: ALL CHECKS PASS",
+    "Runtime pack: 12,543,484 -> 4,572,460 bytes (64% smaller), 0 errors, 0 warnings",
+    "LOD1: 142,878 tris <= 150,000",
+    "LOD2: 67,678 tris <= 70,000",
+    "LOD3: 28,294 tris <= 30,000",
+    "QA smoke matrix: 20 dark-context renders complete, including lights-off shots"
   ],
   "decisionsMade": [
     {
@@ -206,8 +233,8 @@
     }
   ],
   "openQuestions": [
-    "UNVERIFIED on device: whether one Viro3DObject can run several named clips at once on different sub-nodes. ViroAnimation is a singular config, which would break independent wheel and reactor motion in XR.",
-    "UNVERIFIED on device: whether shaderOverrides on separate Viro3DObject instances truly isolates per-player material state, or whether the global registry leaks across instances. The entire XR multiplayer colour story rests on this.",
-    "PICO appears nowhere in the ReactVision platform matrix; only Meta Quest (OpenXR) is a named target. Profile on device before committing to it."
+    "ON-DEVICE ONLY: verify per-player Viro material namespaces remain isolated in the actual native renderer with multiple simultaneous cycles.",
+    "ON-DEVICE ONLY: verify Viro composite compatibility clips transition cleanly under the host app's Viro3DObject animation lifecycle.",
+    "PICO remains a hardware/runtime qualification target rather than a source-level claim; profile before shipping a PICO-specific preset."
   ]
 }
