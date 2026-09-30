@@ -24,32 +24,32 @@
     "MAT_LC_GRAPHITE": {
       "desc": "Satin black composite. The bike's dominant surface. Never pure black - real black composite sits near sRGB 0x121314, and crushing it to 0x000000 is what makes a model read as cheap plastic.",
       "baseColor": "#121314", "metallic": 0.0, "roughness": 0.44,
-      "specularIor": 1.48, "coat": 0.0, "anisotropic": 0.0
+      "ior": 1.48, "coat": 0.0, "anisotropic": 0.0
     },
     "MAT_LC_BLACK_CLEARCOAT": {
       "desc": "Painted composite shell under automotive clear coat. Carries the sharp horizon reflections that sell panel curvature with the lights off.",
       "baseColor": "#0E0F11", "metallic": 0.0, "roughness": 0.34,
-      "specularIor": 1.5, "coat": 1.0, "coatRoughness": 0.055, "anisotropic": 0.0
+      "ior": 1.5, "coat": 1.0, "coatRoughness": 0.055, "anisotropic": 0.0
     },
     "MAT_LC_CARBON": {
       "desc": "Exposed twill carbon under clear coat. Structural panels only - armor, back support, load paths. Weave direction must follow the part.",
       "baseColor": "#17181B", "metallic": 0.0, "roughness": 0.26,
-      "specularIor": 1.52, "coat": 1.0, "coatRoughness": 0.09, "anisotropic": 0.3, "anisotropicRotation": 0.0
+      "ior": 1.52, "coat": 1.0, "coatRoughness": 0.09, "anisotropic": 0.3, "anisotropicRotation": 0.0
     },
     "MAT_LC_MILLED_METAL": {
       "desc": "CNC aluminum, bead-blasted then clear-anodized. Aluminum F0 measured (0.912,0.914,0.920). Bright, tight highlight, visible tool witness marks.",
       "baseColor": "#E9EAEC", "metallic": 1.0, "roughness": 0.24,
-      "specularIor": 1.5, "coat": 0.0, "anisotropic": 0.0
+      "ior": 1.5, "coat": 0.0, "anisotropic": 0.0
     },
     "MAT_LC_BRUSHED_METAL": {
       "desc": "Dark anodized / blackened brushed steel. Covers the doc's anodized-aluminum and blackened-steel callouts in one slot. Anisotropy runs along the brush direction, so UVs must be oriented per part or the highlight smears.",
       "baseColor": "#4A4C50", "metallic": 1.0, "roughness": 0.46,
-      "specularIor": 1.5, "coat": 0.0, "anisotropic": 0.72, "anisotropicRotation": 0.0
+      "ior": 1.5, "coat": 0.0, "anisotropic": 0.72, "anisotropicRotation": 0.0
     },
     "MAT_LC_RUBBER": {
       "desc": "High-performance synthetic contact surface. Roughness rises across the contact patch from thermal cycling; keep it off pure-smooth or the wheel reads as a neon disc.",
       "baseColor": "#0C0C0D", "metallic": 0.0, "roughness": 0.84,
-      "specularIor": 1.45, "coat": 0.0, "anisotropic": 0.0
+      "ior": 1.45, "coat": 0.0, "anisotropic": 0.0
     },
     "MAT_LC_SMOKED_GLASS": {
       "desc": "Smoked technical lens. Real thickness so edges pick up refraction; emissive elements sit behind it, never on it.",

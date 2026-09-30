@@ -1,0 +1,63 @@
+{
+  "specVersion": "1.0.0",
+  "date": "2026-09-30",
+  "audit": {
+    "existingImplementation": "none",
+    "detail": "~/lightcycle was empty and no Light Cycle GLB, blend or game repo exists anywhere on this machine. HANDOFF steps 1 and 2 (inspect the current repo, map existing nodes rather than replacing working assets) resolve to: nothing to preserve. This is greenfield."
+  },
+  "toolchain": {
+    "blender": "5.2.1 LTS (headless; the Blender MCP is not connected because Blender is not running)",
+    "three": "0.186.1",
+    "zustand": "5.0.15",
+    "node": "26.8.2"
+  },
+  "complete": [
+    { "item": "single source of truth", "where": "spec/lightcycle.spec.json + spec/lightcycle.nodes.json", "detail": "102 nodes, 11 materials, 18 clips, 6 colors, canonical dimensions. Every other artifact derives from these two files." },
+    { "item": "material library at real PBR values", "where": "spec + tools/build_lightcycle.py", "detail": "The doc's 11 material names exactly, no inventions. Graphite, clearcoat composite, carbon, milled and brushed metal, rubber, smoked glass, and four neutral emissive channels." },
+    { "item": "modular hierarchy with correct pivots", "where": "assets/source/lightcycle_blockout.blend", "detail": "All 24 HANDOFF-contractual nodes present, correct parents, wheel pivots on the axle, reactor pivot on the core." },
+    { "item": "GLB export", "where": "assets/export/lightcycle.glb", "detail": "25,688 tris, 102 nodes, 11 materials, 78 primitives." },
+    { "item": "node/material/animation manifest", "where": "tools/validate_glb.py --manifest", "detail": "Deliverable 6." },
+    { "item": "CI validation of required nodes", "where": "tools/validate_glb.py", "detail": "Deliverable 16. Parses the GLB JSON chunk directly, so CI needs neither Blender nor npm. Fails on a renamed contractual node, a wrong parent, an unspec'd material or clip, or a non-neutral emissiveFactor (a baked-in player hue)." },
+    { "item": "LightCycleEnergyConfig", "where": "src/energy/config.ts", "detail": "Deliverable 7 prerequisite. Renderer-independent; no three.js or Viro types leak into it." },
+    { "item": "ThreeLightCycleMaterialAdapter", "where": "src/three/ThreeLightCycleMaterialAdapter.ts", "detail": "Deliverable 7. Clones only the 4 emissive materials per player; body materials stay shared by reference." },
+    { "item": "Zustand state integration", "where": "src/state/cycleStore.ts", "detail": "Deliverable 9. Players keyed by id so two colors coexist. No useState anywhere." },
+    { "item": "lights-off render path", "where": "tools/render_matrix.py --lights-off", "detail": "Doc 18's gate made runnable in Blender, and again at runtime via adapter.lightsOff()." }
+  ],
+  "partial": [
+    { "item": "the model itself", "state": "BLOCKOUT, not AAA", "detail": "Every contractual node exists at the right size and pivot, wearing the real material library, but the mesh inside each node is a primitive proxy. It does not yet pass the doc 18 gate and is not close. The hard-surface modelling is the remaining bulk of the work; it replaces proxy meshes in place without touching any name, so the adapters, validator and manifest keep working throughout.", "next": "Model in this order, since each unblocks the next visual judgement: front wheel assembly, reactor, chassis shells, cockpit, canopy." },
+    { "item": "LOD chain", "state": "LOD0 only, and it is a blockout", "detail": "Deliverable 3 not started." },
+    { "item": "QA matrix", "state": "3 of 8 views x 1 of 6 colors rendered", "where": "assets/render/" }
+  ],
+  "blocked": [
+    { "item": "KTX2/Basis texture compression", "why": "Blender 5.2.1's exporter reaches KTX2 only via export_use_gltfpack, which shells out to an external gltfpack binary. gltfpack, toktx and basisu are all absent from PATH and the addon preference gltfpack_path_ui is empty; attempting it raises PermissionError. Draco and MeshOptimizer bridges ARE bundled and load fine.", "unblock": "brew install / download gltfpack, or compress outside Blender. Meshopt is available today as an interim." },
+    { "item": "textures of any kind", "why": "Deliverables 4 and 5 (neutral PBR texture package, neutral emissive masks) need UVs, which need final geometry. The material library currently drives scalars only.", "unblock": "follows the modelling pass" }
+  ],
+  "notStarted": [
+    "ViroLightCycleMaterialAdapter (deliverable 8) - research agent still running",
+    "six-color runtime preview selector (10)",
+    "Rive HUD/leaderboard color binding (11)",
+    "runtime Light Ribbon (12)",
+    "damage/derezz implementation (14)",
+    "animation clips - all 18 warn as absent in the validator",
+    "rider proxy, and the ergonomics check that depends on it"
+  ],
+  "verified": [
+    "tsc --noEmit: clean",
+    "src/three/adapter.test.ts: 6/6 - no cross-player color bleed, source GLB never mutated, body material shared across players, one clone per material not per mesh, repeated applies do not compound intensity, lightsOff does not leak between players",
+    "tools/validate_glb.py on the exported GLB: 0 errors, 18 warnings (all 18 are the not-yet-authored animation clips)",
+    "Blender build: 102/102 objects, no name collisions",
+    "lights-off render completes end to end"
+  ],
+  "decisionsMade": [
+    { "decision": "NeutralToneMapping in three.js, AgX in Blender", "why": "ACESFilmic desaturates hot saturated values toward white. Doc 17 explicitly screens for gold flattening to yellow and red drifting orange, which is that exact artifact." },
+    { "decision": "clone + selective material.clone() for multiplayer, not onBeforeCompile or InstancedMesh", "why": "Verified against three 0.186.1 source: Material.clone() copies scalars and colors but keeps texture pointers, so no map is re-uploaded, and MeshStandardMaterial is a fixed uber-shader so no recompile. InstancedMesh would cost per-bike frustum culling for a draw-call win that is irrelevant at 2-6 bikes." },
+    { "decision": "one shared UnrealBloomPass with threshold above the body materials' peak", "why": "Bloom is applied post-color, so each player's hue survives a single pass. Per-player passes are only needed if art direction wants different bloom radii, not different hues." },
+    { "decision": "11 materials exactly as the doc names them", "why": "The doc also calls for dark anodized aluminum and blackened steel as distinct looks but names only two metal slots. Rather than invent a 12th material, MAT_LC_BRUSHED_METAL carries both at a dark base color. Flagged rather than silently resolved." },
+    { "decision": "export_animation_mode='ACTIONS'", "why": "Verified empirically: ACTIONS yields glTF animations named verbatim after the Blender Actions. ACTIVE_ACTIONS yields zero once the active action is cleared, and SCENE names them after objects." }
+  ],
+  "openQuestions": [
+    "The doc's LOD0 target of 180k-300k tris is a desktop/console figure. Deliverable 'viable for Quest/Pico' needs a headset budget that is very likely far lower. Pending the Viro research agent.",
+    "docs/LIGHTCYCLE_MASTER_REFERENCE_AND_BUILD_PROMPT.md section I references references/07_generated_hybrid_concept.png, which does not exist in the handoff pack. The three ChatGPT concept PNGs were copied to docs/references/ instead.",
+    "dimensions_m are starting targets triangulated from the concept boards, not measured. They need a rider proxy before they are locked."
+  ]
+}
