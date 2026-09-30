@@ -69,6 +69,20 @@ def main():
 
     by_name = {Path(r["path"]).name: r for r in rows}
     checks = []
+    lod0 = by_name.get("lightcycle.lod0.glb")
+    if lod0:
+        checks.append({
+            "check": "LOD0 hero >= 180,000 tris",
+            "pass": lod0["triangles"] >= 180_000,
+            "actual": lod0["triangles"],
+            "limit": 180_000,
+        })
+        checks.append({
+            "check": "LOD0 hero <= 300,000 tris",
+            "pass": lod0["triangles"] <= 300_000,
+            "actual": lod0["triangles"],
+            "limit": 300_000,
+        })
     limits = {1: 150_000, 2: 70_000, 3: 30_000}
     for lod, limit in limits.items():
         name = f"lightcycle.lod{lod}.glb"
