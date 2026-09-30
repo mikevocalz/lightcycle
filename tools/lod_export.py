@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parent.parent
 SPEC = json.loads((ROOT / "spec/lightcycle.spec.json").read_text())
 
 TARGETS = {
-    0: None,
+    0: 300_000,
     1: 150_000,
     2: 70_000,
     3: 30_000,
@@ -55,43 +55,58 @@ def tri_count():
 
 
 def decimate_to(target: int):
-    before = tri_count()
-    if before <= target:
-        print(f"LOD target {target:,}: source already {before:,}; no decimation required")
-        return before, before
+    """Collapse large render meshes until the final baked geometry fits target.
 
-    # Leave tiny mechanical/emissive parts alone; collapse larger surfaces enough
-    # to reach the scene target while preserving the node/pivot contract.
-    candidates = []
-    fixed = 0
-    for o in bpy.context.scene.objects:
-        if o.type != "MESH" or o.name.startswith("COL_"):
-            continue
-        o.data.calc_loop_triangles()
-        tris = len(o.data.loop_triangles)
-        if tris < 96 or "Energy" in o.name or o.name.startswith("LC_Emit_"):
-            fixed += tris
-        else:
-            candidates.append((o, tris))
+    One global ratio is not exact because small/emissive parts are protected and
+    Blender rounds per-mesh collapses independently. Use bounded corrective
+    passes instead of pretending a requested ratio is the shipped triangle count.
+    """
+    source = tri_count()
+    current = source
+    for pass_index in range(3):
+        if current <= target:
+            break
 
-    variable = sum(t for _, t in candidates)
-    wanted_variable = max(1, target - fixed)
-    ratio = max(0.035, min(1.0, wanted_variable / max(1, variable)))
+        candidates = []
+        fixed = 0
+        for o in bpy.context.scene.objects:
+            if o.type != "MESH" or o.name.startswith("COL_"):
+                continue
+            o.data.calc_loop_triangles()
+            tris = len(o.data.loop_triangles)
+            if tris < 96 or "Energy" in o.name or o.name.startswith("LC_Emit_"):
+                fixed += tris
+            else:
+                candidates.append((o, tris))
 
-    for o, tris in candidates:
-        m = o.modifiers.new("__LC_LOD_DECIMATE__", "DECIMATE")
-        m.decimate_type = "COLLAPSE"
-        m.ratio = ratio
-        if hasattr(m, "use_collapse_triangulate"):
-            m.use_collapse_triangulate = True
-        bpy.context.view_layer.objects.active = o
-        o.select_set(True)
-        bpy.ops.object.modifier_apply(modifier=m.name)
-        o.select_set(False)
+        variable = sum(t for _, t in candidates)
+        wanted_variable = max(1, target - fixed)
+        # Aim a little below target to absorb per-object integer rounding.
+        ratio = max(0.025, min(0.995, wanted_variable / max(1, variable) * 0.975))
+        if ratio >= 0.995 or not candidates:
+            break
 
-    after = tri_count()
-    print(f"LOD decimate: {before:,} -> {after:,} tris (ratio {ratio:.3f}, target <= {target:,})")
-    return before, after
+        for o, _tris in candidates:
+            m = o.modifiers.new(f"__LC_LOD_DECIMATE_{pass_index}__", "DECIMATE")
+            m.decimate_type = "COLLAPSE"
+            m.ratio = ratio
+            if hasattr(m, "use_collapse_triangulate"):
+                m.use_collapse_triangulate = True
+            bpy.context.view_layer.objects.active = o
+            o.select_set(True)
+            bpy.ops.object.modifier_apply(modifier=m.name)
+            o.select_set(False)
+
+        next_count = tri_count()
+        print(f"LOD pass {pass_index + 1}: {current:,} -> {next_count:,} tris "
+              f"(ratio {ratio:.4f}, target <= {target:,})")
+        if next_count >= current:
+            break
+        current = next_count
+
+    if current > target:
+        raise RuntimeError(f"LOD decimation missed target: {current:,} > {target:,}")
+    return source, current
 
 
 def export(path: Path):
