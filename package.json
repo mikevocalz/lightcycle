@@ -5,13 +5,20 @@
   "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "build:glb": "blender --background --python tools/build_lightcycle.py",
+    "build:glb": "npm run textures && blender --background --python tools/build_lightcycle.py",
     "validate": "python3 tools/validate_glb.py assets/export/lightcycle.glb --manifest assets/export/manifest.json",
     "render:lightsoff": "blender --background --python tools/render_matrix.py -- --lights-off",
     "pack": "python3 tools/pack_runtime.py",
     "rider": "blender -b assets/source/lightcycle_blockout.blend -P tools/rider_proxy.py",
-    "test": "node src/three/adapter.test.ts && node src/viro/adapter.test.ts",
-    "check": "npm run build:glb && npm run validate && npm run pack && npm run typecheck && npm test"
+    "test": "node src/three/adapter.test.ts && node src/viro/adapter.test.ts && node src/runtime/runtime.test.ts",
+    "check": "npm run build:glb && npm run validate && npm run pack && npm run typecheck && npm test",
+    "textures": "python3 tools/generate_textures.py",
+    "lods": "python3 tools/build_lods.py",
+    "profile": "python3 tools/profile_asset.py",
+    "qa:matrix": "blender -b assets/source/lightcycle_blockout.blend -P tools/render_matrix.py -- --matrix --engine BLENDER_EEVEE --samples 8 --res 720",
+    "qa:ci": "blender -b assets/source/lightcycle_blockout.blend -P tools/render_matrix.py -- --matrix --matrix-colors blue,gold,white --matrix-views side,front34,rear,reactor,wheel --engine BLENDER_EEVEE --samples 4 --res 480",
+    "preview": "python3 -m http.server 4173",
+    "check:ci": "npm run build:glb && npm run validate && npm run typecheck && npm test && npm run rider && npm run lods && npm run profile"
   },
   "dependencies": {
     "three": "^0.186.1",
