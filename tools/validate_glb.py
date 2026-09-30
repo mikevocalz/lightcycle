@@ -83,13 +83,23 @@ def main() -> int:
         if ef and max(ef) > 0 and (max(ef) - min(ef)) > 0.02:
             errors.append(f"{m.get('name')}: emissiveFactor {ef} is not neutral - player hue is baked in")
 
-    # 6. Clips.
-    for c in spec["clips"]:
+    # 6. Clips. The original portable clips stay renderer-neutral; Viro gets
+    # composite compatibility clips because its GLB player supports one active
+    # embedded animation at a time and cannot layer wheel/reactor/state clips.
+    expected_clips = list(spec["clips"]) + list(spec.get("viroCompositeClips", []))
+    for c in expected_clips:
         if c not in clip_names:
             warnings.append(f"clip {c} not in GLB")
     for c in clip_names:
-        if c and c not in spec["clips"]:
+        if c and c not in expected_clips:
             errors.append(f"unspec'd animation clip: {c!r}")
+
+    # Named nodes are contractual. gltfpack -kn may insert anonymous mesh-child
+    # helper nodes while preserving transform names, so anonymous extras are OK;
+    # unexpected *named* nodes are not.
+    unexpected_named = sorted({n for n in node_names if n and n not in declared})
+    if unexpected_named:
+        errors.append(f"unexpected named nodes in GLB: {unexpected_named[:12]}")
 
     if args.manifest:
         args.manifest.parent.mkdir(parents=True, exist_ok=True)

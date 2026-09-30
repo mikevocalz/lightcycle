@@ -385,7 +385,7 @@
    "parent": "LC_RearCanopy",
    "kind": "mesh",
    "mat": "MAT_LC_BLACK_CLEARCOAT",
-   "hinge": "z",
+   "hinge": "x",
    "required": true
   },
   {
@@ -393,7 +393,7 @@
    "parent": "LC_RearCanopy",
    "kind": "mesh",
    "mat": "MAT_LC_BLACK_CLEARCOAT",
-   "hinge": "z",
+   "hinge": "x",
    "required": true
   },
   {

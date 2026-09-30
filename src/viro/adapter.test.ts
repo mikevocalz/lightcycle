@@ -2,6 +2,7 @@
 import assert from 'node:assert/strict'
 import { ViroLightCycleMaterialAdapter, type ViroMaterialDef } from './ViroLightCycleMaterialAdapter.ts'
 import { energyConfig } from '../energy/config.ts'
+import { viroSequence, viroSteadyAnimation, viroTransitionAnimation } from './ViroAnimationAdapter.ts'
 
 /** Stands in for Viro's global, name-keyed material registry. */
 const registry: Record<string, ViroMaterialDef> = {}
@@ -39,4 +40,14 @@ for (const n of p1.materialNames()) {
 assert.notEqual(registry[`MAT_LC_EMISSIVE_PRIMARY${p2.ns}`]!.diffuseColor, '#000000',
   'lightsOff leaked to the other player')
 
-console.log('viro adapter: 5/5 ok')
+// 6. Viro gets composite GLB clips because embedded animation playback is single-active.
+assert.equal(viroSteadyAnimation('driving').name, 'LC_Viro_Drive')
+assert.equal(viroSteadyAnimation('driving', -1).name, 'LC_Viro_DriveSteerLeft')
+assert.equal(viroSteadyAnimation('boost').name, 'LC_Viro_BoostLoop')
+assert.equal(viroSteadyAnimation('damaged').name, 'LC_Viro_DamagedLoop')
+assert.equal(viroSteadyAnimation('destroyed').name, 'LC_Viro_Derez')
+assert.equal(viroTransitionAnimation('highSpeedEnter').loop, false)
+const seq = viroSequence('boostEnter', viroSteadyAnimation('boost'))
+assert.deepEqual(seq.map((x) => x.name), ['LC_Viro_BoostEnter', 'LC_Viro_BoostLoop'])
+
+console.log('viro adapter: materials 5/5 + composite animation mapping ok')

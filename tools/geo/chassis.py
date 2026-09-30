@@ -5,8 +5,8 @@ This is the part of the bike that has to look expensive with every emissive
 switched off. No fuel-tank shape, no normal seat, no swingarm read - a low,
 long, monumental 1982 mass up close made of real panel breaks, recessed
 fasteners, milled brackets and structural ribs (TRON: Ares). Every shell is a
-thin plate (2-6 cm world size chosen so the caller's 2.2 mm bevel reads as a
-real machined edge) standing off the backbone with a visible reveal gap, so
+thin plate (2-6 mm outer skins, with thicker structural inner panels, so the
+2.2 mm bevel reads as a real machined edge) standing off the backbone with a visible reveal gap, so
 LC_Body_Core shows through between the plates instead of the whole assembly
 reading as one slab.
 
@@ -246,11 +246,11 @@ def nose_shell(dims: dict, side: int):
     y_gill = side * y86 * 1.16
 
     # Outer skin, two plates with a 3.5 cm seam between them.
-    _box(bm, (-0.655, y_skin, 0.50), (0.090, 0.023, 0.100))
-    _box(bm, (-0.430, y_skin, 0.49), (0.100, 0.023, 0.095))
+    _box(bm, (-0.655, y_skin, 0.50), (0.090, 0.003, 0.100))
+    _box(bm, (-0.430, y_skin, 0.49), (0.100, 0.003, 0.095))
 
     # Inner standoff panel, inboard of the skin for a visible reveal.
-    _box(bm, (-0.50, y_in, 0.48), (0.175, 0.026, 0.080))
+    _box(bm, (-0.50, y_in, 0.48), (0.175, 0.008, 0.080))
 
     # Nose-tip vent gills, angled so they catch light without an emissive.
     tilt = Matrix.Rotation(math.radians(-22) * side, 4, "X")
@@ -285,13 +285,13 @@ def mid_shell(dims: dict, side: int):
 
     # Outer skin, split at the cockpit divider with a small gap for a
     # visible conduit run.
-    _box(bm, (-0.155, y_skin, 0.49), (0.145, 0.0225, 0.090))
-    _box(bm, (0.155, y_skin, 0.49), (0.145, 0.0225, 0.090))
+    _box(bm, (-0.155, y_skin, 0.49), (0.145, 0.003, 0.090))
+    _box(bm, (0.155, y_skin, 0.49), (0.145, 0.003, 0.090))
     _bolt(bm, (0.0, y_skin, 0.49), r=0.0075, depth=0.030,
           rot=Matrix.Rotation(math.pi / 2, 4, "Z"))
 
     # Inner standoff panel.
-    _box(bm, (0.0, y_in, 0.475), (0.28, 0.025, 0.075))
+    _box(bm, (0.0, y_in, 0.475), (0.28, 0.008, 0.075))
 
     # Louvered vents.
     tilt = Matrix.Rotation(math.radians(12) * side, 4, "X")
@@ -321,12 +321,12 @@ def rear_shell(dims: dict, side: int):
     y_in = side * y86 * 0.78
     y_tip = side * y86 * 1.05
 
-    _box(bm, (0.44, y_skin, 0.50), (0.165, 0.023, 0.100))
+    _box(bm, (0.44, y_skin, 0.50), (0.165, 0.003, 0.100))
     # Tapered tail tip - smaller cross-section, narrowing the silhouette.
-    _box(bm, (0.665, y_tip, 0.475), (0.075, 0.020, 0.075))
+    _box(bm, (0.665, y_tip, 0.475), (0.075, 0.003, 0.075))
 
     # Inner standoff panel.
-    _box(bm, (0.42, y_in, 0.48), (0.185, 0.026, 0.080))
+    _box(bm, (0.42, y_in, 0.48), (0.185, 0.008, 0.080))
 
     # Vent gills near the tip.
     tilt = Matrix.Rotation(math.radians(20) * side, 4, "X")
@@ -357,7 +357,7 @@ def armor(dims: dict, side: int):
     y86 = ctx["y86"]
     y = side * y86 * 1.02
 
-    plate_half = (0.11, 0.017, 0.075)
+    plate_half = (0.11, 0.003, 0.075)
     centers_x = (-0.20, -0.02, 0.16, 0.34, 0.52)
     for i, x in enumerate(centers_x):
         z = 0.41 + (0.006 if i % 2 else 0.0)  # slight alternating stand-off

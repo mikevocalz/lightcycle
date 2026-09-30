@@ -3,11 +3,10 @@
 
     blender --background --python tools/build_lightcycle.py
 
-What this produces today is a dimensionally-correct BLOCKOUT: every contractual
-node exists with the right parent and the right pivot, wearing the real material
-library at real PBR values. The hard-surface modelling replaces the proxy mesh
-inside each node without touching a single name, so the adapters, the validator
-and the manifest keep working throughout.
+What this produces is the canonical production hierarchy: every contractual node
+exists with the right parent, material, and physical pivot. Hard-surface builders
+replace proxy geometry without touching names, so adapters, validation, animation,
+and the manifest stay stable throughout production.
 
 Verified against Blender 5.2.1 LTS. Socket names are the 5.x ones ('Coat Weight',
 'Transmission Weight'); the 'Clearcoat *' names of older releases do not exist.
@@ -16,6 +15,7 @@ import json, math, sys
 from pathlib import Path
 
 import bpy
+from mathutils import Vector
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import geo  # noqa: E402 - real hard-surface builders, dispatched per node name
@@ -24,6 +24,7 @@ ROOT = Path(__file__).resolve().parent.parent
 SPEC = json.loads((ROOT / "spec/lightcycle.spec.json").read_text())
 NODES = json.loads((ROOT / "spec/lightcycle.nodes.json").read_text())["nodes"]
 D = SPEC["dimensions_m"]
+TEX_ROOT = ROOT / "assets/textures/generated"
 
 
 def srgb_to_linear(hex_color: str) -> tuple:
@@ -38,6 +39,79 @@ def srgb_to_linear(hex_color: str) -> tuple:
 
 def reset_scene():
     bpy.ops.wm.read_factory_settings(use_empty=True)
+
+
+
+def attach_texture_maps(mat, name: str, bsdf):
+    """Attach deterministic neutral texture maps when the generated package exists.
+
+    Scalars remain a safe fallback when somebody invokes Blender directly instead
+    of npm run build:glb. Player hue is never sourced from these files.
+    """
+    nodes = mat.node_tree.nodes
+    links = mat.node_tree.links
+    stem = name.lower()
+
+    def tex(suffix: str, colorspace: str):
+        path = TEX_ROOT / f"{stem}_{suffix}.png"
+        if not path.exists():
+            return None
+        node = nodes.new("ShaderNodeTexImage")
+        node.name = f"LC_{suffix}"
+        node.label = suffix
+        node.image = bpy.data.images.load(str(path), check_existing=True)
+        node.image.colorspace_settings.name = colorspace
+        node.extension = "REPEAT"
+        return node
+
+    if SPEC["materials"][name].get("emissive"):
+        # Emissive regions are already isolated by dedicated geometry/material
+        # slots, so the slot itself is the live mask. Keep the generated neutral
+        # PNG in the texture package for provenance/atlas workflows, but do not
+        # wire white into Emission Color: that would override Blender QA tints
+        # and runtime emissiveFactor/player color.
+        mask_path = TEX_ROOT / f"{stem}_emissive_mask.png"
+        if mask_path.exists():
+            mat["lc_emissive_mask_path"] = str(mask_path.relative_to(ROOT))
+        return
+
+    base = tex("basecolor", "sRGB")
+    rough = tex("roughness", "Non-Color")
+    metallic = tex("metallic", "Non-Color")
+    normal = tex("normal", "Non-Color")
+
+    if base:
+        links.new(base.outputs["Color"], bsdf.inputs["Base Color"])
+    if rough:
+        links.new(rough.outputs["Color"], bsdf.inputs["Roughness"])
+    if metallic:
+        links.new(metallic.outputs["Color"], bsdf.inputs["Metallic"])
+    if normal:
+        nm = nodes.new("ShaderNodeNormalMap")
+        nm.name = "LC_NormalMap"
+        nm.inputs["Strength"].default_value = 0.42
+        links.new(normal.outputs["Color"], nm.inputs["Color"])
+        links.new(nm.outputs["Normal"], bsdf.inputs["Normal"])
+
+
+def unwrap_production(objects):
+    """Create stable UVs after the final production topology exists."""
+    count = 0
+    for o in objects.values():
+        if o.type != "MESH" or o.get("lc_geometry") != "production":
+            continue
+        if not o.data.polygons:
+            continue
+        bpy.ops.object.select_all(action="DESELECT")
+        o.select_set(True)
+        bpy.context.view_layer.objects.active = o
+        bpy.ops.object.mode_set(mode="EDIT")
+        bpy.ops.mesh.select_all(action="SELECT")
+        bpy.ops.uv.smart_project(angle_limit=math.radians(66.0), island_margin=0.018)
+        bpy.ops.object.mode_set(mode="OBJECT")
+        o.select_set(False)
+        count += 1
+    print(f"UV unwrap: {count} production mesh nodes")
 
 
 def build_materials() -> dict:
@@ -210,6 +284,48 @@ COL_PROXY = {
     "COL_LC_RiderZone": ((0.05, 0, 0.70), (0.55, 0.20, 0.16)),
 }
 
+def production_pivot(name: str):
+    """World-space origin for nodes animated directly rather than through a parent.
+
+    Production bmeshes are authored in world coordinates. Without moving the mesh
+    data back around the physical pivot and placing the object origin there, a
+    perfectly named reactor ring or canopy panel rotates around world (0,0,0).
+    """
+    half_w = D["width"] / 2
+    if name == "LC_Reactor_Core" or name.startswith(("LC_Reactor_Ring_", "LC_Gyro_")):
+        return (0.30, 0.0, AXLE_Z - 0.06)
+    if name.startswith("LC_Canopy_") and name in {"LC_Canopy_L", "LC_Canopy_R"}:
+        side = 1 if name.endswith("_L") else -1
+        y = side * half_w * 0.86 * 0.62
+        return (0.62, y, 0.755)
+    if name.startswith("LC_DeployArm_"):
+        side = 1 if name.endswith("_L") else -1
+        y = side * half_w * 0.73 * 0.72
+        return (0.44, y, 0.735)
+    damage = {
+        "LC_Damage_Nose_L": (-0.655, half_w * 0.86 * 1.10, 0.50),
+        "LC_Damage_Nose_R": (-0.655, -half_w * 0.86 * 1.10, 0.50),
+        "LC_Damage_Panel_L1": (-0.155, half_w * 0.86 * 1.10, 0.49),
+        "LC_Damage_Panel_L2": (0.155, half_w * 0.86 * 1.10, 0.49),
+        "LC_Damage_Panel_R1": (-0.155, -half_w * 0.86 * 1.10, 0.49),
+        "LC_Damage_Panel_R2": (0.155, -half_w * 0.86 * 1.10, 0.49),
+        "LC_Damage_Rear_L": (0.610, half_w * 0.86 * 1.10, 0.49),
+        "LC_Damage_Rear_R": (0.610, -half_w * 0.86 * 1.10, 0.49),
+        "LC_Damage_ReactorCover": (0.30, half_w * 0.82, 0.40),
+    }
+    return damage.get(name)
+
+
+def set_mesh_origin_world(obj, pivot):
+    """Move an object's origin to a world pivot without moving visible geometry."""
+    if pivot is None or obj.type != "MESH":
+        return
+    p = Vector(pivot)
+    for v in obj.data.vertices:
+        v.co -= p
+    obj.location = p
+
+
 EMPTY_AT = {
     # Pivots that must sit on real hardware, not the world origin: wheel spin
     # happens about the axle and the reactor rings counter-rotate about the core.
@@ -235,6 +351,7 @@ def make_mesh(entry, mats):
             o = geo.L.obj_from_bm(bm, n)
             o.data.shade_smooth()
             geo.L.bevel_obj(o, width=0.0022, segments=2, angle_deg=32.0)
+            set_mesh_origin_world(o, production_pivot(n))
             o["lc_geometry"] = "production"
             return o
 
@@ -311,6 +428,8 @@ def build():
             made[entry["name"]].matrix_parent_inverse = made[entry["parent"]].matrix_world.inverted()
 
     bpy.context.view_layer.update()
+    unwrap_production(made)
+    bpy.context.view_layer.update()
     prod = sum(1 for o in made.values() if o.get("lc_geometry") == "production")
     tris = sum(len(o.data.loop_triangles) for o in made.values()
                if o.type == "MESH" and (o.data.calc_loop_triangles() or True))
@@ -375,7 +494,7 @@ def push_tracks():
 
 
 def author_clips(made: dict):
-    """All 18 declared clips, driven by real pivots.
+    """Author the 18 renderer-neutral clips plus Viro composite compatibility clips.
 
     Nothing here scales the bike or fakes motion with a morph - the doc forbids
     it and the modular hierarchy exists precisely so it is not needed.
@@ -473,6 +592,110 @@ def author_clips(made: dict):
         key(M[nm], "LC_Derez", "rotation_euler", AXIS["y"], [(1, 0.0), (30, 1.1 + 0.2 * i)])
     key(M["LC_Reactor_Core"], "LC_Derez", "scale", 0, [(1, 1.0), (14, 1.6), (30, 0.02)])
 
+    # --- Viro single-active-animation compatibility ----------------------
+    # ViroReact 3.x exposes named GLB clips but does not layer/blend several
+    # embedded animations at once. These renderer-compatibility tracks combine
+    # the same real pivots into the common gameplay states while preserving the
+    # original 18 independent clips for Three.js and other capable runtimes.
+    def viro_drive(track, frames=48, wheel_turns=1.0, ring_gain=2.0,
+                   gyro_turns=0.45, steer=0.0):
+        for w in wheels:
+            spin(w, track, wheel_turns, frames)
+        for r, t in rings:
+            spin(r, track, t * ring_gain, frames)
+        for g, ax in gyros:
+            spin(g, track, gyro_turns, frames, axis=ax)
+        if steer:
+            key(yoke, track, "rotation_euler", AXIS["z"],
+                [(1, steer), (frames, steer)], interp="LINEAR")
+
+    # Stationary reactor life.
+    for r, t in rings:
+        spin(r, "LC_Viro_Idle", t * 0.45, 96)
+    for g, ax in gyros:
+        spin(g, "LC_Viro_Idle", 0.12, 96, axis=ax)
+    key(M["LC_Reactor_Core"], "LC_Viro_Idle", "scale", 0,
+        [(1, 1.0), (48, 1.015), (96, 1.0)])
+
+    viro_drive("LC_Viro_Drive")
+    viro_drive("LC_Viro_DriveSteerLeft", steer=0.42)
+    viro_drive("LC_Viro_DriveSteerRight", steer=-0.42)
+
+    # Brake combines wheel/reactor motion with the physical suspension dive.
+    viro_drive("LC_Viro_Brake", frames=30, wheel_turns=0.55, ring_gain=0.65, gyro_turns=0.12)
+    for sp in susp:
+        key(sp, "LC_Viro_Brake", "location", 2,
+            [(1, 0.0), (8, -0.028), (20, -0.018), (30, 0.0)])
+    key(root, "LC_Viro_Brake", "rotation_euler", AXIS["y"],
+        [(1, 0.0), (9, -0.055), (30, 0.0)])
+
+    # Boost transitions keep wheel motion present while reactor/core ramp.
+    for track, frames, wt, rg in (
+        ("LC_Viro_BoostEnter", 18, 1.4, 2.8),
+        ("LC_Viro_BoostLoop", 24, 3.0, 5.0),
+        ("LC_Viro_BoostExit", 22, 1.3, 1.8),
+    ):
+        viro_drive(track, frames=frames, wheel_turns=wt, ring_gain=rg, gyro_turns=rg * 0.18)
+    key(M["LC_Reactor_Core"], "LC_Viro_BoostEnter", "scale", 0, [(1, 1.0), (18, 1.22)])
+    key(M["LC_Reactor_Core"], "LC_Viro_BoostLoop", "scale", 0,
+        [(1, 1.22), (12, 1.30), (24, 1.22)])
+    key(M["LC_Reactor_Core"], "LC_Viro_BoostExit", "scale", 0, [(1, 1.22), (22, 1.0)])
+
+    # High-speed mode: the single clip owns driving plus the real canopy hinges.
+    for track, frames, closed0, closed1 in (
+        ("LC_Viro_HighSpeedEnter", 36, 0.0, 1.0),
+        ("LC_Viro_HighSpeedLoop", 48, 1.0, 1.0),
+        ("LC_Viro_HighSpeedExit", 30, 1.0, 0.0),
+    ):
+        viro_drive(track, frames=frames, wheel_turns=2.4, ring_gain=3.2, gyro_turns=0.85)
+        for nm, sgn in (("LC_Canopy_L", 1), ("LC_Canopy_R", -1)):
+            key(M[nm], track, "rotation_euler", AXIS["x"],
+                [(1, -1.15 * sgn * closed0), (frames, -1.15 * sgn * closed1)], interp="LINEAR")
+        for nm, sgn in (("LC_DeployArm_L", 1), ("LC_DeployArm_R", -1)):
+            key(M[nm], track, "rotation_euler", AXIS["y"],
+                [(1, 0.62 * sgn * closed0), (frames, 0.62 * sgn * closed1)], interp="LINEAR")
+        key(M["LC_RearCanopy"], track, "location", 0,
+            [(1, -0.115 * closed0), (frames, -0.115 * closed1)], interp="LINEAR")
+
+    # Damage keeps the drivetrain alive while sacrificial panels loosen.
+    viro_drive("LC_Viro_Damage", frames=26, wheel_turns=0.45, ring_gain=0.4, gyro_turns=0.10)
+    for nm in ("LC_Damage_Panel_L1", "LC_Damage_Panel_R2", "LC_Damage_Nose_L"):
+        key(M[nm], "LC_Viro_Damage", "rotation_euler", AXIS["y"],
+            [(1, 0.0), (10, 0.22), (26, 0.16)])
+        key(M[nm], "LC_Viro_Damage", "location", 2,
+            [(1, 0.0), (10, 0.012), (26, 0.008)])
+
+    # A loopable damaged state holds the loosened panels while wheels/reactor
+    # keep moving. This avoids replaying the damage impact every loop.
+    viro_drive("LC_Viro_DamagedLoop", frames=48, wheel_turns=0.40, ring_gain=0.32, gyro_turns=0.08)
+    for nm in ("LC_Damage_Panel_L1", "LC_Damage_Panel_R2", "LC_Damage_Nose_L"):
+        key(M[nm], "LC_Viro_DamagedLoop", "rotation_euler", AXIS["y"],
+            [(1, 0.16), (48, 0.16)], interp="LINEAR")
+        key(M[nm], "LC_Viro_DamagedLoop", "location", 2,
+            [(1, 0.008), (48, 0.008)], interp="LINEAR")
+
+    viro_drive("LC_Viro_Crash", frames=34, wheel_turns=0.35, ring_gain=0.25, gyro_turns=0.06)
+    key(root, "LC_Viro_Crash", "rotation_euler", AXIS["x"],
+        [(1, 0.0), (12, 0.9), (34, 1.55)])
+    key(root, "LC_Viro_Crash", "location", 2,
+        [(1, 0.0), (8, 0.14), (34, -0.05)])
+    for sp in susp:
+        key(sp, "LC_Viro_Crash", "location", 2,
+            [(1, 0.0), (10, -0.035), (34, -0.02)])
+
+    for i, nm in enumerate(("LC_Damage_Nose_L", "LC_Damage_Nose_R", "LC_Damage_Panel_L1",
+                            "LC_Damage_Panel_L2", "LC_Damage_Panel_R1", "LC_Damage_Panel_R2",
+                            "LC_Damage_Rear_L", "LC_Damage_Rear_R", "LC_Damage_ReactorCover")):
+        d = 0.16 + 0.03 * i
+        key(M[nm], "LC_Viro_Derez", "location", 1,
+            [(1, 0.0), (30, d * (1 if i % 2 else -1))])
+        key(M[nm], "LC_Viro_Derez", "location", 2,
+            [(1, 0.0), (30, 0.10 + 0.02 * i)])
+        key(M[nm], "LC_Viro_Derez", "rotation_euler", AXIS["y"],
+            [(1, 0.0), (30, 1.1 + 0.2 * i)])
+    key(M["LC_Reactor_Core"], "LC_Viro_Derez", "scale", 0,
+        [(1, 1.0), (14, 1.6), (30, 0.02)])
+
     push_tracks()
 
 
@@ -486,7 +709,7 @@ def export(path: Path):
         export_animation_mode="ACTIONS",
         export_merge_animation="NLA_TRACK",  # one glTF clip per track name, not per Action
         export_nla_strips=True,
-        export_apply=False,
+        export_apply=True,           # bake production bevels into runtime geometry
         export_yup=True,
         export_cameras=False,
         export_lights=False,
