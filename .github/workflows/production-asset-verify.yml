@@ -52,7 +52,7 @@ jobs:
           unzip -j -o "$RUNNER_TEMP/gltfpack.zip" -d "$RUNNER_TEMP/gltfpack"
           chmod +x "$RUNNER_TEMP/gltfpack/gltfpack"
           echo "$RUNNER_TEMP/gltfpack" >> "$GITHUB_PATH"
-          "$RUNNER_TEMP/gltfpack/gltfpack" -h >/dev/null
+          "$RUNNER_TEMP/gltfpack/gltfpack" -v
 
       - name: Python syntax gate
         run: python3 -m compileall -q tools
