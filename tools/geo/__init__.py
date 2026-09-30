@@ -8,6 +8,7 @@ working the whole way through - which is the point of the modular hierarchy.
 import bmesh
 
 from . import _lib as L
+from . import reactor
 from . import wheels
 
 __all__ = ["build_node", "handled", "L"]
@@ -43,6 +44,10 @@ def handled(name: str) -> bool:
     return build_node.__wrapped_names__(name)
 
 
+# World position of the reactor centre; must match EMPTY_AT in build_lightcycle.
+REACTOR_AT = (0.30, 0.0, 0.40)
+
+
 def _lift(bm, x, dz):
     """Move an axle-local shell onto its real axle."""
     bmesh.ops.translate(bm, verts=bm.verts[:], vec=(x, 0.0, dz))
@@ -72,6 +77,24 @@ def build_node(name: str, dims: dict, x_of):
         # The arm reaches inboard toward the chassis, so it points the other way
         # at each end.
         return place(wheels.suspension(_ctx(dims, s), +1 if s == "Front" else -1), name)
+
+    # --- reactor: authored core-local, main axis +Y ---
+    if name.startswith(("LC_Reactor", "LC_Gyro")):
+        rc = REACTOR_AT
+        if name == "LC_Reactor_Core":
+            bm = reactor.core()
+        elif name.startswith("LC_Reactor_Ring_"):
+            bm = reactor.ring("ABC".index(name[-1]))
+        elif name.startswith("LC_Gyro_"):
+            bm = reactor.gyro(name[-1].lower())
+        elif name == "LC_Reactor_Housing":
+            bm = reactor.housing()
+        elif name == "LC_Reactor_Energy":
+            bm = reactor.energy()
+        else:
+            return None
+        bmesh.ops.translate(bm, verts=bm.verts[:], vec=rc)
+        return bm
 
     if name == "LC_RearDrive":
         return place(wheels.rear_drive(_ctx(dims, "Rear")), "LC_Wheel_Rear")

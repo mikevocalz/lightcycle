@@ -26,7 +26,7 @@ VIEWS = {  # (camera location, look-at) in metres
     "rear34":   ((3.0, -3.2, 1.35), (0.1, 0, 0.52)),
     "front":    ((-4.4, 0.0, 0.85), (0.0, 0, 0.52)),
     "top":      ((0.0, 0.0, 4.6), (0.0, 0, 0.5)),
-    "reactor":  ((0.05, -1.05, 0.62), (0.30, 0, 0.46)),
+    "reactor":  ((0.16, -1.42, 0.60), (0.30, 0, 0.42)),
     "wheel":    ((-1.62, -1.72, 0.86), (-0.96, 0, 0.46)),
 }
 
@@ -112,11 +112,19 @@ def main():
     ap.add_argument("--samples", type=int, default=64)
     ap.add_argument("--res", type=int, default=1280)
     ap.add_argument("--out", default=None)
+    ap.add_argument("--isolate", default=None,
+                    help="render only nodes whose name starts with this "
+                         "(macro shots of parts the shells enclose)")
     a = ap.parse_args(argv)
 
     for o in list(bpy.data.objects):
         if o.type in {"LIGHT", "CAMERA"}:
             bpy.data.objects.remove(o, do_unlink=True)
+
+    if a.isolate:
+        for o in bpy.data.objects:
+            if o.type == "MESH" and not o.name.startswith(a.isolate):
+                o.hide_render = True
 
     set_energy(None if a.lights_off else a.color, a.lights_off)
     studio(a.lights_off)
@@ -135,7 +143,7 @@ def main():
     s.view_settings.view_transform = "AgX"
     s.view_settings.look = "AgX - Base Contrast"
 
-    tag = "lightsoff" if a.lights_off else a.color
+    tag = ("lightsoff" if a.lights_off else a.color) + ("_iso" if a.isolate else "")
     out = a.out or str(ROOT / f"assets/render/{a.view}_{tag}.png")
     Path(out).parent.mkdir(parents=True, exist_ok=True)
     s.render.filepath = out

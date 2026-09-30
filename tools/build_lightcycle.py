@@ -364,12 +364,14 @@ def author_clips(made: dict):
     instead of spinning, which is obvious the moment you scrub it.
     """
     for side in ("Front", "Rear"):
-        clip(made[f"LC_Wheel_{side}"], "LC_WheelSpin", 48, 1.0, "x")
+        clip(made[f"LC_Wheel_{side}"], "LC_WheelSpin", 48, 1.0, "y")
     # Counter-rotation at unequal rates reads as a mechanism rather than a
     # spinning disc, which is the whole point of the reactor being a hero system.
+    # Rings share the wheels' lateral axis, so they must turn about Y - about X
+    # they would wobble in place instead of spinning.
     for node, turns in (("LC_Reactor_Ring_A", 0.5), ("LC_Reactor_Ring_B", -0.34),
                         ("LC_Reactor_Ring_C", 0.22)):
-        clip(made[node], "LC_ReactorIdle", 96, turns, "x")
+        clip(made[node], "LC_ReactorIdle", 96, turns, "y")
     for node, ax in (("LC_Gyro_X", "x"), ("LC_Gyro_Y", "y"), ("LC_Gyro_Z", "z")):
         clip(made[node], "LC_ReactorIdle", 96, 0.25, ax)
 
