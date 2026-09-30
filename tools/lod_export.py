@@ -74,12 +74,20 @@ def decimate_to(target: int):
                 continue
             o.data.calc_loop_triangles()
             tris = len(o.data.loop_triangles)
-            if (
-                tris < 96
-                or "Energy" in o.name
-                or o.name.startswith("LC_Emit_")
-                or o.name.startswith("LC_Damage_")
-            ):
+            # LOD1/2 retain tiny FX/damage silhouettes almost untouched. LOD3
+            # is the remote-bike tier on Quest 2, so every render mesh except
+            # truly tiny pieces must participate or the protected geometry alone
+            # can exceed the 30k whole-bike budget.
+            if target <= 30_000:
+                protected = tris < 24
+            else:
+                protected = (
+                    tris < 96
+                    or "Energy" in o.name
+                    or o.name.startswith("LC_Emit_")
+                    or o.name.startswith("LC_Damage_")
+                )
+            if protected:
                 fixed += tris
             else:
                 candidates.append((o, tris))
@@ -87,7 +95,8 @@ def decimate_to(target: int):
         variable = sum(t for _, t in candidates)
         wanted_variable = max(1, target - fixed)
         # Aim a little below target to absorb per-object integer rounding.
-        ratio = max(0.018, min(0.995, wanted_variable / max(1, variable) * 0.955))
+        min_ratio = 0.003 if target <= 30_000 else 0.018
+        ratio = max(min_ratio, min(0.995, wanted_variable / max(1, variable) * 0.94))
         if ratio >= 0.995 or not candidates:
             break
 
@@ -110,6 +119,12 @@ def decimate_to(target: int):
         current = next_count
 
     if current > target:
+        # Blender launched with -P does not reliably propagate a script exception
+        # as a non-zero process exit. Remove any stale output here; build_lods.py
+        # independently requires a fresh file before it validates anything.
+        out = ROOT / f"assets/export/lightcycle.lod{next(k for k,v in TARGETS.items() if v == target)}.glb"
+        if out.exists():
+            out.unlink()
         raise RuntimeError(f"LOD decimation missed target: {current:,} > {target:,}")
     return source, current
 
