@@ -40,7 +40,11 @@ def main():
 
     for lod in range(4):
         out = ROOT / f"assets/export/lightcycle.lod{lod}.glb"
+        if out.exists():
+            out.unlink()
         run([blender, "-b", str(BLEND), "-P", str(EXPORTER), "--", "--lod", str(lod)])
+        if not out.exists() or out.stat().st_size < 1024:
+            raise SystemExit(f"LOD{lod} exporter did not produce a fresh GLB: {out}")
         run([sys.executable, str(VALIDATOR), str(out)])
         pack_lod(gltfpack, lod)
 
