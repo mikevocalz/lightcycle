@@ -63,7 +63,7 @@ def decimate_to(target: int):
     """
     source = tri_count()
     current = source
-    for pass_index in range(3):
+    for pass_index in range(6):
         if current <= target:
             break
 
@@ -74,7 +74,12 @@ def decimate_to(target: int):
                 continue
             o.data.calc_loop_triangles()
             tris = len(o.data.loop_triangles)
-            if tris < 96 or "Energy" in o.name or o.name.startswith("LC_Emit_"):
+            if (
+                tris < 96
+                or "Energy" in o.name
+                or o.name.startswith("LC_Emit_")
+                or o.name.startswith("LC_Damage_")
+            ):
                 fixed += tris
             else:
                 candidates.append((o, tris))
@@ -82,7 +87,7 @@ def decimate_to(target: int):
         variable = sum(t for _, t in candidates)
         wanted_variable = max(1, target - fixed)
         # Aim a little below target to absorb per-object integer rounding.
-        ratio = max(0.025, min(0.995, wanted_variable / max(1, variable) * 0.975))
+        ratio = max(0.018, min(0.995, wanted_variable / max(1, variable) * 0.955))
         if ratio >= 0.995 or not candidates:
             break
 
