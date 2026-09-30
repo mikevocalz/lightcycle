@@ -1,193 +1,90 @@
 # LIGHT CYCLE — HANDOFF / RESUME POINT
 
-**Repo:** https://github.com/mikevocalz/lightcycle (public)
-**Latest commit:** `003a83d` on `main`
+**Repo:** https://github.com/mikevocalz/lightcycle  
+**Branch:** `finish/production-lightcycle` / PR #1  
+**Verified head:** `12b231ff99ce7ab93160334ba549cbd24a46ad7a`  
 **Updated:** 2026-09-30
-
-This file is the resume contract. It is kept truthful on purpose — if something
-is unfinished it says so, because a handoff that overstates progress costs the
-next session more than it saves.
-
----
 
 ## ONE-LINE STATE
 
-The engineering foundation and pipeline are complete and green. The **model is
-partially migrated to production geometry: 27 of 78 mesh nodes are finished
-(both wheel assemblies + the central reactor); 51 are still blockout proxies.**
-It does not yet pass the lights-off quality gate — the body shells are the
-remaining blocker on that.
+The production Light Cycle software/asset pipeline is complete and green. There are
+**74 production render mesh nodes and 4 intentional collision proxies; there are
+no remaining render blockout proxies.** The latest full
+`production-asset-verify` GitHub Actions run passed.
 
----
+## VERIFIED PRODUCTION STATE
+
+- one canonical modular GLB; six runtime energy colors
+- 102 contractual nodes, 11 materials
+- 18 portable clips + 15 Viro composite compatibility clips = 33 exported clips
+- 74 production render meshes, UV-unwrapped
+- neutral PBR + neutral emissive texture package generated deterministically
+- canonical build validates with 0 errors / 0 warnings
+- runtime KTX2/BasisU pack validates with 0 errors / 0 warnings
+- latest runtime pack: 12,543,484 → 4,572,460 bytes (64% smaller)
+- rider ergonomics: all checks pass
+- LOD0: 283,826 tris
+- LOD1: 142,878 tris
+- LOD2: 67,678 tris
+- LOD3: 28,294 tris
+- Three.js multiplayer material adapter tests pass
+- Viro material isolation tests + composite animation mapping pass
+- runtime Light Ribbon implemented for Three.js and Viro
+- damage/derezz runtime mapping implemented
+- Rive HUD/leaderboard data binding implemented
+- six-color one-GLB preview implemented
+- QA renderer supports the full six-color/eight-view matrix + lights-off
+- CI smoke renders 20 views and uploads all build evidence
+
+## IMPORTANT RENDERER DECISION
+
+Viro's embedded GLB animation playback is treated as one active clip at a time.
+Do **not** try to layer the portable wheel/reactor/state clips on Viro. The asset
+exports 15 `LC_Viro_*` composite compatibility clips and
+`src/viro/ViroAnimationAdapter.ts` maps gameplay state into them. Three.js keeps
+the independent clips.
 
 ## DESIGN DECISIONS — DO NOT RE-LITIGATE
 
-- ONE canonical `lightcycle.glb`. Never six colored GLBs.
-- Node names are **contractual**. `tools/validate_glb.py` fails the build on a rename.
-- Runtime reads `spec/` for node roles, never the GLB's `extras`.
-- Colors are runtime state. Nothing hued is ever baked into a texture.
-- Zustand only. No React `useState` for gameplay state.
-- `NeutralToneMapping` in three.js, `AgX` in Blender — ACES desaturates hot golds/reds.
-- gltfpack is a **separate step**, never a flag on the Blender export.
+- ONE canonical `lightcycle.glb`; never six colored GLBs.
+- Runtime color only; player hue is never baked into textures.
+- Node names are contractual.
+- Zustand only for gameplay/player state; no React `useState`.
+- Three.js uses NeutralToneMapping; Blender authoring QA uses AgX.
+- gltfpack stays a separate post-process and always preserves named nodes.
+- Runtime/glTF/Three/Viro coordinates are Y-up; Blender authoring coordinates are Z-up.
+- The 4 `COL_LC_*` meshes are intentional invisible collision proxies.
 
----
-
-## HOW THE MODEL MIGRATION WORKS
-
-`tools/geo/` dispatches production builders **per node name**. A node with a
-builder gets real geometry; a node without one keeps its blockout proxy. This is
-why the asset can be finished assembly-by-assembly without ever breaking the
-contract, the validator, the manifest or the two runtime adapters.
-
-To finish an assembly: add a builder module under `tools/geo/`, register the node
-names in `tools/geo/__init__.py:build_node`, rebuild, validate, render, commit.
-
----
-
-## COMPLETE
-
-| Area | State |
-|---|---|
-| Spec as single source of truth | 102 nodes, 11 materials, 18 clips, 6 colors, locked dimensions |
-| Blender build → GLB export | `npm run build:glb`, 102/102 objects |
-| GLB contract validation + manifest | `npm run validate`, 0 errors |
-| Runtime packing (gltfpack `-kn -tc`) | `npm run pack`, ~42–60% smaller, contract intact |
-| KTX2/Basis workflow | native gltfpack 1.3 installed and proven |
-| `LightCycleEnergyConfig` | renderer-independent |
-| Three.js material adapter | instance-safe, 6/6 tests |
-| Viro material adapter | Constant+Add recipe, 5/5 tests |
-| Zustand store | players keyed by id, no `useState` |
-| Rider ergonomics | 4/4 contacts, `npm run rider` ALL PASS |
-| **All 18 animation clips** | **exact spec match, 83 channels, 0 validator warnings** |
-| XR LOD budget | Quest 2/3 figures in `spec.xrBudget` |
-| **Front + rear wheel assemblies** | **production geometry, 18 nodes** |
-| **Central reactor** | **production geometry, 9 nodes** |
-
-## INCOMPLETE — THE ACTUAL REMAINING WORK
-
-| # | Item | State |
-|---|---|---|
-| 1 | Chassis + nose/mid/rear shells | PROXY. **Next task — the main blocker on the lights-off gate.** |
-| 2 | Cockpit + rider contact surfaces | PROXY |
-| 3 | Articulated canopy | PROXY |
-| 4 | Damage panel geometry | PROXY |
-| 6 | UV unwrap | NOT STARTED (needs final geometry) |
-| 7 | PBR texture package | NOT STARTED (needs UVs) |
-| 8 | Neutral emissive masks | NOT STARTED |
-| 9 | High-poly → runtime bake | NOT STARTED |
-
-| 11 | LOD1 / LOD2 / LOD3 | NOT STARTED (LOD0 only) |
-| 12 | Light Ribbon runtime | NOT STARTED |
-| 13 | Damage runtime | NOT STARTED |
-| 14 | Derezz runtime | NOT STARTED |
-| 15 | Preview app + color picker | NOT STARTED |
-| 16 | Rive HUD binding | NOT STARTED |
-| 17 | QA render matrix | partial: a few views, 1 of 6 colors |
-| 18 | Performance profiling | NOT STARTED |
-
----
-
-## CURRENT FILES
-
-- Blender source: `assets/source/lightcycle_blockout.blend` (name is now stale — it is a hybrid)
-- Canonical export: `assets/export/lightcycle.glb` — 102 nodes, 49,712 tris
-- Packed runtime: `assets/export/lightcycle.runtime.glb`
-- Geometry builders: `tools/geo/{_lib,wheels,reactor}.py`, dispatch in `tools/geo/__init__.py`
-
-## CLIPS — ALL 18 DONE
-
-Authored in `tools/build_lightcycle.py:author_clips()`. Keys accumulate into one
-Action per (object, clip) pair, then push to NLA. The clip name lives on the
-**NLA track** — Blender refuses two Actions the same name, and
-`export_merge_animation='NLA_TRACK'` folds same-named tracks into one glTF
-animation. Naming the Action instead produces `LC_WheelSpin_Rear`-style names the
-validator rejects.
-
-The transformation clips drive `LC_Canopy_L/R` about X and `LC_DeployArm_L/R`
-about Y, plus a forward slide on `LC_RearCanopy`. **When the cockpit geometry
-lands, re-check those hinge axes against the real pivots and adjust the angles.**
-
----
-
-## KNOWN TRAPS (verified empirically — do not rediscover these)
-
-1. **Blender 5.x actions are slotted.** `Action.fcurves` does not exist; fcurves live under `layers → strips → channelbags`.
-2. **Blender 5.x Principled sockets**: `Coat Weight`, `Transmission Weight`, `Emission Strength`. The `Clearcoat *` names are gone.
-3. **Blender auto-suffixes duplicate object names at assignment time.** The builder hard-fails on collision rather than shipping `LC_Wheel_Front.001`.
-4. **Render engine strings** are `BLENDER_EEVEE`, `BLENDER_WORKBENCH`, `CYCLES`. `BLENDER_EEVEE_NEXT` raises. AgX look is `AgX - Base Contrast`.
-5. **gltfpack default deletes 5 contractual nodes.** Always `-kn`. Blender's `export_gltfpack_kn` defaults False, and its `export_use_gltfpack` writes to a `gltfpacked/` subdir while swallowing `CalledProcessError`.
-6. **npm gltfpack cannot do KTX2 at all** (Node/WASM, no BasisU). Use the native build.
-7. **`_lib.revolve`/`radial` take a NAMED spin axis** and map (lateral, radius) onto it. Lateral must lie ALONG the axis or rings collapse to ribbons.
-7b. **Bike axes in Blender: length X (nose at -X), up Z, lateral Y.** Wheels and reactor rings spin about **Y**. Spinning them about X mounts them sideways — a ring seen edge-on in a dark render still looks like a tyre, so this survived three renders undetected. Author wheel/reactor parts in a part-local frame and let the dispatcher place them.
-7c. **Verify geometry by printing world bounds, not by looking at a render.** Both the axle-height and the axis bug were invisible in renders and obvious in one line of bounds.
-8. **Viro has no emissive property**, and `Viro3DObject` cannot address a named sub-node from JS. Material name is the only runtime handle.
-9. The local Blender has `io_scene_gfbanm` + BlenderMCP addons that throw a harmless `unregister_class` traceback on every headless exit. Ignore it.
-
-## OPEN QUESTIONS (need hardware / cannot be settled from source)
-
-- Can one `Viro3DObject` run several named clips concurrently on different sub-nodes? `ViroAnimation` is a singular config. **Blocks independent wheel+reactor motion in XR.**
-- Does `shaderOverrides` truly isolate per-player material state on device, or does the global registry leak? **The whole XR multiplayer color story rests on this.**
-- PICO appears nowhere in the ReactVision platform matrix. Do not claim support.
-
----
-
-## NEXT TASK
-
-**Build the chassis and body shells in production geometry** — `tools/geo/chassis.py`
-for the 13 body nodes, then `tools/geo/cockpit.py` for the 18 cockpit/canopy nodes.
-
-The shells are the remaining blocker on the lights-off gate: the wheels and
-reactor now read as machined hardware, but the body is still a featureless slab
-of boxes and it drags the whole asset down.
-
-They need thin layered panels with real gaps and a visible underlying structure —
-not solid blocks. Panel thickness 2–6mm, chamfered edges, recessed fasteners,
-service access, and a cutout over the reactor so it is visible from the side.
-Keep the centre body narrow so the two wheel masses dominate.
-
-Then: damage panels, UVs, textures, the remaining 16 clips, LODs, runtime systems.
-
-### Exact next commands
+## FULL LOCAL / CI COMMANDS
 
 ```bash
-cd ~/lightcycle
-npm run check                      # confirm green baseline first
-# author tools/geo/<assembly>.py, register node names in tools/geo/__init__.py
+npm ci
+npm run typecheck
+npm test
 npm run build:glb
 npm run validate
-blender -b assets/source/lightcycle_blockout.blend -P tools/render_matrix.py -- --lights-off --view side --samples 56
-# macro shots of enclosed parts need --isolate, e.g. --view reactor --isolate LC_Reactor
-npm run rider                      # must stay ALL PASS
-git add -A && git commit && git push
+npm run rider
+npm run pack
+npm run lods
+npm run profile
+npm run qa:ci       # CI-sized verification subset
+npm run qa:matrix   # full six-color/eight-view render matrix
+npm run preview     # http://localhost:4173/preview/
 ```
 
----
+## WHAT IS STILL HARDWARE-ONLY
 
-## RESUME PROMPT
+These are not source-code blockers and must not be marked as unfinished modeling:
 
-```text
-Continue completing the production Light Cycle in:
+1. **Quest device profiling** — confirm real frame time with track, FX and multiple bikes.
+2. **Viro native multiplayer isolation** — prove player material namespaces stay isolated on device.
+3. **Viro animation lifecycle** — verify the composite clips transition cleanly in the host `Viro3DObject`.
+4. **PICO qualification** — do not claim PICO support until the target runtime/device is profiled.
+5. **Human art-direction review** — inspect the full `npm run qa:matrix` output at final shipping exposure/settings.
 
-https://github.com/mikevocalz/lightcycle
+## RESUME RULE
 
-Read first:
-
-README.md
-docs/HANDOFF.md
-docs/STATUS.json
-docs/LIGHTCYCLE_MASTER_REFERENCE_AND_BUILD_PROMPT.md
-spec/lightcycle.spec.json
-spec/lightcycle.nodes.json
-
-Do not restart the project.
-
-Continue from the exact state recorded in HANDOFF.md.
-
-The goal remains a fully finished AAA/PS5-quality TRON 1982 x TRON: Ares Light Cycle.
-
-Do not stop at blockout, scaffolding, documentation, or partial implementation.
-
-Finish the next incomplete production item, run validation, update STATUS/HANDOFF,
-commit, push, then continue to the next incomplete item until the complete
-definition-of-done checklist is green.
-```
+Do not restart or remodel the bike from scratch. If future work is requested,
+start from the current production geometry and contracts. New work should be
+device integration, art-direction polish, or host-game integration—not replacing
+the finished pipeline.
