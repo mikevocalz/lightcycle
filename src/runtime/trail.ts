@@ -1,3 +1,4 @@
+/** Runtime/glTF world coordinates. glTF, Three.js and Viro all use +Y as up. */
 export type Vec3 = { x: number; y: number; z: number }
 
 export type TrailPoint = Vec3 & {
