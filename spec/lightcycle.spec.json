@@ -3,7 +3,7 @@
   "specVersion": "1.0.0",
   "asset": "lightcycle.glb",
   "upAxis": "Y",
-  "forwardAxis": "-Z",
+  "forwardAxis": "-X",
   "unit": "meter",
   "dimensions_m": {
     "_note": "Locked against a 50th-percentile prone rider proxy by tools/rider_proxy.py, not eyeballed. All four contact points solve with reachable two-link IK and the canopy clears. Re-run rider_proxy.py after moving any contact point.",
@@ -253,5 +253,6 @@
       "why": "PICO appears nowhere in the ReactVision platform matrix; only Meta Quest (OpenXR) is a named target. Its OpenXR runtime may share the path but that is unconfirmed. Profile on device before committing."
     },
     "rule": "LOD0 is for web and cinematic capture only. No headset target ever loads it."
-  }
+  },
+  "_axisNote": "Authored in Blender with length X, up Z, lateral Y; export_yup maps that to glTF up +Y, forward -X, lateral -Z. Wheels spin about Blender Y (glTF Z). Spinning them about X mounts the wheel sideways."
 }

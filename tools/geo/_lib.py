@@ -7,11 +7,18 @@ highlights catching light, which needs actual bevels and actual panel breaks.
 
 Wheel axis is +X throughout; profiles are authored as (y, z) = (lateral, radius).
 """
+import math
+
 import bmesh
 import bpy
 from mathutils import Matrix, Vector
 
 TAU = 6.283185307179586
+
+# Which world axis each spin axis uses, and how (lateral, radius) map onto it.
+AXES = {"x": (1.0, 0.0, 0.0), "y": (0.0, 1.0, 0.0), "z": (0.0, 0.0, 1.0)}
+LATERAL = AXES
+RADIAL = {"x": (0.0, 0.0, 1.0), "y": (0.0, 0.0, 1.0), "z": (1.0, 0.0, 0.0)}
 
 
 def new_bm() -> bmesh.types.BMesh:
@@ -30,43 +37,47 @@ def obj_from_bm(bm: bmesh.types.BMesh, name: str, mat=None):
     return ob
 
 
-def revolve(bm, profile, segments=64, axis=(1, 0, 0), center=(0, 0, 0), closed=True):
-    """Spin a closed (y, z) profile around `axis` into a solid ring.
+def revolve(bm, profile, segments=64, axis="y", center=(0, 0, 0), closed=True):
+    """Spin a closed (lateral, radius) profile about `axis` into a solid ring.
 
-    A closed profile revolved 360 degrees with merged seam verts gives watertight
-    geometry - the alternative, a plain torus primitive, cannot express a tyre
-    crown, a shoulder radius and a bead in one surface.
+    The lateral component lies ALONG the spin axis and the radius in the plane
+    perpendicular to it. Putting lateral anywhere else folds it into the rotation
+    radius and the ring collapses to a ribbon - that bug cost a rebuild once.
+
+    Wheels spin about the LATERAL axis of the bike, which is Y in Blender space
+    (length X, up Z). Spinning them about X mounts the wheel sideways.
     """
-    # The lateral component must lie ALONG the spin axis. Putting it on Y instead
-    # folds it into the rotation radius and the ring collapses to a ribbon.
-    verts = [bm.verts.new((center[0] + y, center[1], center[2] + z)) for y, z in profile]
+    ax = AXES[axis]
+    lat, rad = LATERAL[axis], RADIAL[axis]
+    verts = []
+    for y, z in profile:
+        v = Vector(center) + Vector(lat) * y + Vector(rad) * z
+        verts.append(bm.verts.new(v))
     edges = []
     n = len(verts)
     for i in range(n if closed else n - 1):
         edges.append(bm.edges.new((verts[i], verts[(i + 1) % n])))
-    bmesh.ops.spin(bm, geom=edges, cent=center, axis=axis, angle=TAU,
+    bmesh.ops.spin(bm, geom=edges, cent=center, axis=ax, angle=TAU,
                    steps=segments, use_merge=False)
     bmesh.ops.remove_doubles(bm, verts=bm.verts[:], dist=1e-5)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
     return bm
 
 
-def radial(bm, build, count, radius, axis="x", x=0.0, phase=0.0):
-    """Stamp `build(bm, matrix)` count times around the axis.
+def radial(bm, build, count, radius, axis="y", along=0.0, phase=0.0):
+    """Stamp `build(bm, matrix)` count times around `axis` at `radius`.
 
     Bolt circles, cooling slots, brake vanes and bearing rollers are all this.
-    Doing it as real geometry rather than a normal-map detail is what holds up in
-    the reactor and wheel macro shots the QA matrix calls for.
+    Real geometry rather than a normal-map detail is what holds up in the wheel
+    and reactor macro shots the QA matrix calls for.
     """
+    lat, rad = Vector(LATERAL[axis]), Vector(RADIAL[axis])
+    tan = Vector(AXES[axis]).cross(rad)
+    rot_axis = {"x": "X", "y": "Y", "z": "Z"}[axis]
     for i in range(count):
         a = phase + TAU * i / count
-        if axis == "x":
-            loc = Vector((x, radius * -__import__("math").sin(a), radius * __import__("math").cos(a)))
-            rot = Matrix.Rotation(a, 4, "X")
-        else:
-            loc = Vector((radius * __import__("math").cos(a), radius * __import__("math").sin(a), x))
-            rot = Matrix.Rotation(a, 4, "Z")
-        build(bm, Matrix.Translation(loc) @ rot)
+        loc = lat * along + rad * (radius * math.cos(a)) + tan * (radius * math.sin(a))
+        build(bm, Matrix.Translation(loc) @ Matrix.Rotation(a, 4, rot_axis))
     return bm
 
 

@@ -1,185 +1,155 @@
 """Front and rear wheel assemblies: hubless perimeter design.
 
-The 1982 silhouette lives almost entirely in these two masses, so they get the
-most geometry. Hubless means the centre is genuinely open - the tyre rides on a
-perimeter stator carried by radial webs and roller bearings, with nothing in the
-middle. A solid hub filled with a disc would kill the read instantly.
+Authored in an AXLE-LOCAL frame: origin at the axle centre, axle along +Y
+(the bike's lateral axis), radius measured in the XZ plane. The dispatcher
+translates the finished shell onto the real axle. Spinning a wheel about X
+instead mounts it sideways, which is the bug this frame exists to prevent.
 
-Sections are authored as (lateral, radius) profiles revolved about +X.
+The 1982 silhouette lives almost entirely in these two masses, so they carry the
+most geometry. Hubless means the centre is genuinely open - the tyre rides a
+perimeter stator on radial webs and roller bearings, with nothing in the middle.
 """
 import math
 
 import bmesh
-import bpy
-from mathutils import Matrix, Vector
+from mathutils import Matrix
 
 from . import _lib as L
 
+_Y = Matrix.Rotation(math.pi / 2, 4, "X")  # a Z-axis primitive re-aimed along Y
 
-def _mirror_profile(half):
-    """half runs crown -> bead on +y. Mirror it back along -y to close the loop."""
+
+def _mirror(half):
+    """half runs crown -> bead on +lateral. Mirror back to close the loop."""
     return list(half) + [(-y, z) for y, z in reversed(half[1:-1])] + [(-half[-1][0], half[-1][1])]
 
 
-# Tyre cross-section. Crowned contact patch, shoulder radius, sidewall taper,
-# square bead - the shape a real high-performance carcass takes under load.
 def _tyre_profile(R, hw, bead_r):
+    """Crowned contact patch, shoulder radius, sidewall taper, square bead - the
+    shape a real high-performance carcass takes under load."""
+    k = hw / 0.15
     half = [
-        (0.000, R), (0.055, R - 0.0004), (0.098, R - 0.0018), (0.126, R - 0.0072),
-        (0.1424 * (hw / 0.15), R - 0.0175), (0.1470 * (hw / 0.15), R - 0.0310),
-        (0.1485 * (hw / 0.15), R - 0.0520), (0.1470 * (hw / 0.15), R - 0.0730),
-        (0.1390 * (hw / 0.15), R - 0.0900), (0.1240 * (hw / 0.15), bead_r + 0.004),
-        (0.1050 * (hw / 0.15), bead_r),
+        (0.000, R), (0.055, R - 0.0004), (0.098, R - 0.0018), (0.126 * k, R - 0.0072),
+        (0.1424 * k, R - 0.0175), (0.1470 * k, R - 0.0310), (0.1485 * k, R - 0.0520),
+        (0.1470 * k, R - 0.0730), (0.1390 * k, R - 0.0900),
+        (0.1240 * k, bead_r + 0.004), (0.1050 * k, bead_r),
     ]
-    return _mirror_profile(half)
+    return _mirror(half)
 
 
-def _ring_profile(z0, z1, hw):
+def _ring(z0, z1, hw):
     return [(-hw, z0), (hw, z0), (hw, z1), (-hw, z1)]
 
 
-def tyre(ctx, x):
-    R, hw = ctx["R"], ctx["hw"]
+def tyre(c):
     bm = L.new_bm()
-    L.revolve(bm, _tyre_profile(R, hw, ctx["bead_r"]), segments=96, center=(x, 0, 0))
-    # Circumferential tread grooves: shallow rings cut visually by raised ribs, so
-    # the contact patch never reads as a smooth neon disc.
-    for gy in (-0.052, 0.052):
-        L.revolve(bm, _ring_profile(R + 0.0008, R + 0.0022, 0.009), segments=96,
-                  center=(x + gy, 0, 0))
+    R = c["R"]
+    L.revolve(bm, _tyre_profile(R, c["hw"], c["bead_r"]), segments=96, axis="y")
+    # Circumferential tread ribs keep the contact surface off pure-smooth, so the
+    # wheel never reads as a neon disc.
+    for lat in (-0.052, 0.052):
+        L.revolve(bm, [(lat - 0.009, R + 0.0008), (lat + 0.009, R + 0.0008),
+                       (lat + 0.009, R + 0.0022), (lat - 0.009, R + 0.0022)],
+                  segments=96, axis="y")
     return bm
 
 
-def stator(ctx, x):
-    """The perimeter rail the wheel actually runs on, plus its radial webs."""
+def stator(c):
+    """The perimeter rail the wheel runs on, plus its radial webs."""
     bm = L.new_bm()
-    br = ctx["bead_r"]
-    inner = ctx["hub_r"] + 0.022
-    L.revolve(bm, _ring_profile(br - 0.004, br, 0.100), segments=96, center=(x, 0, 0))
-    L.revolve(bm, _ring_profile(inner, inner + 0.016, 0.092), segments=96, center=(x, 0, 0))
+    br, inner = c["bead_r"], c["hub_r"] + 0.022
+    L.revolve(bm, _ring(br - 0.004, br, 0.100), segments=96, axis="y")
+    L.revolve(bm, _ring(inner, inner + 0.016, 0.092), segments=96, axis="y")
 
     span = (br - 0.004) - (inner + 0.016)
     mid = (inner + 0.016) + span / 2
+    L.radial(bm, lambda b, m: L.box(b, m, (span, 0.026, 0.070)), c["webs"], mid, axis="y")
 
-    def web(b, m):
-        L.box(b, m, (0.070, 0.026, span))
-
-    L.radial(bm, web, ctx["webs"], mid, axis="x", x=x)
-
-    # Fastener bosses on the outer rail - service logic, visible at macro range.
     def boss(b, m):
-        L.cylinder(b, m @ Matrix.Rotation(math.pi / 2, 4, "Y"), 0.0105, 0.030, segments=12)
+        L.cylinder(b, m @ _Y, 0.0105, 0.030, segments=12)
 
-    L.radial(bm, boss, ctx["webs"], br - 0.016, axis="x", x=x + 0.101)
-    L.radial(bm, boss, ctx["webs"], br - 0.016, axis="x", x=x - 0.101)
+    for lat in (0.101, -0.101):
+        L.radial(bm, boss, c["webs"], br - 0.016, axis="y", along=lat)
     return bm
 
 
-def bearing(ctx, x):
+def bearing(c):
     """Two races with real rollers between them."""
     bm = L.new_bm()
-    hr = ctx["hub_r"]
-    L.revolve(bm, _ring_profile(hr + 0.004, hr + 0.014, 0.072), segments=72, center=(x, 0, 0))
-    L.revolve(bm, _ring_profile(hr - 0.014, hr - 0.004, 0.072), segments=72, center=(x, 0, 0))
-
-    def roller(b, m):
-        L.cylinder(b, m @ Matrix.Rotation(math.pi / 2, 4, "Y"), 0.0072, 0.104, segments=10)
-
-    L.radial(bm, roller, ctx["rollers"], hr, axis="x", x=x)
+    hr = c["hub_r"]
+    L.revolve(bm, _ring(hr + 0.004, hr + 0.014, 0.072), segments=72, axis="y")
+    L.revolve(bm, _ring(hr - 0.014, hr - 0.004, 0.072), segments=72, axis="y")
+    L.radial(bm, lambda b, m: L.cylinder(b, m @ _Y, 0.0072, 0.104, segments=10),
+             c["rollers"], hr, axis="y")
     return bm
 
 
-def energy_ring(ctx, x):
+def energy_ring(c):
     """A recessed channel, so the glow sits INSIDE machined geometry rather than
-    floating on the surface. This is what keeps the energy reading as part of the
-    machine instead of a decal."""
+    floating on the surface - the difference between energy and a decal."""
     bm = L.new_bm()
-    r = ctx["hub_r"] + 0.030
-    for gy in (-0.062, 0.062):
-        L.revolve(bm, _ring_profile(r, r + 0.014, 0.008), segments=96, center=(x + gy, 0, 0))
+    r = c["hub_r"] + 0.030
+    for lat in (-0.062, 0.062):
+        L.revolve(bm, [(lat - 0.008, r), (lat + 0.008, r),
+                       (lat + 0.008, r + 0.014), (lat - 0.008, r + 0.014)],
+                  segments=96, axis="y")
     return bm
 
 
-def brake_disc(ctx, x):
+def brake_disc(c):
     bm = L.new_bm()
-    hr = ctx["hub_r"]
-    L.revolve(bm, _ring_profile(hr - 0.075, hr - 0.016, 0.0055), segments=72, center=(x, 0, 0))
-
-    # Directional vanes on the inner face read as a real ventilated disc.
-    def vane(b, m):
-        L.box(b, m, (0.011, 0.0100, 0.052))
-
-    L.radial(bm, vane, 30, hr - 0.046, axis="x", x=x + 0.0085)
+    hr = c["hub_r"]
+    L.revolve(bm, _ring(hr - 0.075, hr - 0.016, 0.0055), segments=72, axis="y")
+    # Directional vanes read as a real ventilated disc at macro range.
+    L.radial(bm, lambda b, m: L.box(b, m, (0.052, 0.0100, 0.011)),
+             30, hr - 0.046, axis="y", along=0.0085)
     return bm
 
 
-def _drill_cutter(ctx, x):
-    """Cross-drilling for the disc. One boolean, not thirty."""
+def caliper(c, side):
+    """Straddles the disc at the top of the hub void."""
     bm = L.new_bm()
-
-    def hole(b, m):
-        L.cylinder(b, m @ Matrix.Rotation(math.pi / 2, 4, "Y"), 0.0052, 0.06, segments=8)
-
-    for ring_r, n, ph in ((ctx["hub_r"] - 0.030, 20, 0.0), (ctx["hub_r"] - 0.058, 16, 0.18)):
-        L.radial(bm, hole, n, ring_r, axis="x", x=x)
-    return bm
-
-
-def caliper(ctx, x, side):
-    bm = L.new_bm()
-    hr = ctx["hub_r"]
+    r = c["hub_r"] - 0.046
     y = 0.070 * side
-    base = Matrix.Translation((x, y, hr - 0.046))
-    L.box(bm, base, (0.088, 0.044, 0.108))
-    L.box(bm, Matrix.Translation((x, y, hr + 0.012)), (0.060, 0.036, 0.030))
-    for dz in (-0.030, 0.030):
-        L.cylinder(bm, Matrix.Translation((x, y + 0.019 * side, hr - 0.046 + dz))
-                   @ Matrix.Rotation(math.pi / 2, 4, "X"), 0.0155, 0.016, segments=14)
-    for dz in (-0.044, 0.044):
-        L.cylinder(bm, Matrix.Translation((x + 0.030, y, hr - 0.046 + dz))
-                   @ Matrix.Rotation(math.pi / 2, 4, "Y"), 0.0062, 0.050, segments=10)
+    L.box(bm, Matrix.Translation((0, y, r)), (0.108, 0.044, 0.088))
+    L.box(bm, Matrix.Translation((0, y, r + 0.058)), (0.030, 0.036, 0.060))
+    for dx in (-0.030, 0.030):
+        L.cylinder(bm, Matrix.Translation((dx, y + 0.019 * side, r)) @ _Y,
+                   0.0155, 0.016, segments=14)
+    for dx in (-0.044, 0.044):
+        L.cylinder(bm, Matrix.Translation((dx, y, r + 0.030)), 0.0062, 0.050, segments=10)
     return bm
 
 
-def suspension(ctx, x, toward):
-    """A milled arm carrying the stator into the chassis, with lightening pockets."""
+def suspension(c, toward):
+    """A milled arm carrying the stator inboard, with lightening pockets."""
     bm = L.new_bm()
-    hr = ctx["hub_r"]
-    length = 0.30
-    cx = x + toward * (length / 2)
-    L.box(bm, Matrix.Translation((cx, 0, hr + 0.030)), (length, 0.074, 0.062))
-    L.box(bm, Matrix.Translation((cx, 0, hr + 0.030)), (length * 0.82, 0.098, 0.030))
+    r, length = c["hub_r"] + 0.030, 0.30
+    cx = toward * (length / 2)
+    L.box(bm, Matrix.Translation((cx, 0, r)), (length, 0.074, 0.062))
+    L.box(bm, Matrix.Translation((cx, 0, r)), (length * 0.82, 0.098, 0.030))
     for i in (-1, 0, 1):
-        L.cylinder(bm, Matrix.Translation((cx + i * 0.072, 0, hr + 0.030))
-                   @ Matrix.Rotation(math.pi / 2, 4, "X"), 0.0175, 0.090, segments=14)
-    L.cylinder(bm, Matrix.Translation((x, 0, hr + 0.030)) @ Matrix.Rotation(math.pi / 2, 4, "X"),
-               0.030, 0.108, segments=20)
+        L.cylinder(bm, Matrix.Translation((cx + i * 0.072, 0, r)) @ _Y,
+                   0.0175, 0.090, segments=14)
+    L.cylinder(bm, Matrix.Translation((0, 0, r)) @ _Y, 0.030, 0.108, segments=20)
     return bm
 
 
-def rear_drive(ctx, x):
-    """The rear is deliberately heavier than the front - it drives the wheel and
-    feeds the trail emitter."""
+def rear_drive(c):
+    """Heavier than the front by design - it drives the wheel and feeds the trail."""
     bm = L.new_bm()
-    hr = ctx["hub_r"]
-    L.cylinder(bm, Matrix.Translation((x, 0, hr - 0.010))
-               @ Matrix.Rotation(math.pi / 2, 4, "Y"), 0.086, 0.140, segments=32)
-    L.cylinder(bm, Matrix.Translation((x, 0, hr - 0.010))
-               @ Matrix.Rotation(math.pi / 2, 4, "Y"), 0.098, 0.052, segments=32)
-
-    def fin(b, m):
-        L.box(b, m, (0.130, 0.012, 0.030))
-
-    L.radial(bm, fin, 18, hr + 0.020, axis="x", x=x)
+    hr = c["hub_r"]
+    L.cylinder(bm, Matrix.Translation((0, 0, hr - 0.010)) @ _Y, 0.086, 0.140, segments=32)
+    L.cylinder(bm, Matrix.Translation((0, 0, hr - 0.010)) @ _Y, 0.098, 0.052, segments=32)
+    L.radial(bm, lambda b, m: L.box(b, m, (0.030, 0.012, 0.130)), 18, hr + 0.020, axis="y")
     return bm
 
 
-def steering_yoke(ctx, x):
+def steering_yoke(c):
     bm = L.new_bm()
-    hr = ctx["hub_r"]
-    L.box(bm, Matrix.Translation((x, 0, hr + 0.090)), (0.130, 0.190, 0.048))
+    r = c["hub_r"] + 0.090
+    L.box(bm, Matrix.Translation((0, 0, r)), (0.130, 0.190, 0.048))
     for s in (-1, 1):
-        L.box(bm, Matrix.Translation((x, 0.082 * s, hr + 0.046)), (0.090, 0.030, 0.076))
-    L.cylinder(bm, Matrix.Translation((x, 0, hr + 0.090))
-               @ Matrix.Rotation(math.pi / 2, 4, "X"), 0.026, 0.200, segments=18)
+        L.box(bm, Matrix.Translation((0, 0.082 * s, r - 0.044)), (0.090, 0.030, 0.076))
+    L.cylinder(bm, Matrix.Translation((0, 0, r)) @ _Y, 0.026, 0.200, segments=18)
     return bm
