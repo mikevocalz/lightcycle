@@ -321,59 +321,159 @@ def build():
 
 AXIS = {"x": 0, "y": 1, "z": 2}
 
+# (object, clip) -> Action. A clip can drive several channels on several objects,
+# so keys accumulate into one Action per pair before anything is pushed to NLA.
+_ACTIONS = {}
 
-def clip(obj, track: str, frames: int, turns: float, axis: str):
-    """Key one object into the NLA track named for a canonical clip.
 
-    The clip name lives on the TRACK, not the Action, because a clip like
-    LC_WheelSpin drives two wheels and Blender refuses two Actions the same name.
-    export_merge_animation='NLA_TRACK' then folds every track sharing a name into
-    one glTF animation, so the spec's clip list stays one entry per clip.
+def key(obj, track: str, path: str, index: int, frames, interp="BEZIER"):
+    """Keyframe one channel of one object into the Action for `track`.
 
-    Verified on 5.2.1: export_animation_mode='ACTIONS' names animations verbatim;
-    ACTIVE_ACTIONS yields nothing once the active action is cleared, and SCENE
-    names them after objects instead.
+    The clip name lives on the NLA TRACK, never the Action: a clip like
+    LC_Brake drives several objects and Blender refuses two Actions the same
+    name. export_merge_animation='NLA_TRACK' folds same-named tracks into one
+    glTF animation.
     """
     obj.rotation_mode = "XYZ"
-    act = bpy.data.actions.new(f"{track}__{obj.name}")
+    k = (obj.name, track)
+    act = _ACTIONS.get(k)
+    if act is None:
+        act = bpy.data.actions.new(f"{track}__{obj.name}")
+        _ACTIONS[k] = act
     obj.animation_data_create()
     obj.animation_data.action = act
-    i = AXIS[axis]
-    for f, turn in ((1, 0.0), (frames, turns)):
-        obj.rotation_euler[i] = turn * 2 * math.pi
-        obj.keyframe_insert("rotation_euler", index=i, frame=f)
+    base = {"location": obj.location, "rotation_euler": obj.rotation_euler,
+            "scale": obj.scale}[path]
+    rest = base[index]
+    for f, v in frames:
+        base[index] = rest + v if path != "scale" else v
+        obj.keyframe_insert(path, index=index, frame=f)
+    base[index] = rest
     # Blender 5.x actions are slotted: fcurves live under layers -> strips ->
-    # channelbags, and Action.fcurves no longer exists. Linear, not the default
-    # bezier, or a looping spin eases in and out at every loop boundary.
+    # channelbags and Action.fcurves no longer exists.
     for layer in act.layers:
         for strip in layer.strips:
             for cb in getattr(strip, "channelbags", []):
                 for fc in cb.fcurves:
                     for kp in fc.keyframe_points:
-                        kp.interpolation = "LINEAR"
-    nla = obj.animation_data.nla_tracks.new()
-    nla.name = track
-    nla.strips.new(track, 1, act)
+                        kp.interpolation = interp
     obj.animation_data.action = None
 
 
-def author_clips(made: dict):
-    """Only the clips the blockout can honestly carry. The rest need real geometry.
+def spin(obj, track, turns, frames, axis="y"):
+    key(obj, track, "rotation_euler", AXIS[axis],
+        [(1, 0.0), (frames, turns * 2 * math.pi)], interp="LINEAR")
 
-    These double as a pivot check: a wheel keyed about the wrong origin swings
-    instead of spinning, which is obvious the moment you scrub it.
+
+def push_tracks():
+    """One NLA track per clip, named for the clip."""
+    for (obj_name, track), act in _ACTIONS.items():
+        obj = bpy.data.objects[obj_name]
+        nla = obj.animation_data.nla_tracks.new()
+        nla.name = track
+        nla.strips.new(track, 1, act)
+
+
+def author_clips(made: dict):
+    """All 18 declared clips, driven by real pivots.
+
+    Nothing here scales the bike or fakes motion with a morph - the doc forbids
+    it and the modular hierarchy exists precisely so it is not needed.
     """
-    for side in ("Front", "Rear"):
-        clip(made[f"LC_Wheel_{side}"], "LC_WheelSpin", 48, 1.0, "y")
-    # Counter-rotation at unequal rates reads as a mechanism rather than a
-    # spinning disc, which is the whole point of the reactor being a hero system.
-    # Rings share the wheels' lateral axis, so they must turn about Y - about X
-    # they would wobble in place instead of spinning.
-    for node, turns in (("LC_Reactor_Ring_A", 0.5), ("LC_Reactor_Ring_B", -0.34),
-                        ("LC_Reactor_Ring_C", 0.22)):
-        clip(made[node], "LC_ReactorIdle", 96, turns, "y")
-    for node, ax in (("LC_Gyro_X", "x"), ("LC_Gyro_Y", "y"), ("LC_Gyro_Z", "z")):
-        clip(made[node], "LC_ReactorIdle", 96, 0.25, ax)
+    M = made
+    wheels = [M["LC_Wheel_Front"], M["LC_Wheel_Rear"]]
+    rings = [(M["LC_Reactor_Ring_A"], 0.50), (M["LC_Reactor_Ring_B"], -0.34),
+             (M["LC_Reactor_Ring_C"], 0.22)]
+    gyros = [(M["LC_Gyro_X"], "x"), (M["LC_Gyro_Y"], "y"), (M["LC_Gyro_Z"], "z")]
+    root, yoke = M["LC_ROOT"], M["LC_SteeringYoke"]
+    susp = [M["LC_Wheel_Front_Suspension"], M["LC_Wheel_Rear_Suspension"]]
+
+    # --- locomotion -------------------------------------------------------
+    for w in wheels:
+        spin(w, "LC_WheelSpin", 1.0, 48)
+    for r, t in rings:
+        spin(r, "LC_ReactorIdle", t, 96)
+    for g, ax in gyros:
+        spin(g, "LC_ReactorIdle", 0.25, 96, axis=ax)
+    for r, t in rings:
+        spin(r, "LC_ReactorAcceleration", t * 3.2, 48)
+    for g, ax in gyros:
+        spin(g, "LC_ReactorAcceleration", 0.9, 48, axis=ax)
+
+    # Idle: the machine is never dead still - slow gyros and a breathing core.
+    for g, ax in gyros:
+        spin(g, "LC_Idle", 0.06, 120, axis=ax)
+    key(M["LC_Reactor_Core"], "LC_Idle", "scale", 0,
+        [(1, 1.0), (60, 1.015), (120, 1.0)])
+
+    # --- steering and lean ------------------------------------------------
+    for name, ang in (("LC_SteerLeft", 0.42), ("LC_SteerRight", -0.42)):
+        key(yoke, name, "rotation_euler", AXIS["z"], [(1, 0.0), (12, ang), (24, ang)])
+    for name, ang in (("LC_LeanLeft", 0.50), ("LC_LeanRight", -0.50)):
+        key(root, name, "rotation_euler", AXIS["x"], [(1, 0.0), (14, ang), (28, ang)])
+
+    # --- braking: real suspension travel, nose dives ----------------------
+    for sp in susp:
+        key(sp, "LC_Brake", "location", 2, [(1, 0.0), (8, -0.028), (20, -0.018), (30, 0.0)])
+    key(root, "LC_Brake", "rotation_euler", AXIS["y"], [(1, 0.0), (9, -0.055), (30, 0.0)])
+
+    # --- boost ------------------------------------------------------------
+    for r, t in rings:
+        spin(r, "LC_BoostEnter", t * 1.8, 18)
+        spin(r, "LC_BoostLoop", t * 5.0, 24)
+        spin(r, "LC_BoostExit", t * 1.4, 22)
+    key(M["LC_Reactor_Core"], "LC_BoostEnter", "scale", 0, [(1, 1.0), (18, 1.22)])
+    key(M["LC_Reactor_Core"], "LC_BoostLoop", "scale", 0,
+        [(1, 1.22), (12, 1.30), (24, 1.22)])
+    key(M["LC_Reactor_Core"], "LC_BoostExit", "scale", 0, [(1, 1.22), (22, 1.0)])
+
+    # --- high-speed transformation: real hinges, no global scale ----------
+    for nm, sgn in (("LC_Canopy_L", 1), ("LC_Canopy_R", -1)):
+        key(M[nm], "LC_HighSpeedTransform", "rotation_euler", AXIS["x"],
+            [(1, 0.0), (36, -1.15 * sgn)])
+        key(M[nm], "LC_HighSpeedReverse", "rotation_euler", AXIS["x"],
+            [(1, -1.15 * sgn), (30, 0.0)])
+    for nm, sgn in (("LC_DeployArm_L", 1), ("LC_DeployArm_R", -1)):
+        key(M[nm], "LC_HighSpeedTransform", "rotation_euler", AXIS["y"],
+            [(1, 0.0), (36, 0.62 * sgn)])
+        key(M[nm], "LC_HighSpeedReverse", "rotation_euler", AXIS["y"],
+            [(1, 0.62 * sgn), (30, 0.0)])
+    # The canopy assembly slides forward over the rider as it closes.
+    key(M["LC_RearCanopy"], "LC_HighSpeedTransform", "location", 0,
+        [(1, 0.0), (36, -0.115)])
+    key(M["LC_RearCanopy"], "LC_HighSpeedReverse", "location", 0,
+        [(1, -0.115), (30, 0.0)])
+
+    # --- failure states ---------------------------------------------------
+    for r, t in rings:
+        spin(r, "LC_ReactorOverload", t * 7.0, 30)
+    key(M["LC_Reactor_Core"], "LC_ReactorOverload", "scale", 0,
+        [(1, 1.0), (10, 1.5), (16, 1.1), (24, 1.7), (30, 0.9)], interp="LINEAR")
+
+    for nm in ("LC_Damage_Panel_L1", "LC_Damage_Panel_R2", "LC_Damage_Nose_L"):
+        key(M[nm], "LC_Damage", "rotation_euler", AXIS["y"],
+            [(1, 0.0), (10, 0.22), (26, 0.16)])
+        key(M[nm], "LC_Damage", "location", 2, [(1, 0.0), (10, 0.012), (26, 0.008)])
+    for r, t in rings:
+        spin(r, "LC_Damage", t * 0.4, 26)
+
+    key(root, "LC_Crash", "rotation_euler", AXIS["x"], [(1, 0.0), (12, 0.9), (34, 1.55)])
+    key(root, "LC_Crash", "location", 2, [(1, 0.0), (8, 0.14), (34, -0.05)])
+    for sp in susp:
+        key(sp, "LC_Crash", "location", 2, [(1, 0.0), (10, -0.035), (34, -0.02)])
+
+    # Derez: panels blow outward, the core collapses. The shader dissolve is a
+    # runtime effect; this is only the mechanical part.
+    for i, nm in enumerate(("LC_Damage_Nose_L", "LC_Damage_Nose_R", "LC_Damage_Panel_L1",
+                            "LC_Damage_Panel_L2", "LC_Damage_Panel_R1", "LC_Damage_Panel_R2",
+                            "LC_Damage_Rear_L", "LC_Damage_Rear_R", "LC_Damage_ReactorCover")):
+        d = 0.16 + 0.03 * i
+        key(M[nm], "LC_Derez", "location", 1, [(1, 0.0), (30, d * (1 if i % 2 else -1))])
+        key(M[nm], "LC_Derez", "location", 2, [(1, 0.0), (30, 0.10 + 0.02 * i)])
+        key(M[nm], "LC_Derez", "rotation_euler", AXIS["y"], [(1, 0.0), (30, 1.1 + 0.2 * i)])
+    key(M["LC_Reactor_Core"], "LC_Derez", "scale", 0, [(1, 1.0), (14, 1.6), (30, 0.02)])
+
+    push_tracks()
 
 
 def export(path: Path):
