@@ -7,7 +7,11 @@
     "typecheck": "tsc --noEmit",
     "build:glb": "blender --background --python tools/build_lightcycle.py",
     "validate": "python3 tools/validate_glb.py assets/export/lightcycle.glb --manifest assets/export/manifest.json",
-    "render:lightsoff": "blender --background --python tools/render_matrix.py -- --lights-off"
+    "render:lightsoff": "blender --background --python tools/render_matrix.py -- --lights-off",
+    "pack": "python3 tools/pack_runtime.py",
+    "rider": "blender -b assets/source/lightcycle_blockout.blend -P tools/rider_proxy.py",
+    "test": "node src/three/adapter.test.ts && node src/viro/adapter.test.ts",
+    "check": "npm run build:glb && npm run validate && npm run pack && npm run typecheck && npm test"
   },
   "dependencies": {
     "three": "^0.186.1",

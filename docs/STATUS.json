@@ -9,7 +9,8 @@
     "blender": "5.2.1 LTS (headless; the Blender MCP is not connected because Blender is not running)",
     "three": "0.186.1",
     "zustand": "5.0.15",
-    "node": "26.8.2"
+    "node": "26.8.2",
+    "gltfpack": "1.3 native arm64 (the npm build is Node/WASM and cannot do BasisU at all)"
   },
   "complete": [
     {
@@ -86,6 +87,16 @@
       "item": "ViroLightCycleMaterialAdapter",
       "where": "src/viro/ViroLightCycleMaterialAdapter.ts",
       "detail": "Deliverable 8. Translates the config into Constant + Add materials with per-player namespaced names, since ViroMaterial has no emissive field and the registry is global."
+    },
+    {
+      "item": "KTX2/Basis unblocked + runtime packing",
+      "where": "tools/pack_runtime.py, npm run pack",
+      "detail": "Native gltfpack 1.3 installed at /opt/homebrew/bin/gltfpack. Canonical GLB 581,904 -> 233,528 bytes (60%) with the node contract intact."
+    },
+    {
+      "item": "reference pack path fixed",
+      "where": "docs/references/",
+      "detail": "The master doc pointed at references/07_generated_hybrid_concept.png, a file and directory that never existed in the handoff. The three generated concepts are now committed under docs/references/ and the doc points at them."
     }
   ],
   "partial": [
@@ -116,11 +127,6 @@
       "item": "textures of any kind",
       "why": "Deliverables 4 and 5 (neutral PBR texture package, neutral emissive masks) need UVs, which need final geometry. The material library currently drives scalars only.",
       "unblock": "follows the modelling pass"
-    },
-    {
-      "item": "KTX2/Basis texture compression",
-      "why": "Blender 5.2.1's exporter reaches KTX2 only via export_use_gltfpack, which shells out to an external gltfpack binary. gltfpack, toktx and basisu are all absent from PATH and the addon preference gltfpack_path_ui is empty; attempting it raises PermissionError. Draco and MeshOptimizer bridges ARE bundled and load fine.",
-      "unblock": "brew install / download gltfpack, or compress outside Blender. Meshopt is available today as an interim."
     }
   ],
   "notStarted": [
@@ -139,7 +145,8 @@
     "lights-off render completes end to end",
     "GLB animation names are exactly ['LC_WheelSpin', 'LC_ReactorIdle']",
     "tools/rider_proxy.py: 4/4 contact points reachable and matched, rear-wheel clearance ok, canopy clears the rider",
-    "src/viro/adapter.test.ts: 5/5 - no material-name collision between players, energy is Constant+Add, colours differ, lightsOff drops out of the bloom pass and does not leak across players"
+    "src/viro/adapter.test.ts: 5/5 - no material-name collision between players, energy is Constant+Add, colours differ, lightsOff drops out of the bloom pass and does not leak across players",
+    "npm run pack: 581,904 -> 233,528 bytes, validator 0 errors on the packed GLB, all 102 named nodes survive -kn"
   ],
   "decisionsMade": [
     {
@@ -177,12 +184,19 @@
     {
       "decision": "the bike moves to fit the rider, not the reverse",
       "why": "Doc section 15. Segment lengths are fixed human anatomy; control positions are a design choice, so the solver reports where the rider lands and the deck table follows."
+    },
+    {
+      "decision": "gltfpack is a separate post-process, never a flag on the Blender export",
+      "why": "Default gltfpack destroys 5 contractual nodes (LC_Reactor_Core, LC_FX_TrailOrigin, LC_FX_Boost, LC_FX_CrashCenter, LC_FX_DerezCenter) and fails the validator; -kn fixes it but Blender's export_gltfpack_kn defaults to False. Blender also writes to a gltfpacked/ subdirectory and swallows CalledProcessError, so a failed pack reports success. Calling gltfpack directly makes a failure a failure, and keeps the canonical GLB as the thing CI validates."
+    },
+    {
+      "decision": "losing node extras to gltfpack is acceptable",
+      "why": "gltfpack strips all extras with no flag to keep them, but the lc_* tags are DCC-side bookkeeping. The runtime reads spec/ for node roles and never the GLB's extras, so nothing downstream depends on them."
     }
   ],
   "openQuestions": [
     "UNVERIFIED on device: whether one Viro3DObject can run several named clips at once on different sub-nodes. ViroAnimation is a singular config, which would break independent wheel and reactor motion in XR.",
     "UNVERIFIED on device: whether shaderOverrides on separate Viro3DObject instances truly isolates per-player material state, or whether the global registry leaks across instances. The entire XR multiplayer colour story rests on this.",
-    "PICO appears nowhere in the ReactVision platform matrix; only Meta Quest (OpenXR) is a named target. Profile on device before committing to it.",
-    "docs/LIGHTCYCLE_MASTER_REFERENCE_AND_BUILD_PROMPT.md section I references references/07_generated_hybrid_concept.png, which is absent from the handoff pack. The three concept PNGs were copied to docs/references/ instead."
+    "PICO appears nowhere in the ReactVision platform matrix; only Meta Quest (OpenXR) is a named target. Profile on device before committing to it."
   ]
 }

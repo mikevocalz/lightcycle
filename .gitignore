@@ -1,5 +1,6 @@
 node_modules/
 assets/render/*.png
 assets/export/*.glb
+assets/source/lightcycle_rider_check.blend
 assets/export/manifest.json
 *.blend1

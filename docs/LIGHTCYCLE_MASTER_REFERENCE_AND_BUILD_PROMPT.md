@@ -153,7 +153,13 @@ Source:
 
 **Use for:** mood only — the final asset must become substantially more physically grounded and less concept-render-clean than this image.
 
-![Generated hybrid concept](references/07_generated_hybrid_concept.png)
+![Generated hybrid concept 1](references/01_generated_hybrid_concept.png)
+![Generated hybrid concept 2](references/02_generated_hybrid_concept.png)
+![Generated hybrid concept 3](references/03_generated_hybrid_concept.png)
+
+> Path corrected. The handoff pack shipped three generated concepts at the top
+> level, not a single `07_...` file, and the `references/` directory it named did
+> not exist. These are those three images.
 
 ---
 
