@@ -61,6 +61,7 @@ def main():
     candidates = [
         ROOT / "assets/export/lightcycle.glb",
         *[ROOT / f"assets/export/lightcycle.lod{i}.glb" for i in range(4)],
+        *[ROOT / f"assets/export/lightcycle.lod{i}.runtime.glb" for i in range(4)],
         ROOT / "assets/export/lightcycle.runtime.glb",
     ]
     rows = [inspect(p) for p in candidates if p.exists()]
