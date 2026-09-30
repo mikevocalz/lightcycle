@@ -5,106 +5,253 @@
   "upAxis": "Y",
   "forwardAxis": "-Z",
   "unit": "meter",
-
   "dimensions_m": {
-    "_note": "Starting targets derived from the Ares practical build and the concept boards. Tune against a rider proxy before locking; CI only asserts the export is within tolerance of these, it does not assert they are correct.",
+    "_note": "Locked against a 50th-percentile prone rider proxy by tools/rider_proxy.py, not eyeballed. All four contact points solve with reachable two-link IK and the canopy clears. Re-run rider_proxy.py after moving any contact point.",
     "length": 2.95,
     "width": 0.46,
     "height": 0.98,
     "wheelbase": 1.92,
     "wheelOuterDiameter": 0.92,
-    "wheelSectionWidth": 0.30,
+    "wheelSectionWidth": 0.3,
     "hubVoidDiameter": 0.54,
     "groundClearance": 0.085,
     "chestSupportHeight": 0.62,
-    "tolerance": 0.06
+    "tolerance": 0.06,
+    "riderEnvelope": {
+      "_note": "Measured from the solved proxy. The machine must stay larger than this or the rider stops looking integrated into a serious vehicle (doc section 15).",
+      "lengthAlongX": 1.549,
+      "topZ": 0.796,
+      "requiredCanopyZ": 0.856,
+      "contactPoints": {
+        "grip": [
+          -0.72,
+          0.7
+        ],
+        "chestSupport": [
+          -0.238,
+          0.528
+        ],
+        "kneeRest": [
+          0.443,
+          0.695
+        ],
+        "footPeg": [
+          0.62,
+          0.28
+        ]
+      },
+      "legOutboardY": 0.21,
+      "legOutboardWhy": "Shin centreline must clear the rear wheel's 0.30 m section width; at hip breadth (0.175) the shin passes through the tyre."
+    }
   },
-
   "materials": {
     "MAT_LC_GRAPHITE": {
       "desc": "Satin black composite. The bike's dominant surface. Never pure black - real black composite sits near sRGB 0x121314, and crushing it to 0x000000 is what makes a model read as cheap plastic.",
-      "baseColor": "#121314", "metallic": 0.0, "roughness": 0.44,
-      "ior": 1.48, "coat": 0.0, "anisotropic": 0.0
+      "baseColor": "#121314",
+      "metallic": 0.0,
+      "roughness": 0.44,
+      "ior": 1.48,
+      "coat": 0.0,
+      "anisotropic": 0.0
     },
     "MAT_LC_BLACK_CLEARCOAT": {
       "desc": "Painted composite shell under automotive clear coat. Carries the sharp horizon reflections that sell panel curvature with the lights off.",
-      "baseColor": "#0E0F11", "metallic": 0.0, "roughness": 0.34,
-      "ior": 1.5, "coat": 1.0, "coatRoughness": 0.055, "anisotropic": 0.0
+      "baseColor": "#0E0F11",
+      "metallic": 0.0,
+      "roughness": 0.34,
+      "ior": 1.5,
+      "coat": 1.0,
+      "coatRoughness": 0.055,
+      "anisotropic": 0.0
     },
     "MAT_LC_CARBON": {
       "desc": "Exposed twill carbon under clear coat. Structural panels only - armor, back support, load paths. Weave direction must follow the part.",
-      "baseColor": "#17181B", "metallic": 0.0, "roughness": 0.26,
-      "ior": 1.52, "coat": 1.0, "coatRoughness": 0.09, "anisotropic": 0.3, "anisotropicRotation": 0.0
+      "baseColor": "#17181B",
+      "metallic": 0.0,
+      "roughness": 0.26,
+      "ior": 1.52,
+      "coat": 1.0,
+      "coatRoughness": 0.09,
+      "anisotropic": 0.3,
+      "anisotropicRotation": 0.0
     },
     "MAT_LC_MILLED_METAL": {
       "desc": "CNC aluminum, bead-blasted then clear-anodized. Aluminum F0 measured (0.912,0.914,0.920). Bright, tight highlight, visible tool witness marks.",
-      "baseColor": "#E9EAEC", "metallic": 1.0, "roughness": 0.24,
-      "ior": 1.5, "coat": 0.0, "anisotropic": 0.0
+      "baseColor": "#E9EAEC",
+      "metallic": 1.0,
+      "roughness": 0.24,
+      "ior": 1.5,
+      "coat": 0.0,
+      "anisotropic": 0.0
     },
     "MAT_LC_BRUSHED_METAL": {
       "desc": "Dark anodized / blackened brushed steel. Covers the doc's anodized-aluminum and blackened-steel callouts in one slot. Anisotropy runs along the brush direction, so UVs must be oriented per part or the highlight smears.",
-      "baseColor": "#4A4C50", "metallic": 1.0, "roughness": 0.46,
-      "ior": 1.5, "coat": 0.0, "anisotropic": 0.72, "anisotropicRotation": 0.0
+      "baseColor": "#4A4C50",
+      "metallic": 1.0,
+      "roughness": 0.46,
+      "ior": 1.5,
+      "coat": 0.0,
+      "anisotropic": 0.72,
+      "anisotropicRotation": 0.0
     },
     "MAT_LC_RUBBER": {
       "desc": "High-performance synthetic contact surface. Roughness rises across the contact patch from thermal cycling; keep it off pure-smooth or the wheel reads as a neon disc.",
-      "baseColor": "#0C0C0D", "metallic": 0.0, "roughness": 0.84,
-      "ior": 1.45, "coat": 0.0, "anisotropic": 0.0
+      "baseColor": "#0C0C0D",
+      "metallic": 0.0,
+      "roughness": 0.84,
+      "ior": 1.45,
+      "coat": 0.0,
+      "anisotropic": 0.0
     },
     "MAT_LC_SMOKED_GLASS": {
       "desc": "Smoked technical lens. Real thickness so edges pick up refraction; emissive elements sit behind it, never on it.",
-      "baseColor": "#1A1C1F", "metallic": 0.0, "roughness": 0.07,
-      "transmission": 0.82, "ior": 1.52, "thickness": 0.006, "coat": 0.0, "anisotropic": 0.0
+      "baseColor": "#1A1C1F",
+      "metallic": 0.0,
+      "roughness": 0.07,
+      "transmission": 0.82,
+      "ior": 1.52,
+      "thickness": 0.006,
+      "coat": 0.0,
+      "anisotropic": 0.0
     },
-
     "MAT_LC_EMISSIVE_PRIMARY": {
       "desc": "Broad graphic luminous field - the 1982 DNA. Wheel rings and the body's main energy bus. NEUTRAL: emission is white, player hue is applied at runtime.",
-      "emissive": true, "channel": "primary",
-      "baseColor": "#050505", "metallic": 0.0, "roughness": 0.30,
-      "emissionColor": "#FFFFFF", "emissionStrength": 3.0
+      "emissive": true,
+      "channel": "primary",
+      "baseColor": "#050505",
+      "metallic": 0.0,
+      "roughness": 0.3,
+      "emissionColor": "#FFFFFF",
+      "emissionStrength": 3.0
     },
     "MAT_LC_EMISSIVE_SECONDARY": {
       "desc": "Precision technical strips and status detail. Dimmer than primary so the 70/30 field-to-detail balance holds.",
-      "emissive": true, "channel": "secondary",
-      "baseColor": "#050505", "metallic": 0.0, "roughness": 0.30,
-      "emissionColor": "#FFFFFF", "emissionStrength": 1.6
+      "emissive": true,
+      "channel": "secondary",
+      "baseColor": "#050505",
+      "metallic": 0.0,
+      "roughness": 0.3,
+      "emissionColor": "#FFFFFF",
+      "emissionStrength": 1.6
     },
     "MAT_LC_EMISSIVE_CORE": {
       "desc": "White-hot core. Reads near-white at every player color - this is the layer that keeps gold from flattening to yellow and red from going orange.",
-      "emissive": true, "channel": "core",
-      "baseColor": "#050505", "metallic": 0.0, "roughness": 0.25,
-      "emissionColor": "#FFFFFF", "emissionStrength": 9.0
+      "emissive": true,
+      "channel": "core",
+      "baseColor": "#050505",
+      "metallic": 0.0,
+      "roughness": 0.25,
+      "emissionColor": "#FFFFFF",
+      "emissionStrength": 9.0
     },
     "MAT_LC_EMISSIVE_REACTOR": {
       "desc": "Reactor conduits and ring energy. Driven per state (idle/accel/boost/damage) by the runtime, so the authored strength is only the idle baseline.",
-      "emissive": true, "channel": "reactor",
-      "baseColor": "#050505", "metallic": 0.0, "roughness": 0.28,
-      "emissionColor": "#FFFFFF", "emissionStrength": 4.5
+      "emissive": true,
+      "channel": "reactor",
+      "baseColor": "#050505",
+      "metallic": 0.0,
+      "roughness": 0.28,
+      "emissionColor": "#FFFFFF",
+      "emissionStrength": 4.5
     }
   },
-
   "colors": {
-    "blue":   { "energy": "#00C8FF", "core": "#E7FCFF", "halo": "#008CFF" },
-    "red":    { "energy": "#FF291A", "core": "#FFF0E8", "halo": "#FF0037" },
-    "gold":   { "energy": "#FFC13D", "core": "#FFF3BD", "halo": "#FF8700" },
-    "purple": { "energy": "#B65CFF", "core": "#F3E5FF", "halo": "#7900FF" },
-    "green":  { "energy": "#31FF83", "core": "#E7FFF0", "halo": "#00C95B" },
-    "white":  { "energy": "#EAF8FF", "core": "#FFFFFF", "halo": "#A7DFFF" }
+    "blue": {
+      "energy": "#00C8FF",
+      "core": "#E7FCFF",
+      "halo": "#008CFF"
+    },
+    "red": {
+      "energy": "#FF291A",
+      "core": "#FFF0E8",
+      "halo": "#FF0037"
+    },
+    "gold": {
+      "energy": "#FFC13D",
+      "core": "#FFF3BD",
+      "halo": "#FF8700"
+    },
+    "purple": {
+      "energy": "#B65CFF",
+      "core": "#F3E5FF",
+      "halo": "#7900FF"
+    },
+    "green": {
+      "energy": "#31FF83",
+      "core": "#E7FFF0",
+      "halo": "#00C95B"
+    },
+    "white": {
+      "energy": "#EAF8FF",
+      "core": "#FFFFFF",
+      "halo": "#A7DFFF"
+    }
   },
-
   "clips": [
-    "LC_Idle", "LC_WheelSpin", "LC_ReactorIdle", "LC_ReactorAcceleration",
-    "LC_SteerLeft", "LC_SteerRight", "LC_LeanLeft", "LC_LeanRight", "LC_Brake",
-    "LC_BoostEnter", "LC_BoostLoop", "LC_BoostExit",
-    "LC_HighSpeedTransform", "LC_HighSpeedReverse",
-    "LC_ReactorOverload", "LC_Damage", "LC_Crash", "LC_Derez"
+    "LC_Idle",
+    "LC_WheelSpin",
+    "LC_ReactorIdle",
+    "LC_ReactorAcceleration",
+    "LC_SteerLeft",
+    "LC_SteerRight",
+    "LC_LeanLeft",
+    "LC_LeanRight",
+    "LC_Brake",
+    "LC_BoostEnter",
+    "LC_BoostLoop",
+    "LC_BoostExit",
+    "LC_HighSpeedTransform",
+    "LC_HighSpeedReverse",
+    "LC_ReactorOverload",
+    "LC_Damage",
+    "LC_Crash",
+    "LC_Derez"
   ],
-
   "lod": {
-    "_note": "Doc targets. LOD0/LOD1 are desktop/console figures and are NOT headset-safe; see docs/STATUS.md for the XR budget.",
-    "LOD0": [180000, 300000],
-    "LOD1": [90000, 150000],
-    "LOD2": [40000, 70000],
-    "LOD3": [15000, 30000]
+    "_note": "LOD0/LOD1 are the doc's desktop and console figures. They are NOT headset-safe - see xrBudget below, which governs on Quest and PICO.",
+    "LOD0": [
+      180000,
+      300000
+    ],
+    "LOD1": [
+      90000,
+      150000
+    ],
+    "LOD2": [
+      40000,
+      70000
+    ],
+    "LOD3": [
+      15000,
+      30000
+    ]
+  },
+  "xrBudget": {
+    "_note": "Quest 2 allows roughly 350-500k tris scene-wide with a 150k hero cap; Quest 3 allows 750k-1M with a 300k hero cap. A race has up to 6 bikes, so the hero cap is the wrong number to budget against - the whole grid has to fit alongside track and FX.",
+    "quest2": {
+      "sceneTris": [
+        350000,
+        500000
+      ],
+      "heroTris": 150000,
+      "localPlayerLOD": "LOD1",
+      "remotePlayerLOD": "LOD3",
+      "why": "6 bikes at LOD1 (90-150k each) is 540-900k and blows the scene ceiling on bikes alone. Only the local bike earns LOD1."
+    },
+    "quest3": {
+      "sceneTris": [
+        750000,
+        1000000
+      ],
+      "heroTris": 300000,
+      "localPlayerLOD": "LOD1",
+      "remotePlayerLOD": "LOD2",
+      "why": "LOD0 fits the hero cap only as the sole object on screen, which never happens in a race."
+    },
+    "pico": {
+      "status": "UNVERIFIED",
+      "why": "PICO appears nowhere in the ReactVision platform matrix; only Meta Quest (OpenXR) is a named target. Its OpenXR runtime may share the path but that is unconfirmed. Profile on device before committing."
+    },
+    "rule": "LOD0 is for web and cinematic capture only. No headset target ever loads it."
   }
 }

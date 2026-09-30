@@ -140,6 +140,9 @@ def placement(entry: dict):
             return ("torus", (rx, 0, rz), (0, math.pi / 2, 0), {"major": 0.19, "minor": 0.006})
 
     # Chassis, cockpit, canopy, emission strips, damage panels: laid along the deck.
+    # Contact-point positions below were solved by tools/rider_proxy.py against a
+    # 50th-percentile prone rider, not placed by eye. Re-run it after moving any
+    # of them; an unreachable control is the fastest way to make a model look wrong.
     deck = {
         "LC_Body_Core": (0.0, 0, 0.50, (0.62, 0.17, 0.11)),
         "LC_Body_Spine": (0.0, 0, 0.60, (0.72, 0.07, 0.04)),
@@ -153,24 +156,24 @@ def placement(entry: dict):
         "LC_Rear_Shell_R": (0.60, -1, 0.52, (0.32, 0.06, 0.13)),
         "LC_Armor_L": (0.18, 1, 0.42, (0.46, 0.03, 0.09)),
         "LC_Armor_R": (0.18, -1, 0.42, (0.46, 0.03, 0.09)),
-        "LC_Handlebar_L": (-0.68, 1, 0.66, (0.06, 0.09, 0.03)),
-        "LC_Handlebar_R": (-0.68, -1, 0.66, (0.06, 0.09, 0.03)),
-        "LC_Control_L": (-0.74, 1, 0.66, (0.05, 0.04, 0.03)),
-        "LC_Control_R": (-0.74, -1, 0.66, (0.05, 0.04, 0.03)),
-        "LC_ChestSupport": (-0.30, 0, 0.62, (0.22, 0.14, 0.03)),
-        "LC_ShinRest_L": (0.46, 1, 0.46, (0.20, 0.05, 0.06)),
-        "LC_ShinRest_R": (0.46, -1, 0.46, (0.20, 0.05, 0.06)),
-        "LC_FootRest_L": (0.66, 1, 0.40, (0.07, 0.05, 0.02)),
-        "LC_FootRest_R": (0.66, -1, 0.40, (0.07, 0.05, 0.02)),
+        "LC_Handlebar_L": (-0.72, 1, 0.70, (0.06, 0.09, 0.03)),
+        "LC_Handlebar_R": (-0.72, -1, 0.70, (0.06, 0.09, 0.03)),
+        "LC_Control_L": (-0.78, 1, 0.70, (0.05, 0.04, 0.03)),
+        "LC_Control_R": (-0.78, -1, 0.70, (0.05, 0.04, 0.03)),
+        "LC_ChestSupport": (-0.238, 0, 0.528, (0.22, 0.14, 0.03)),
+        "LC_ShinRest_L": (0.443, 1, 0.695, (0.20, 0.05, 0.06), 0.92),
+        "LC_ShinRest_R": (0.443, -1, 0.695, (0.20, 0.05, 0.06), 0.92),
+        "LC_FootRest_L": (0.620, 1, 0.280, (0.07, 0.05, 0.02), 0.92),
+        "LC_FootRest_R": (0.620, -1, 0.280, (0.07, 0.05, 0.02), 0.92),
         "LC_RiderMount": (0.05, 0, 0.58, (0.30, 0.11, 0.02)),
         "LC_CockpitDisplay": (-0.52, 0, 0.66, (0.09, 0.10, 0.01)),
-        "LC_Canopy_Center": (0.62, 0, 0.78, (0.26, 0.12, 0.04)),
-        "LC_Canopy_L": (0.62, 1, 0.70, (0.26, 0.04, 0.12)),
-        "LC_Canopy_R": (0.62, -1, 0.70, (0.26, 0.04, 0.12)),
-        "LC_BackSupport": (0.44, 0, 0.66, (0.14, 0.13, 0.03)),
-        "LC_DeployArm_L": (0.50, 1, 0.72, (0.18, 0.02, 0.02)),
-        "LC_DeployArm_R": (0.50, -1, 0.72, (0.18, 0.02, 0.02)),
-        "LC_CanopyEnergy": (0.62, 0, 0.82, (0.24, 0.10, 0.006)),
+        "LC_Canopy_Center": (0.62, 0, 0.856, (0.26, 0.12, 0.04)),
+        "LC_Canopy_L": (0.62, 1, 0.790, (0.26, 0.04, 0.12)),
+        "LC_Canopy_R": (0.62, -1, 0.790, (0.26, 0.04, 0.12)),
+        "LC_BackSupport": (0.44, 0, 0.72, (0.14, 0.13, 0.03)),
+        "LC_DeployArm_L": (0.50, 1, 0.80, (0.18, 0.02, 0.02)),
+        "LC_DeployArm_R": (0.50, -1, 0.80, (0.18, 0.02, 0.02)),
+        "LC_CanopyEnergy": (0.62, 0, 0.896, (0.24, 0.10, 0.006)),
         "LC_Emit_BodyPrimary": (0.0, 1, 0.55, (0.66, 0.004, 0.018)),
         "LC_Emit_BodySecondary": (0.0, 1, 0.38, (0.52, 0.004, 0.008)),
         "LC_Emit_FrontWheel": (-0.80, 1, 0.55, (0.16, 0.004, 0.02)),
@@ -190,8 +193,10 @@ def placement(entry: dict):
         "LC_Damage_ReactorCover": (0.30, 1, 0.40, (0.17, 0.012, 0.17)),
     }
     if n in deck:
-        x, yside, z, s = deck[n]
-        return ("cube", (x, yside * half_w * 0.86, z), (0, 0, 0), {"s": s})
+        entry = deck[n]
+        x, yside, z, sc = entry[:4]
+        yf = entry[4] if len(entry) > 4 else 0.86  # leg rests sit further outboard
+        return ("cube", (x, yside * half_w * yf, z), (0, 0, 0), {"s": sc})
     return None
 
 
