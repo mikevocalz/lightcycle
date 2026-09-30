@@ -48,88 +48,88 @@
     "MAT_LC_GRAPHITE": {
       "desc": "Satin black composite. The bike's dominant surface. Never pure black - real black composite sits near sRGB 0x121314, and crushing it to 0x000000 is what makes a model read as cheap plastic.",
       "baseColor": "#121314",
-      "metallic": 0.0,
+      "metallic": 0,
       "roughness": 0.44,
       "ior": 1.48,
-      "coat": 0.0,
-      "anisotropic": 0.0
+      "coat": 0,
+      "anisotropic": 0
     },
     "MAT_LC_BLACK_CLEARCOAT": {
       "desc": "Painted composite shell under automotive clear coat. Carries the sharp horizon reflections that sell panel curvature with the lights off.",
       "baseColor": "#0E0F11",
-      "metallic": 0.0,
+      "metallic": 0,
       "roughness": 0.34,
       "ior": 1.5,
-      "coat": 1.0,
+      "coat": 1,
       "coatRoughness": 0.055,
-      "anisotropic": 0.0
+      "anisotropic": 0
     },
     "MAT_LC_CARBON": {
       "desc": "Exposed twill carbon under clear coat. Structural panels only - armor, back support, load paths. Weave direction must follow the part.",
       "baseColor": "#17181B",
-      "metallic": 0.0,
+      "metallic": 0,
       "roughness": 0.26,
       "ior": 1.52,
-      "coat": 1.0,
+      "coat": 1,
       "coatRoughness": 0.09,
       "anisotropic": 0.3,
-      "anisotropicRotation": 0.0
+      "anisotropicRotation": 0
     },
     "MAT_LC_MILLED_METAL": {
       "desc": "CNC aluminum, bead-blasted then clear-anodized. Aluminum F0 measured (0.912,0.914,0.920). Bright, tight highlight, visible tool witness marks.",
       "baseColor": "#E9EAEC",
-      "metallic": 1.0,
+      "metallic": 1,
       "roughness": 0.24,
       "ior": 1.5,
-      "coat": 0.0,
-      "anisotropic": 0.0
+      "coat": 0,
+      "anisotropic": 0
     },
     "MAT_LC_BRUSHED_METAL": {
       "desc": "Dark anodized / blackened brushed steel. Covers the doc's anodized-aluminum and blackened-steel callouts in one slot. Anisotropy runs along the brush direction, so UVs must be oriented per part or the highlight smears.",
       "baseColor": "#4A4C50",
-      "metallic": 1.0,
+      "metallic": 1,
       "roughness": 0.46,
       "ior": 1.5,
-      "coat": 0.0,
+      "coat": 0,
       "anisotropic": 0.72,
-      "anisotropicRotation": 0.0
+      "anisotropicRotation": 0
     },
     "MAT_LC_RUBBER": {
       "desc": "High-performance synthetic contact surface. Roughness rises across the contact patch from thermal cycling; keep it off pure-smooth or the wheel reads as a neon disc.",
       "baseColor": "#0C0C0D",
-      "metallic": 0.0,
+      "metallic": 0,
       "roughness": 0.84,
       "ior": 1.45,
-      "coat": 0.0,
-      "anisotropic": 0.0
+      "coat": 0,
+      "anisotropic": 0
     },
     "MAT_LC_SMOKED_GLASS": {
       "desc": "Smoked technical lens. Real thickness so edges pick up refraction; emissive elements sit behind it, never on it.",
       "baseColor": "#1A1C1F",
-      "metallic": 0.0,
+      "metallic": 0,
       "roughness": 0.07,
       "transmission": 0.82,
       "ior": 1.52,
       "thickness": 0.006,
-      "coat": 0.0,
-      "anisotropic": 0.0
+      "coat": 0,
+      "anisotropic": 0
     },
     "MAT_LC_EMISSIVE_PRIMARY": {
       "desc": "Broad graphic luminous field - the 1982 DNA. Wheel rings and the body's main energy bus. NEUTRAL: emission is white, player hue is applied at runtime.",
       "emissive": true,
       "channel": "primary",
       "baseColor": "#050505",
-      "metallic": 0.0,
+      "metallic": 0,
       "roughness": 0.3,
       "emissionColor": "#FFFFFF",
-      "emissionStrength": 3.0
+      "emissionStrength": 3
     },
     "MAT_LC_EMISSIVE_SECONDARY": {
       "desc": "Precision technical strips and status detail. Dimmer than primary so the 70/30 field-to-detail balance holds.",
       "emissive": true,
       "channel": "secondary",
       "baseColor": "#050505",
-      "metallic": 0.0,
+      "metallic": 0,
       "roughness": 0.3,
       "emissionColor": "#FFFFFF",
       "emissionStrength": 1.6
@@ -139,17 +139,17 @@
       "emissive": true,
       "channel": "core",
       "baseColor": "#050505",
-      "metallic": 0.0,
+      "metallic": 0,
       "roughness": 0.25,
       "emissionColor": "#FFFFFF",
-      "emissionStrength": 9.0
+      "emissionStrength": 9
     },
     "MAT_LC_EMISSIVE_REACTOR": {
       "desc": "Reactor conduits and ring energy. Driven per state (idle/accel/boost/damage) by the runtime, so the authored strength is only the idle baseline.",
       "emissive": true,
       "channel": "reactor",
       "baseColor": "#050505",
-      "metallic": 0.0,
+      "metallic": 0,
       "roughness": 0.28,
       "emissionColor": "#FFFFFF",
       "emissionStrength": 4.5
@@ -254,5 +254,22 @@
     },
     "rule": "LOD0 is for web and cinematic capture only. No headset target ever loads it."
   },
-  "_axisNote": "Authored in Blender with length X, up Z, lateral Y; export_yup maps that to glTF up +Y, forward -X, lateral -Z. Wheels spin about Blender Y (glTF Z). Spinning them about X mounts the wheel sideways."
+  "_axisNote": "Authored in Blender with length X, up Z, lateral Y; export_yup maps that to glTF up +Y, forward -X, lateral -Z. Wheels spin about Blender Y (glTF Z). Spinning them about X mounts the wheel sideways.",
+  "viroCompositeClips": [
+    "LC_Viro_Idle",
+    "LC_Viro_Drive",
+    "LC_Viro_DriveSteerLeft",
+    "LC_Viro_DriveSteerRight",
+    "LC_Viro_Brake",
+    "LC_Viro_BoostEnter",
+    "LC_Viro_BoostLoop",
+    "LC_Viro_BoostExit",
+    "LC_Viro_HighSpeedEnter",
+    "LC_Viro_HighSpeedLoop",
+    "LC_Viro_HighSpeedExit",
+    "LC_Viro_Damage",
+    "LC_Viro_Crash",
+    "LC_Viro_Derez"
+  ],
+  "viroAnimationNote": "ViroReact 3.x supports named embedded GLB clips but only one active animation at a time (no layered/blended animations). These composite clips preserve wheel/reactor/state motion in the one canonical GLB without requiring multiple model copies."
 }
