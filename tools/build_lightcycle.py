@@ -295,6 +295,61 @@ def build():
     return made, tris
 
 
+AXIS = {"x": 0, "y": 1, "z": 2}
+
+
+def clip(obj, track: str, frames: int, turns: float, axis: str):
+    """Key one object into the NLA track named for a canonical clip.
+
+    The clip name lives on the TRACK, not the Action, because a clip like
+    LC_WheelSpin drives two wheels and Blender refuses two Actions the same name.
+    export_merge_animation='NLA_TRACK' then folds every track sharing a name into
+    one glTF animation, so the spec's clip list stays one entry per clip.
+
+    Verified on 5.2.1: export_animation_mode='ACTIONS' names animations verbatim;
+    ACTIVE_ACTIONS yields nothing once the active action is cleared, and SCENE
+    names them after objects instead.
+    """
+    obj.rotation_mode = "XYZ"
+    act = bpy.data.actions.new(f"{track}__{obj.name}")
+    obj.animation_data_create()
+    obj.animation_data.action = act
+    i = AXIS[axis]
+    for f, turn in ((1, 0.0), (frames, turns)):
+        obj.rotation_euler[i] = turn * 2 * math.pi
+        obj.keyframe_insert("rotation_euler", index=i, frame=f)
+    # Blender 5.x actions are slotted: fcurves live under layers -> strips ->
+    # channelbags, and Action.fcurves no longer exists. Linear, not the default
+    # bezier, or a looping spin eases in and out at every loop boundary.
+    for layer in act.layers:
+        for strip in layer.strips:
+            for cb in getattr(strip, "channelbags", []):
+                for fc in cb.fcurves:
+                    for kp in fc.keyframe_points:
+                        kp.interpolation = "LINEAR"
+    nla = obj.animation_data.nla_tracks.new()
+    nla.name = track
+    nla.strips.new(track, 1, act)
+    obj.animation_data.action = None
+
+
+def author_clips(made: dict):
+    """Only the clips the blockout can honestly carry. The rest need real geometry.
+
+    These double as a pivot check: a wheel keyed about the wrong origin swings
+    instead of spinning, which is obvious the moment you scrub it.
+    """
+    for side in ("Front", "Rear"):
+        clip(made[f"LC_Wheel_{side}"], "LC_WheelSpin", 48, 1.0, "x")
+    # Counter-rotation at unequal rates reads as a mechanism rather than a
+    # spinning disc, which is the whole point of the reactor being a hero system.
+    for node, turns in (("LC_Reactor_Ring_A", 0.5), ("LC_Reactor_Ring_B", -0.34),
+                        ("LC_Reactor_Ring_C", 0.22)):
+        clip(made[node], "LC_ReactorIdle", 96, turns, "x")
+    for node, ax in (("LC_Gyro_X", "x"), ("LC_Gyro_Y", "y"), ("LC_Gyro_Z", "z")):
+        clip(made[node], "LC_ReactorIdle", 96, 0.25, ax)
+
+
 def export(path: Path):
     path.parent.mkdir(parents=True, exist_ok=True)
     bpy.ops.export_scene.gltf(
@@ -303,6 +358,7 @@ def export(path: Path):
         export_extras=True,          # carries lc_* tags into node/material extras
         export_animations=True,
         export_animation_mode="ACTIONS",
+        export_merge_animation="NLA_TRACK",  # one glTF clip per track name, not per Action
         export_nla_strips=True,
         export_apply=False,
         export_yup=True,
@@ -317,6 +373,7 @@ def export(path: Path):
 
 if __name__ == "__main__":
     made, tris = build()
+    author_clips(made)
     blend = ROOT / "assets/source/lightcycle_blockout.blend"
     blend.parent.mkdir(parents=True, exist_ok=True)
     bpy.ops.wm.save_as_mainfile(filepath=str(blend))
