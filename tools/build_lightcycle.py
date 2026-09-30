@@ -24,6 +24,7 @@ ROOT = Path(__file__).resolve().parent.parent
 SPEC = json.loads((ROOT / "spec/lightcycle.spec.json").read_text())
 NODES = json.loads((ROOT / "spec/lightcycle.nodes.json").read_text())["nodes"]
 D = SPEC["dimensions_m"]
+TEX_ROOT = ROOT / "assets/textures/generated"
 
 
 def srgb_to_linear(hex_color: str) -> tuple:
@@ -38,6 +39,74 @@ def srgb_to_linear(hex_color: str) -> tuple:
 
 def reset_scene():
     bpy.ops.wm.read_factory_settings(use_empty=True)
+
+
+
+def attach_texture_maps(mat, name: str, bsdf):
+    """Attach deterministic neutral texture maps when the generated package exists.
+
+    Scalars remain a safe fallback when somebody invokes Blender directly instead
+    of npm run build:glb. Player hue is never sourced from these files.
+    """
+    nodes = mat.node_tree.nodes
+    links = mat.node_tree.links
+    stem = name.lower()
+
+    def tex(suffix: str, colorspace: str):
+        path = TEX_ROOT / f"{stem}_{suffix}.png"
+        if not path.exists():
+            return None
+        node = nodes.new("ShaderNodeTexImage")
+        node.name = f"LC_{suffix}"
+        node.label = suffix
+        node.image = bpy.data.images.load(str(path), check_existing=True)
+        node.image.colorspace_settings.name = colorspace
+        node.extension = "REPEAT"
+        return node
+
+    if SPEC["materials"][name].get("emissive"):
+        mask = tex("emissive_mask", "Non-Color")
+        if mask:
+            links.new(mask.outputs["Color"], bsdf.inputs["Emission Color"])
+        return
+
+    base = tex("basecolor", "sRGB")
+    rough = tex("roughness", "Non-Color")
+    metallic = tex("metallic", "Non-Color")
+    normal = tex("normal", "Non-Color")
+
+    if base:
+        links.new(base.outputs["Color"], bsdf.inputs["Base Color"])
+    if rough:
+        links.new(rough.outputs["Color"], bsdf.inputs["Roughness"])
+    if metallic:
+        links.new(metallic.outputs["Color"], bsdf.inputs["Metallic"])
+    if normal:
+        nm = nodes.new("ShaderNodeNormalMap")
+        nm.name = "LC_NormalMap"
+        nm.inputs["Strength"].default_value = 0.42
+        links.new(normal.outputs["Color"], nm.inputs["Color"])
+        links.new(nm.outputs["Normal"], bsdf.inputs["Normal"])
+
+
+def unwrap_production(objects):
+    """Create stable UVs after the final production topology exists."""
+    count = 0
+    for o in objects.values():
+        if o.type != "MESH" or o.get("lc_geometry") != "production":
+            continue
+        if not o.data.polygons:
+            continue
+        bpy.ops.object.select_all(action="DESELECT")
+        o.select_set(True)
+        bpy.context.view_layer.objects.active = o
+        bpy.ops.object.mode_set(mode="EDIT")
+        bpy.ops.mesh.select_all(action="SELECT")
+        bpy.ops.uv.smart_project(angle_limit=math.radians(66.0), island_margin=0.018)
+        bpy.ops.object.mode_set(mode="OBJECT")
+        o.select_set(False)
+        count += 1
+    print(f"UV unwrap: {count} production mesh nodes")
 
 
 def build_materials() -> dict:
@@ -353,6 +422,8 @@ def build():
             made[entry["name"]].parent = made[entry["parent"]]
             made[entry["name"]].matrix_parent_inverse = made[entry["parent"]].matrix_world.inverted()
 
+    bpy.context.view_layer.update()
+    unwrap_production(made)
     bpy.context.view_layer.update()
     prod = sum(1 for o in made.values() if o.get("lc_geometry") == "production")
     tris = sum(len(o.data.loop_triangles) for o in made.values()
