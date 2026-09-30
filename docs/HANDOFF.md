@@ -1,6 +1,7 @@
 # Light Cycle — resumable reference-body redesign
 
 Updated 2026-09-30. Branch: `art/reference-body-redesign`.
+Draft PR: https://github.com/mikevocalz/lightcycle/pull/2 (unmerged; visual approval pending).
 Production base: `c5d0039fcbaafa0d77f37c97525ca0f8be079f13`.
 
 ## Start here on every resume
@@ -74,8 +75,8 @@ shading-review items; do not claim byte-identical shading.
 2. A concrete comparison was sent to the user for approval or revision. If they
    request changes, refine those primary shapes, rebuild and regenerate affected
    evidence. Do not add decorative detail to hide a wrong silhouette.
-3. Commit/push/open PR is authorized. Keep it draft/unmerged while visual review
-   or remote CI is pending. Record the PR URL in STATUS when available. Merge
+3. Draft PR #2 is committed, pushed and open. Keep it draft/unmerged while visual
+   review or remote CI is pending. Inspect current PR check state on resume. Merge
    only after both technical checks and explicit human visual confirmation.
 4. Native Viro/Quest/PICO host/device behavior and FPS remain unverified because
    no native host or headset is present. Rive is a binding interface, not .riv art.

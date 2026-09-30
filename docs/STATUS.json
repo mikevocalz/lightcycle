@@ -9,8 +9,8 @@
   "userDecision": "Match visible reference shape; preserve current wheels",
   "visualAcceptance": "pending; no human approval; blocking final completion/merge",
   "localTechnical": "pass",
-  "remoteCI": "pending PR",
-  "pullRequest": null,
+  "remoteCI": "in progress; inspect PR checks for current commit",
+  "pullRequest": "https://github.com/mikevocalz/lightcycle/pull/2",
   "handoff": "docs/HANDOFF.md",
   "taskLedger": "docs/handoff/TASKS.json",
   "evidence": "docs/review/verification.json",
@@ -26,13 +26,14 @@
     "Body modeling pass8, neutral energy and reactor aperture",
     "Rest-pose, steering-pivot, texture wiring, KTX2 preview and collision-visibility fixes",
     "Required local technical pipeline and final renders",
-    "Actual browser six colors/lights-off/one-GLB check"
+    "Actual browser six colors/lights-off/one-GLB check",
+    "Committed, pushed and opened draft PR #2"
   ],
   "remaining": [
     "Human reference-fidelity review and any requested primary-body revisions",
     "Wheel UV/normal shading review",
-    "Commit/push/PR and remote CI",
-    "Conditional merge only with human visual approval and green technical checks"
+    "Conditional merge only with human visual approval and green technical checks",
+    "Remote CI must pass before merge"
   ],
   "limitations": [
     "No hardware FPS/native Viro host verification",

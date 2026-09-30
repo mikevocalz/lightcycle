@@ -177,15 +177,16 @@
     },
     {
       "id": "publish_pr",
-      "status": "pending",
+      "status": "complete",
       "owner": "parent",
       "files": [],
       "dependsOn": [
         "runtime_regression",
         "final_matrix"
       ],
-      "next": "Commit/push/open draft PR with retained evidence; remote CI and human visual gate required before merge."
+      "next": "Draft PR #2 is open and pushed. Inspect remote CI and wait for explicit visual approval; do not merge automatically."
     }
   ],
-  "activeProcesses": []
+  "activeProcesses": [],
+  "pullRequest": "https://github.com/mikevocalz/lightcycle/pull/2"
 }
