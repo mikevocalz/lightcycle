@@ -64,14 +64,14 @@ export class ThreeLightRibbon {
         const base = wallPositions.length / 3
         wallPositions.push(
           a.x, a.y, a.z,
-          a.x, a.y, a.z + this.height,
+          a.x, a.y + this.height, a.z,
           b.x, b.y, b.z,
-          b.x, b.y, b.z + this.height,
+          b.x, b.y + this.height, b.z,
         )
         wallIndices.push(base, base + 2, base + 1, base + 1, base + 2, base + 3)
         corePositions.push(
-          a.x, a.y, a.z + this.height,
-          b.x, b.y, b.z + this.height,
+          a.x, a.y + this.height, a.z,
+          b.x, b.y + this.height, b.z,
         )
       }
     }
