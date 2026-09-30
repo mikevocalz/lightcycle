@@ -3,6 +3,7 @@ import { LightRibbonPath } from './trail.ts'
 import { damageRuntime } from './damage.ts'
 import { bindLightCycleHud, lightCycleHudModel, type RiveViewModelWriter } from '../hud/riveBinding.ts'
 import type { Player } from '../state/cycleStore.ts'
+import { toViroLightRibbon, viroLightRibbonMaterials } from '../viro/ViroLightRibbon.ts'
 
 const trail = new LightRibbonPath({ minDistance: 0.1, teleportDistance: 2 })
 assert.equal(trail.append({ x: 0, y: 0, z: 0 }, 0), true)
@@ -12,6 +13,10 @@ assert.equal(trail.segments().length, 1)
 trail.append({ x: 4, y: 0, z: 0 }, 48)
 trail.append({ x: 4.2, y: 0, z: 0 }, 64)
 assert.equal(trail.segments().length, 2, 'teleport failed to split the wall')
+const viroSegments = toViroLightRibbon(trail, 'p1', 1.05)
+assert.equal(viroSegments.length, 2)
+assert.equal(viroSegments[0]!.walls.length > 0, true)
+assert.equal(viroSegments[0]!.corePoints.every((p) => p[1] >= 1.05), true, 'Viro trail is not Y-up')
 
 const player: Player = {
   playerId: 'p1',
@@ -41,10 +46,16 @@ const writer: RiveViewModelWriter = {
   setBoolean: (k, v) => { writes[k] = v },
   setColor: (k, v) => { writes[k] = v },
 }
+const viroMats = viroLightRibbonMaterials({
+  energyColor: '#00C8FF', coreColor: '#E7FCFF', haloColor: '#008CFF',
+  energyIntensity: 1, coreIntensity: 1, bloomStrength: 1,
+}, 'p1')
+assert.equal(Object.keys(viroMats).length, 2)
+
 bindLightCycleHud(writer, lightCycleHudModel(player, 12))
 assert.equal(writes.playerName, 'MCP')
 assert.equal(writes.score, 12)
 assert.equal(writes.damaged, true)
 assert.match(String(writes.playerColor), /^#[0-9A-F]{6}$/)
 
-console.log('runtime: 12/12 ok')
+console.log('runtime: trail + damage + Rive + Viro ribbon ok')
