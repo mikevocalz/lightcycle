@@ -332,12 +332,18 @@ def nose_shell(dims,side):
     def front_cowl(u,v):
         z=.735+.245*u
         width=.350-.065*u
-        # Leave the solved head/rider channel open; the reference cowl is a pair of
-        # outboard faceted shoulders, not a plate through the rider's helmet volume.
-        inner_y=.120
-        y=side*(inner_y+(width-inner_y)*v)
         offset=_interp([(0,.415),(.52,.315),(1,.120)],u)
         x=-dims['wheelbase']/2+offset+.012*(1-v)
+        # Leave the solved rider channel open. At the lower cowl edge the
+        # forearms sit farther outboard than the old fixed 120 mm opening, so
+        # derive the inner edge from the same rounded-capsule envelope used by
+        # the acceptance check.
+        inner_y=.120
+        for capsule in rider_capsules():
+            interval=capsule_axis_interval(capsule,1,(x,0,z),margin=.018)
+            if interval:
+                inner_y=max(inner_y,max(abs(q) for q in interval))
+        y=side*(inner_y+(width-inner_y)*v)
         return x,y,z
     skin(bm,front_cowl,30,18,.009,(1,0,0))
     return bm
