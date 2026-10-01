@@ -1,0 +1,121 @@
+{
+  "inspected_at": "2026-09-30",
+  "workspace_path": "/Users/mikevocalz/lightcycle",
+  "source_commit": "c5d0039fcbaafa0d77f37c97525ca0f8be079f13",
+  "branch_last_observed": "art/reference-body-redesign",
+  "environment_source": "Argent gather-workspace-data plus read-only local file and executable inspection",
+  "project_type": "Standalone TypeScript/Three.js asset pipeline with Blender generation and Viro adapter modules",
+  "is_react_native": false,
+  "is_expo": false,
+  "is_native_ios": false,
+  "is_native_android": false,
+  "package_manager": "npm",
+  "lockfile": "package-lock.json",
+  "node_modules_present": true,
+  "platform_support": {
+    "web": "Three.js preview at http://localhost:4173/preview/",
+    "viro_xr": "Adapter modules and renderer-independent runtime logic; no launchable ViroReact application",
+    "ios_directory": false,
+    "android_directory": false,
+    "app_json": null,
+    "metro_config": null,
+    "metro_port": null,
+    "eas_json": null,
+    "expo_horizon_core_configuration": "No Expo application or existing headset window contract found in this repository",
+    "hardware_qualification": "Requires a host application and target hardware; not performed by this inspection"
+  },
+  "dependencies": {
+    "three": "^0.186.1",
+    "zustand": "^5.0.15",
+    "typescript": "^5.9.0",
+    "@types/node": "^26.6.3",
+    "@types/three": "^0.186.0"
+  },
+  "tools": {
+    "node": {"path": "/opt/homebrew/bin/node", "version": "26.8.2"},
+    "npm": {"path": "/opt/homebrew/bin/npm", "version": "11.19.1"},
+    "python3": {"path": "/usr/local/bin/python3", "version": "3.13.3"},
+    "blender": {"path": "/opt/homebrew/bin/blender", "version": "5.2.1 LTS"},
+    "gltfpack": {"path": "/opt/homebrew/bin/gltfpack", "version": "1.3", "native_binary": true},
+    "ffmpeg": {"path": "/opt/homebrew/bin/ffmpeg", "version": "9.0.2"},
+    "game-dev": {"available_on_path": false},
+    "argent_mcp": {"available": true, "devices_used": []}
+  },
+  "python_modules": {
+    "PIL": true,
+    "numpy": true,
+    "trimesh": false,
+    "bpy_in_system_python": false,
+    "note": "Texture generator is dependency-free. Blender scripts execute with Blender's Python, so absence of system bpy is expected."
+  },
+  "commands": {
+    "install": "npm ci",
+    "typecheck": "npm run typecheck",
+    "tests": "npm test",
+    "python_syntax": "python3 -m compileall -q tools",
+    "canonical_build": "npm run build:glb",
+    "canonical_validate": "npm run validate",
+    "runtime_pack": "npm run pack",
+    "rider_ergonomics": "npm run rider",
+    "lod_chain": "npm run lods",
+    "static_asset_profile": "npm run profile",
+    "lights_off_render": "npm run render:lightsoff",
+    "qa_smoke_matrix": "npm run qa:ci",
+    "qa_full_matrix": "npm run qa:matrix",
+    "preview": "npm run preview",
+    "preview_url": "http://localhost:4173/preview/",
+    "basic_check": "npm run check",
+    "ci_check_script": "npm run check:ci"
+  },
+  "command_caveats": [
+    "npm run check covers build, validation, pack, typecheck and tests, but not rider, LODs, static profile or render matrix.",
+    "npm run check:ci covers build, validation, typecheck, tests, rider, LODs and static profile, but does not directly include canonical runtime packing or render QA.",
+    "The actual GitHub Actions workflow separately runs canonical pack and the QA smoke matrix.",
+    "npm run build:glb first generates textures, then runs tools/build_lightcycle.py in background Blender.",
+    "Runtime packing must retain gltfpack -kn -tc. The npm/WASM gltfpack package cannot replace the native binary because it lacks BasisU support.",
+    "Build, LOD, render and rider commands mutate generated files and are not read-only checks."
+  ],
+  "ci": {
+    "provider": "GitHub Actions",
+    "workflow": ".github/workflows/production-asset-verify.yml",
+    "runner": "ubuntu-24.04",
+    "timeout_minutes": 45,
+    "node_version": "26",
+    "blender_version": "5.2.1",
+    "gltfpack_version": "1.3",
+    "pipeline": [
+      "npm ci",
+      "python3 -m compileall -q tools",
+      "npm run typecheck",
+      "npm test",
+      "npm run build:glb",
+      "npm run validate",
+      "npm run rider",
+      "npm run pack",
+      "npm run lods",
+      "npm run profile",
+      "npm run qa:ci"
+    ]
+  },
+  "authoritative_files": [
+    "spec/lightcycle.spec.json",
+    "spec/lightcycle.nodes.json",
+    "docs/LIGHTCYCLE_MASTER_REFERENCE_AND_BUILD_PROMPT.md",
+    "docs/STATUS.json",
+    "docs/HANDOFF.md"
+  ],
+  "game_development_studio": {
+    "status": "CLI workflow unavailable",
+    "reason": "game-dev executable not found on PATH",
+    "skill_constraint": "Report missing CLI; do not install software, change credentials or substitute an unrequested remote service.",
+    "impact": "Game Development Studio provider operations and CLI receipts remain unavailable; existing Blender and TypeScript repository workflows are available."
+  },
+  "inspection_scope": {
+    "files_changed": false,
+    "devices_booted_or_used": false,
+    "applications_launched": false,
+    "tests_run": false,
+    "asset_builds_run": false,
+    "note": "Other agents synchronized the repository and created the current branch during inspection. The final snapshot and workflow findings apply to c5d0039."
+  }
+}

@@ -1,0 +1,25 @@
+
+> lightcycle@0.1.0 rider
+> blender --factory-startup -b assets/source/lightcycle_blockout.blend --python-exit-code 1 -P tools/rider_proxy.py
+
+00:00.501  blend            | Read blend: "/Users/mikevocalz/lightcycle/assets/source/lightcycle_blockout.blend"
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+--- ERGONOMICS (doc section 15) ---
+arm reach to grips : ok
+leg reach to pegs  : ok
+
+contact                      rider lands at       bike part at      dx      dz  verdict
+hands -> handlebars      (-0.720, 0.700) (-0.720, 0.699)  -0.000   0.001  ok
+chest -> chest support   (-0.238, 0.528) (-0.251, 0.477)   0.012   0.050  ok
+knee -> shin rest        ( 0.443, 0.695) ( 0.443, 0.659)   0.000   0.036  ok
+feet -> foot rest        ( 0.620, 0.280) ( 0.590, 0.298)   0.030  -0.018  ok
+
+foot vs rear wheel                     intersects in side view  ok (passes outboard)
+ankle vs rear wheel                                      clear  ok
+
+rider occupies x [-0.879 .. 0.670] = 1.549 m, tops out at z 0.796 m
+canopy centre z 0.916 vs rider top 0.796 -> CLEARS
+height: rider needs 0.856 m, spec says 0.980 m -> ok
+
+ALL ERGONOMICS CHECKS PASS

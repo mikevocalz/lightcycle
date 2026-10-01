@@ -1,0 +1,7 @@
+
+> lightcycle@0.1.0 pack
+> python3 tools/pack_runtime.py
+
+23,950,296 -> 7,550,672 bytes  (68% smaller)
+180 nodes, 11 materials, 33 clips, 0 errors, 0 warnings
+packed -> /Users/mikevocalz/lightcycle/assets/export/lightcycle.runtime.glb

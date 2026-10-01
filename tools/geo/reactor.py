@@ -77,26 +77,34 @@ def gyro(axis):
 
 
 def housing():
-    """Containment: two finned side plates on radial struts, an outer shroud, and
-    an aperture of overlapping blades."""
+    """Open containment cheeks expose the nested rings through annular windows.
+
+    Inner bearing lips connect to the outer shroud through six narrow webs.
+    Cooling and parked aperture blades occupy the perimeter, leaving the moving
+    precision rings visible from either side of the complete assembly.
+    """
     bm = L.new_bm()
     L.revolve(bm, _ring(0.178, 0.200, 0.058), segments=72, axis="y")       # shroud
     for lat in (0.052, -0.052):
-        L.revolve(bm, [(lat - 0.007, 0.062), (lat + 0.007, 0.062),
-                       (lat + 0.007, 0.182), (lat - 0.007, 0.182)],
-                  segments=72, axis="y")                                    # side plates
-    # Cooling fins on both outer faces.
+        for inner, outer in ((0.062, 0.073), (0.164, 0.182)):
+            L.revolve(bm, [(lat - 0.006, inner), (lat + 0.006, inner),
+                           (lat + 0.006, outer), (lat - 0.006, outer)],
+                      segments=72, axis="y")
+        # Actual open windows between structural webs, not dark painted slots.
+        L.radial(bm, lambda b, m: L.box(b, m, (0.009, 0.012, 0.093)),
+                 6, 0.1185, axis="y", along=lat, phase=math.pi / 6)
+    # Compact cooling fins remain on the outer lips rather than covering rings.
     for lat in (0.070, -0.070):
-        L.radial(bm, lambda b, m: L.box(b, m, (0.090, 0.008, 0.016)),
-                 24, 0.125, axis="y", along=lat)
+        L.radial(bm, lambda b, m: L.box(b, m, (0.025, 0.008, 0.016)),
+                 24, 0.175, axis="y", along=lat)
     # Radial struts tying shroud to plates.
     L.radial(bm, lambda b, m: L.box(b, m, (0.026, 0.104, 0.020)), 8, 0.190, axis="y")
-    # Aperture blades: overlapping, each rotated off-radial so they read as a
-    # mechanism that could actually close.
+    # Overlapping shield blades are parked outside the outer moving ring in
+    # the authored rest pose, retaining their closing-mechanism construction.
     def blade(b, m):
-        L.box(b, m @ Matrix.Rotation(math.radians(24), 4, "Y"), (0.062, 0.005, 0.030))
+        L.box(b, m @ Matrix.Rotation(math.radians(24), 4, "Y"), (0.050, 0.005, 0.026))
 
-    L.radial(bm, blade, 14, 0.150, axis="y", along=0.040)
+    L.radial(bm, blade, 14, 0.174, axis="y", along=0.040)
     # Fastener circle on the shroud.
     L.radial(bm, lambda b, m: L.cylinder(b, m @ _Y, 0.0075, 0.124, segments=10),
              16, 0.192, axis="y")

@@ -1,240 +1,50 @@
 {
   "specVersion": "1.0.0",
   "date": "2026-09-30",
-  "audit": {
-    "existingImplementation": "production",
-    "detail": "Production asset and runtime pipeline are complete in PR #1. Latest full GitHub Actions production-asset-verify run passed on commit 12b231ff."
+  "phase": "body-pass9 exact-three-view corrective pass",
+  "overall": "revision_in_progress",
+  "branch": "art/reference-body-redesign",
+  "productionBase": "c5d0039fcbaafa0d77f37c97525ca0f8be079f13",
+  "primaryReference": "2026-09-30 exact uploaded side + handlebar/front + tail/rear images",
+  "userDecision": "Pass8 rejected: it does not resemble the exact references closely enough. Match the three uploaded views; visual fidelity overrides the old pass8 proportions while runtime architecture stays intact.",
+  "visualAcceptance": "rejected for pass8; pass9 awaiting fresh CI renders and human review; merge blocked",
+  "localTechnical": "not run in this chat environment (Blender/game-dev unavailable); CI required",
+  "remoteCI": {
+    "status": "pending",
+    "testedCommit": null,
+    "run": null,
+    "scope": "Pass9 changes wheel proportions and major shell forms; previous pass8 CI is no longer sufficient."
   },
-  "toolchain": {
-    "blender": "5.2.1 LTS (headless; the Blender MCP is not connected because Blender is not running)",
-    "three": "0.186.1",
-    "zustand": "5.0.15",
-    "node": "26.8.2",
-    "gltfpack": "1.3 native arm64 (the npm build is Node/WASM and cannot do BasisU at all)"
-  },
+  "pullRequest": "https://github.com/mikevocalz/lightcycle/pull/2",
+  "handoff": "docs/HANDOFF.md",
+  "taskLedger": "docs/handoff/TASKS.json",
+  "evidence": "docs/review/verification.json",
+  "comparison": "docs/review/reference-comparison.png",
+  "lodTriangles": [
+    298668,
+    143658,
+    68460,
+    29436
+  ],
   "complete": [
-    {
-      "item": "single source of truth",
-      "where": "spec/lightcycle.spec.json + spec/lightcycle.nodes.json",
-      "detail": "102 nodes, 11 materials, 18 clips, 6 colors, canonical dimensions. Every other artifact derives from these two files."
-    },
-    {
-      "item": "material library at real PBR values",
-      "where": "spec + tools/build_lightcycle.py",
-      "detail": "The doc's 11 material names exactly, no inventions. Graphite, clearcoat composite, carbon, milled and brushed metal, rubber, smoked glass, and four neutral emissive channels."
-    },
-    {
-      "item": "modular hierarchy with correct pivots",
-      "where": "assets/source/lightcycle_blockout.blend",
-      "detail": "All 24 HANDOFF-contractual nodes present, correct parents, wheel pivots on the axle, reactor pivot on the core."
-    },
-    {
-      "item": "node/material/animation manifest",
-      "where": "tools/validate_glb.py --manifest",
-      "detail": "Deliverable 6."
-    },
-    {
-      "item": "LightCycleEnergyConfig",
-      "where": "src/energy/config.ts",
-      "detail": "Deliverable 7 prerequisite. Renderer-independent; no three.js or Viro types leak into it."
-    },
-    {
-      "item": "ThreeLightCycleMaterialAdapter",
-      "where": "src/three/ThreeLightCycleMaterialAdapter.ts",
-      "detail": "Deliverable 7. Clones only the 4 emissive materials per player; body materials stay shared by reference."
-    },
-    {
-      "item": "Zustand state integration",
-      "where": "src/state/cycleStore.ts",
-      "detail": "Deliverable 9. Players keyed by id so two colors coexist. No useState anywhere."
-    },
-    {
-      "item": "lights-off render path",
-      "where": "tools/render_matrix.py --lights-off",
-      "detail": "Doc 18's gate made runnable in Blender, and again at runtime via adapter.lightsOff()."
-    },
-    {
-      "item": "rider proxy + ergonomics check",
-      "where": "tools/rider_proxy.py",
-      "detail": "Two-link IK against a 50th-percentile prone rider. Asks whether the rider can REACH each control rather than picking joint angles. Found and fixed: handlebars unreachable, chest support 0.11 m out, shin and foot rests 0.2-0.44 m out, canopy intersecting the rider's back, and shins passing through the rear wheel. All four contact checks now pass and the canopy clears."
-    },
-    {
-      "item": "dimensions_m locked",
-      "where": "spec/lightcycle.spec.json",
-      "detail": "No longer eyeballed. Carries the measured rider envelope (1.549 m long, tops at z 0.796, canopy must sit at 0.856) and the legOutboardY=0.21 constraint that keeps shins clear of the 0.30 m wheel section."
-    },
-    {
-      "item": "XR LOD budget",
-      "where": "spec.xrBudget",
-      "detail": "Quest 2: 350-500k scene / 150k hero, local LOD1 + remote LOD3. Quest 3: 750k-1M / 300k hero, local LOD1 + remote LOD2. Rule: no headset target ever loads LOD0."
-    },
-    {
-      "item": "ViroLightCycleMaterialAdapter",
-      "where": "src/viro/ViroLightCycleMaterialAdapter.ts",
-      "detail": "Deliverable 8. Translates the config into Constant + Add materials with per-player namespaced names, since ViroMaterial has no emissive field and the registry is global."
-    },
-    {
-      "item": "KTX2/Basis unblocked + runtime packing",
-      "where": "tools/pack_runtime.py, npm run pack",
-      "detail": "Native gltfpack 1.3 installed at /opt/homebrew/bin/gltfpack. Canonical GLB 581,904 -> 233,528 bytes (60%) with the node contract intact."
-    },
-    {
-      "item": "reference pack path fixed",
-      "where": "docs/references/",
-      "detail": "The master doc pointed at references/07_generated_hybrid_concept.png, a file and directory that never existed in the handoff. The three generated concepts are now committed under docs/references/ and the doc points at them."
-    },
-    {
-      "item": "production geometry pipeline + both wheel assemblies",
-      "where": "tools/geo/",
-      "detail": "Per-node-name dispatch so production geometry replaces proxies incrementally. Hubless wheels: revolved tyre section, stator with radial webs, roller bearings, ventilated brake disc, caliper, suspension, rear drive, steering yoke. 18 nodes, 25,688 -> 47,288 tris."
-    },
-    {
-      "item": "central reactor geometry",
-      "where": "tools/geo/reactor.py",
-      "detail": "Nested I-section rings on bearing lands, three orthogonal gimbals with pivot bosses, containment shroud with fastener circle, finned side plates, 14 overlapping aperture blades, faceted core with retaining claws. Reads as hardware with emissions off."
-    },
-    {
-      "item": "all 18 animation clips",
-      "where": "tools/build_lightcycle.py:author_clips()",
-      "detail": "Exact spec match, 83 channels, 0 validator warnings on canonical and packed. Real pivots only - no global scale, no morph fakery."
-    },
-    {
-      "item": "production render geometry",
-      "where": "tools/geo/{wheels,reactor,chassis,cockpit,damage,emission}.py",
-      "detail": "All 74 render mesh nodes use production geometry. The remaining 4 mesh-kind nodes are intentional invisible collision proxies, not blockout render meshes."
-    },
-    {
-      "item": "canonical GLB + animation contract",
-      "where": "tools/build_lightcycle.py + tools/validate_glb.py",
-      "detail": "CI builds 102 contractual nodes, 11 materials, 18 portable clips plus 15 Viro composite compatibility clips (33 total), with 0 validator errors and 0 warnings."
-    },
-    {
-      "item": "UV + neutral PBR/emissive texture package",
-      "where": "tools/generate_textures.py + tools/build_lightcycle.py",
-      "detail": "CI generates neutral maps for all 11 materials, UV unwraps all 74 production render meshes, and keeps player hue out of authored textures."
-    },
-    {
-      "item": "runtime pack",
-      "where": "tools/pack_runtime.py",
-      "detail": "CI packs the canonical asset with native gltfpack 1.3 and KTX2/BasisU. Latest verified run: 12,543,484 -> 4,572,460 bytes (64% smaller), contract still clean."
-    },
-    {
-      "item": "LOD0-LOD3",
-      "where": "tools/lod_export.py + tools/build_lods.py",
-      "detail": "Validated LOD chain. Latest static budgets: LOD0 283,826 tris; LOD1 142,878; LOD2 67,678; LOD3 28,294."
-    },
-    {
-      "item": "six-color runtime preview",
-      "where": "preview/",
-      "detail": "One GLB switches blue/red/gold/purple/green/white at runtime and includes a lights-off material-validation mode."
-    },
-    {
-      "item": "Light Ribbon runtime",
-      "where": "src/runtime/trail.ts + src/three/ThreeLightRibbon.ts + src/viro/ViroLightRibbon.ts",
-      "detail": "Renderer-independent trail history with Three.js wall renderer and Viro polygon/polyline descriptors, using shared Y-up runtime coordinates."
-    },
-    {
-      "item": "damage + derezz runtime",
-      "where": "src/runtime/damage.ts + src/three/ThreeDamageAdapter.ts",
-      "detail": "Detachable damage nodes, damage/derez state mapping, spark origins and energy degradation are wired to the named GLB contract."
-    },
-    {
-      "item": "Rive HUD/leaderboard binding",
-      "where": "src/hud/riveBinding.ts",
-      "detail": "Stable player name/color/core/halo/speed/boost/health/score/damaged/destroyed ViewModel contract."
-    },
-    {
-      "item": "Viro animation compatibility",
-      "where": "src/viro/ViroAnimationAdapter.ts",
-      "detail": "Viro's one-active-embedded-animation limitation is handled by 15 composite compatibility clips while Three.js retains independent clip playback."
-    },
-    {
-      "item": "automated production verification",
-      "where": ".github/workflows/production-asset-verify.yml",
-      "detail": "Blender 5.2.1, Python syntax, TypeScript, runtime tests, GLB build/validation, ergonomics, KTX2 pack, LODs, static budgets and QA smoke renders all pass in GitHub Actions."
-    }
+    "Durable handoffs for all assemblies/runtime/verification",
+    "Body modeling pass8, neutral energy and reactor aperture",
+    "Rest-pose, steering-pivot, texture wiring, KTX2 preview and collision-visibility fixes",
+    "Required local technical pipeline and final renders",
+    "Actual browser six colors/lights-off/one-GLB check",
+    "Committed, pushed and opened draft PR #2",
+    "Full remote production CI passed, including 20 renders and artifact upload"
   ],
-  "partial": [
-    {
-      "item": "full visual QA matrix",
-      "state": "automation complete; CI smoke verified",
-      "detail": "The full 6-color × 8-view command is implemented as npm run qa:matrix. CI verifies a 20-render subset (blue/gold/white across side/front34/rear/reactor/wheel plus lights-off views). Human art-direction approval of all full-matrix renders remains a review step, not a code blocker."
-    }
+  "remaining": [
+    "Run pass9 production CI and inspect fresh side/front/rear/clay/lights-off evidence",
+    "Human reference-fidelity review against the three exact 2026-09-30 uploads",
+    "Conditional merge only after fresh green technical checks and explicit visual approval"
   ],
-  "blocked": [
-    {
-      "item": "on-device XR validation",
-      "why": "Requires actual Quest/PICO hardware and the host app/runtime.",
-      "unblock": "Profile LOD selection, passthrough/MR appearance, multiplayer shader isolation and composite animation playback on target hardware."
-    }
+  "limitations": [
+    "Current chat runtime has no Blender/game-dev CLI; pass9 visual/technical verification must come from GitHub Actions artifacts",
+    "Pass8 was explicitly rejected by the user and must not be cited as visual evidence for pass9",
+    "Wheel coordinates intentionally changed to match exact references; old vertex-preservation baseline is diagnostic only during this reference revision",
+    "No hardware FPS/native Viro host verification"
   ],
-  "notStarted": [],
-  "verified": [
-    "GitHub Actions production-asset-verify: SUCCESS on commit 12b231ff99ce7ab93160334ba549cbd24a46ad7a",
-    "TypeScript: tsc --noEmit clean",
-    "Three adapter: 6/6 tests pass",
-    "Viro adapter: material isolation 5/5 + composite animation mapping pass",
-    "Runtime tests: trail + damage + Rive + Viro ribbon pass",
-    "Texture generation: 11 materials, neutral runtime color",
-    "UV unwrap: 74 production render mesh nodes",
-    "Geometry accounting: 74 production render meshes + 4 intentional collision proxies",
-    "Canonical GLB: 102 nodes, 11 materials, 33 clips, 0 errors, 0 warnings",
-    "Rider ergonomics: ALL CHECKS PASS",
-    "Runtime pack: 12,543,484 -> 4,572,460 bytes (64% smaller), 0 errors, 0 warnings",
-    "LOD1: 142,878 tris <= 150,000",
-    "LOD2: 67,678 tris <= 70,000",
-    "LOD3: 28,294 tris <= 30,000",
-    "QA smoke matrix: 20 dark-context renders complete, including lights-off shots"
-  ],
-  "decisionsMade": [
-    {
-      "decision": "NeutralToneMapping in three.js, AgX in Blender",
-      "why": "ACESFilmic desaturates hot saturated values toward white. Doc 17 explicitly screens for gold flattening to yellow and red drifting orange, which is that exact artifact."
-    },
-    {
-      "decision": "clone + selective material.clone() for multiplayer, not onBeforeCompile or InstancedMesh",
-      "why": "Verified against three 0.186.1 source: Material.clone() copies scalars and colors but keeps texture pointers, so no map is re-uploaded, and MeshStandardMaterial is a fixed uber-shader so no recompile. InstancedMesh would cost per-bike frustum culling for a draw-call win that is irrelevant at 2-6 bikes."
-    },
-    {
-      "decision": "one shared UnrealBloomPass with threshold above the body materials' peak",
-      "why": "Bloom is applied post-color, so each player's hue survives a single pass. Per-player passes are only needed if art direction wants different bloom radii, not different hues."
-    },
-    {
-      "decision": "11 materials exactly as the doc names them",
-      "why": "The doc also calls for dark anodized aluminum and blackened steel as distinct looks but names only two metal slots. Rather than invent a 12th material, MAT_LC_BRUSHED_METAL carries both at a dark base color. Flagged rather than silently resolved."
-    },
-    {
-      "decision": "export_animation_mode='ACTIONS'",
-      "why": "Verified empirically: ACTIONS yields glTF animations named verbatim after the Blender Actions. ACTIVE_ACTIONS yields zero once the active action is cleared, and SCENE names them after objects."
-    },
-    {
-      "decision": "Viro energy is Constant + Add diffuse, not emission",
-      "why": "ViroMaterial has no emissiveColor, emissiveIntensity or emissiveTexture. The native engine has the pipeline but only the glTF importer populates it, and a surface shader modifier cannot reach it. Unlit additive is the documented Viro substitute."
-    },
-    {
-      "decision": "every Viro player mints uniquely-suffixed material names",
-      "why": "ViroMaterials is one global name-keyed registry. Two players sharing MAT_LC_EMISSIVE_PRIMARY would mutate the same native material and share a colour."
-    },
-    {
-      "decision": "material name is the only runtime handle on Viro",
-      "why": "Viro3DObject exposes no node lookup, and materials/shaderOverrides are whole-model. LC_Reactor_Ring_A cannot be targeted at runtime. The spec already gives every independently-controlled region its own material slot, so the architecture survives unchanged."
-    },
-    {
-      "decision": "the bike moves to fit the rider, not the reverse",
-      "why": "Doc section 15. Segment lengths are fixed human anatomy; control positions are a design choice, so the solver reports where the rider lands and the deck table follows."
-    },
-    {
-      "decision": "gltfpack is a separate post-process, never a flag on the Blender export",
-      "why": "Default gltfpack destroys 5 contractual nodes (LC_Reactor_Core, LC_FX_TrailOrigin, LC_FX_Boost, LC_FX_CrashCenter, LC_FX_DerezCenter) and fails the validator; -kn fixes it but Blender's export_gltfpack_kn defaults to False. Blender also writes to a gltfpacked/ subdirectory and swallows CalledProcessError, so a failed pack reports success. Calling gltfpack directly makes a failure a failure, and keeps the canonical GLB as the thing CI validates."
-    },
-    {
-      "decision": "losing node extras to gltfpack is acceptable",
-      "why": "gltfpack strips all extras with no flag to keep them, but the lc_* tags are DCC-side bookkeeping. The runtime reads spec/ for node roles and never the GLB's extras, so nothing downstream depends on them."
-    }
-  ],
-  "openQuestions": [
-    "ON-DEVICE ONLY: verify per-player Viro material namespaces remain isolated in the actual native renderer with multiple simultaneous cycles.",
-    "ON-DEVICE ONLY: verify Viro composite compatibility clips transition cleanly under the host app's Viro3DObject animation lifecycle.",
-    "PICO remains a hardware/runtime qualification target rather than a source-level claim; profile before shipping a PICO-specific preset."
-  ]
+  "activeProcesses": []
 }

@@ -1,0 +1,7 @@
+
+> lightcycle@0.1.0 validate
+> python3 tools/validate_glb.py assets/export/lightcycle.glb --manifest assets/export/manifest.json
+
+manifest -> assets/export/manifest.json
+
+102 nodes, 11 materials, 33 clips, 0 errors, 0 warnings

@@ -29,7 +29,7 @@ def _tyre_profile(R, hw, bead_r):
     shape a real high-performance carcass takes under load."""
     k = hw / 0.15
     half = [
-        (0.000, R), (0.055, R - 0.0004), (0.098, R - 0.0018), (0.126 * k, R - 0.0072),
+        (0.000, R), (0.055 * k, R - 0.0004), (0.098 * k, R - 0.0018), (0.126 * k, R - 0.0072),
         (0.1424 * k, R - 0.0175), (0.1470 * k, R - 0.0310), (0.1485 * k, R - 0.0520),
         (0.1470 * k, R - 0.0730), (0.1390 * k, R - 0.0900),
         (0.1240 * k, bead_r + 0.004), (0.1050 * k, bead_r),
@@ -47,7 +47,8 @@ def tyre(c):
     L.revolve(bm, _tyre_profile(R, c["hw"], c["bead_r"]), segments=96, axis="y")
     # Circumferential tread ribs keep the contact surface off pure-smooth, so the
     # wheel never reads as a neon disc.
-    for lat in (-0.052, 0.052):
+    rib_lat = c["hw"] * .35
+    for lat in (-rib_lat, rib_lat):
         L.revolve(bm, [(lat - 0.009, R + 0.0008), (lat + 0.009, R + 0.0008),
                        (lat + 0.009, R + 0.0022), (lat - 0.009, R + 0.0022)],
                   segments=96, axis="y")
@@ -89,7 +90,8 @@ def energy_ring(c):
     floating on the surface - the difference between energy and a decal."""
     bm = L.new_bm()
     r = c["hub_r"] + 0.030
-    for lat in (-0.062, 0.062):
+    energy_lat = max(.062, c["hw"] * .68)
+    for lat in (-energy_lat, energy_lat):
         L.revolve(bm, [(lat - 0.008, r), (lat + 0.008, r),
                        (lat + 0.008, r + 0.014), (lat - 0.008, r + 0.014)],
                   segments=96, axis="y")
@@ -110,7 +112,7 @@ def caliper(c, side):
     """Straddles the disc at the top of the hub void."""
     bm = L.new_bm()
     r = c["hub_r"] - 0.046
-    y = 0.070 * side
+    y = min(0.120, c["hw"] * .55) * side
     L.box(bm, Matrix.Translation((0, y, r)), (0.108, 0.044, 0.088))
     L.box(bm, Matrix.Translation((0, y, r + 0.058)), (0.030, 0.036, 0.060))
     for dx in (-0.030, 0.030):

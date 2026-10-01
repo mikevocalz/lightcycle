@@ -66,20 +66,48 @@ jobs:
           npm run typecheck
           npm test
 
+      - name: Rest pose and animation export regression
+        run: blender --factory-startup -b --python-exit-code 1 -P tools/check_rest_pose.py
+
       - name: Build canonical production GLB
         run: npm run build:glb
 
       - name: Validate canonical contract
         run: npm run validate
 
+      - name: Verify embedded PBR texture contract
+        run: python3 tools/check_texture_contract.py assets/export/lightcycle.glb
+
+      - name: Verify preserved wheel geometry and pivots
+        run: python3 tools/check_preserved_wheels.py assets/export/lightcycle.glb --report assets/evidence/wheel-preservation.json
+
+      - name: Fixed shell mechanical clearances
+        run: blender --factory-startup -b assets/source/lightcycle_blockout.blend --python-exit-code 1 -P tools/check_shell_geometry.py
+
+      - name: Fixed body clearance against solved rider
+        run: blender --factory-startup -b assets/source/lightcycle_blockout.blend --python-exit-code 1 -P tools/check_body_rider.py
+
       - name: Rider ergonomics
         run: npm run rider
+
+      - name: Canopy rider clearance throughout high-speed clips
+        run: blender --factory-startup -b assets/source/lightcycle_blockout.blend --python-exit-code 1 -P tools/check_canopy_sweep.py -- --out assets/evidence/canopy-sweep.json
 
       - name: Pack runtime GLB with KTX2
         run: npm run pack
 
+      - name: Verify packed KTX2 texture contract
+        run: python3 tools/check_texture_contract.py assets/export/lightcycle.runtime.glb --require-ktx2
+
       - name: Build and validate LOD0-LOD3
         run: npm run lods
+
+      - name: Verify LOD texture and UV contracts
+        run: |
+          for lod in 0 1 2 3; do
+            python3 tools/check_texture_contract.py "assets/export/lightcycle.lod${lod}.glb"
+            python3 tools/check_texture_contract.py "assets/export/lightcycle.lod${lod}.runtime.glb" --require-ktx2
+          done
 
       - name: Static asset budgets
         run: npm run profile
@@ -103,3 +131,4 @@ jobs:
             assets/export/performance.json
             assets/textures/generated/**
             assets/render/**
+            assets/evidence/**

@@ -10,11 +10,11 @@ import math
 from mathutils import Matrix, Vector
 
 from . import _lib as L
-from .chassis import _box, _bolt, _bolt_row, _bracket, _row
+from .chassis import tail_floor, tail_outer, saddle_surface, _tail_end, _box, _bolt, _bolt_row, _bracket, _row, _interp, skin
 
 
 def _half_width(dims: dict) -> float:
-    return dims["width"] / 2
+    return dims.get("mechanicalWidth", dims["width"]) / 2
 
 
 def _side_y(dims: dict, side: int, factor: float = 0.86) -> float:
@@ -32,6 +32,17 @@ def _bar_between(bm, a, b, radius=0.012, segments=18):
     L.cylinder(bm, Matrix.Translation(mid) @ rot, radius, d.length, segments=segments)
 
 
+def _rail_yz(bm, x, y0, z0, y1, z1, depth=.060, thickness=.030):
+    """Faceted rectangular rail in the rear-view Y/Z plane."""
+    dy, dz = y1-y0, z1-z0
+    length = math.hypot(dy, dz)
+    if length <= 1e-6:
+        return
+    angle = math.atan2(dz, dy)
+    _box(bm, (x, (y0+y1)*.5, (z0+z1)*.5),
+         (depth*.5, length*.5, thickness*.5), Matrix.Rotation(angle, 4, "X"))
+
+
 def _boss(bm, center, axis="y", radius=0.022, depth=0.018):
     rot = {
         "x": Matrix.Rotation(math.pi / 2, 4, "Y"),
@@ -43,8 +54,8 @@ def _boss(bm, center, axis="y", radius=0.022, depth=0.018):
 
 def handlebar(dims: dict, side: int):
     bm = L.new_bm()
-    y = _side_y(dims, side, 0.82)
-    grip_y = _side_y(dims, side, 0.96)
+    grip_y = side * dims.get("handlebarHalfSpan", _half_width(dims) * .96)
+    y = grip_y * .86
     _bar_between(bm, (-0.61, side * 0.07, 0.61), (-0.705, y, 0.68), radius=0.014)
     _bar_between(bm, (-0.665, side * 0.105, 0.645), (-0.735, grip_y, 0.70), radius=0.011)
     _boss(bm, (-0.61, side * 0.07, 0.61), "y", 0.025, 0.020)
@@ -62,7 +73,7 @@ def handlebar(dims: dict, side: int):
 
 def control(dims: dict, side: int):
     bm = L.new_bm()
-    y = _side_y(dims, side, 0.985)
+    y = side * dims.get("handlebarHalfSpan", _half_width(dims) * .985)
     _box(bm, (-0.785, y, 0.704), (0.032, 0.018, 0.020))
     _box(bm, (-0.800, y - side * 0.020, 0.690), (0.018, 0.007, 0.024))
     for dx in (-0.010, 0.010):
@@ -88,7 +99,7 @@ def chest_support(dims: dict):
 
 def shin_rest(dims: dict, side: int):
     bm = L.new_bm()
-    y = _side_y(dims, side, 0.92)
+    y = side * dims["riderEnvelope"].get("legOutboardY", .21)
     _box(bm, (0.443, y, 0.675), (0.095, 0.022, 0.020))
     _box(bm, (0.443, y + side * 0.024, 0.700), (0.082, 0.009, 0.032))
     for x in (0.375, 0.510):
@@ -99,7 +110,7 @@ def shin_rest(dims: dict, side: int):
 
 def foot_rest(dims: dict, side: int):
     bm = L.new_bm()
-    y = _side_y(dims, side, 0.92)
+    y = side * dims["riderEnvelope"].get("legOutboardY", .21)
     _bar_between(bm, (0.54, y * 0.62, 0.31), (0.62, y, 0.28), radius=0.010)
     _box(bm, (0.620, y, 0.280), (0.036, 0.026, 0.009))
     for x in _row((0.592, y + side * 0.018, 0.292), (0.648, y + side * 0.018, 0.292), 5):
@@ -110,11 +121,9 @@ def foot_rest(dims: dict, side: int):
 
 def rider_mount(dims: dict):
     bm = L.new_bm()
-    _box(bm, (0.05, 0.0, 0.565), (0.145, 0.050, 0.010))
-    for x in (-0.08, 0.04, 0.16):
-        _box(bm, (x, 0.0, 0.585), (0.045, 0.045, 0.008))
-        for side in (-1, 1):
-            _bar_between(bm, (x, side * 0.035, 0.555), (x, side * 0.11, 0.47), radius=0.008)
+    # Recessed saddle insert follows the spine rather than reading as three
+    # exposed blocks. Its shallow front remains below the solved prone rider.
+    skin(bm, saddle_surface, 40, 12, thickness=0.012, inward=(0, 0, -1))
     return bm
 
 
@@ -126,48 +135,95 @@ def cockpit_display(dims: dict):
     return bm
 
 
+def _canopy_profile(u):
+    # The rear deck echoes the new rear shell, with no change to its hinge or
+    # transform. .864 top minus .008 skin = required .856 minimum underside.
+    return _interp([(0, 0.864), (0.12, 0.878), (0.46, 0.930),
+                    (0.72, 0.968), (1, 0.949)], u)
+
+
+def _canopy_width(u):
+    return _interp([(0, 0.058), (0.38, 0.083), (0.70, 0.105), (1, 0.052)], u)
+
+
+def _canopy_surface(u, v):
+    cross = 2 * v - 1
+    return (0.495 + 0.620 * u, _canopy_width(u) * cross,
+            _canopy_profile(u) + 0.008 * (1 - cross * cross))
+
+
 def canopy_center(dims: dict):
     bm = L.new_bm()
-    _box(bm, (0.62, 0.0, 0.856), (0.125, 0.055, 0.004))
-    _box(bm, (0.62, 0.0, 0.866), (0.105, 0.016, 0.006))
-    for x in _row((0.515, 0, 0), (0.725, 0, 0), 6):
-        _box(bm, (x.x, 0.0, 0.846), (0.006, 0.060, 0.006))
+    skin(bm, _canopy_surface, 44, 20, thickness=0.008, inward=(0, 0, -1))
+    # Rear reference has a large open structural hoop above the broad tyre.
+    # Build it as a faceted frame, not a solid wall, so the negative space survives.
+    x = _tail_end(dims) - .030
+    _rail_yz(bm, x, -.155, .970, .155, .970, depth=.072, thickness=.034)
+    for side in (-1, 1):
+        _rail_yz(bm, x, side*.155, .970, side*.300, .875, depth=.070, thickness=.034)
+        _rail_yz(bm, x, side*.300, .875, side*.345, .748, depth=.068, thickness=.032)
     return bm
 
 
 def canopy_side(dims: dict, side: int):
     bm = L.new_bm()
-    y = _side_y(dims, side, 0.86)
-    _box(bm, (0.610, y, 0.790), (0.125, 0.004, 0.055))
-    _box(bm, (0.635, y + side * 0.010, 0.775), (0.090, 0.003, 0.036))
-    for x in (0.535, 0.610, 0.685):
-        _bar_between(bm, (x, y * 0.62, 0.755), (x, y, 0.785), radius=0.007)
-    for x in (0.545, 0.695):
-        _boss(bm, (x, y * 0.62, 0.755), "x", 0.018, 0.016)
+    # These skins remain separate animated meshes. Outer skirts sit laterally
+    # outside the rider; only the center roof spans the protected rider volume.
+    def shoulder(u, v):
+        # Sweep the lower leading edge back around the fixed knee. The upper
+        # seam retains the complete roof profile; only the lower skirt recedes.
+        x = 0.495 + 0.620 * u + 0.225 * (1 - u) * (1 - v) ** 2
+        along = (x - 0.495) / 0.620
+        lower = tail_floor(x, dims)
+        outer = tail_outer(x, dims)
+        inner = _canopy_width(along) + 0.003
+        y = outer + (inner - outer) * v
+        y += 0.009 * math.sin(math.pi * u) * math.sin(math.pi * v)
+        z = lower + (_canopy_profile(along) - 0.002 - lower) * math.sin(math.pi * v / 2)
+        return x, side * y, z
+    skin(bm, shoulder, 44, 16, thickness=0.007, inward=(0, -side, 0))
     return bm
 
 
 def back_support(dims: dict):
     bm = L.new_bm()
-    _box(bm, (0.44, 0.0, 0.705), (0.068, 0.058, 0.010))
-    _box(bm, (0.44, 0.0, 0.730), (0.056, 0.050, 0.012))
-    for side in (-1, 1):
-        _bar_between(bm, (0.38, side * 0.045, 0.690), (0.31, side * 0.115, 0.56), radius=0.008)
+    # Small curved carbon pad retains the prior support envelope; the shoulder
+    # skins carry the larger rear deck silhouette without a box-like backrest.
+    def pad(u, v):
+        cross = 2 * v - 1
+        width = 0.052 + 0.006 * math.sin(math.pi * u)
+        z = _interp([(0, 0.705), (0.58, 0.728), (1, 0.734)], u)
+        return 0.372 + 0.136 * u, width * cross, z + 0.007 * (1 - cross * cross)
+    skin(bm, pad, 20, 12, thickness=0.014, inward=(0, 0, -1))
     return bm
 
 
 def deploy_arm(dims: dict, side: int):
     bm = L.new_bm()
     y = _side_y(dims, side, 0.73)
-    _bar_between(bm, (0.44, y * 0.72, 0.735), (0.58, y, 0.805), radius=0.010)
-    _bar_between(bm, (0.47, y * 0.72, 0.752), (0.61, y, 0.820), radius=0.007)
+    # Raised, shortened canopy attachments clear the fixed knee throughout the
+    # existing high-speed rotation and parent slide. The hinge stays unchanged.
+    _bar_between(bm, (0.44, y * 0.72, 0.735), (0.545, y, 0.865), radius=0.010)
+    _bar_between(bm, (0.47, y * 0.72, 0.752), (0.575, y, 0.878), radius=0.007)
     _boss(bm, (0.44, y * 0.72, 0.735), "y", 0.021, 0.018)
-    _boss(bm, (0.58, y, 0.805), "y", 0.017, 0.014)
+    _boss(bm, (0.545, y, 0.865), "y", 0.017, 0.014)
     return bm
 
 
 def canopy_energy(dims: dict):
     bm = L.new_bm()
+    # Inner glow follows the rear structural hoop from the exact rear reference.
+    x = _tail_end(dims) - .034
+    _rail_yz(bm, x, -.145, .970, .145, .970, depth=.010, thickness=.010)
     for side in (-1, 1):
-        _box(bm, (0.62, side * 0.030, 0.872), (0.115, 0.006, 0.003))
+        _rail_yz(bm, x, side*.155, .958, side*.286, .872, depth=.010, thickness=.010)
+    for side in (-1, 1):
+        # Narrow inserts follow the real crown. They carry no body mass and stay
+        # inside the existing .98 m height rather than floating above the shell.
+        def ribbon(u, v, side=side):
+            along = 0.016 + 0.968 * u
+            cross = side * (0.84 + 0.065 * (2 * v - 1))
+            x, y, z = _canopy_surface(along, (cross + 1) / 2)
+            return x, y, z + 0.002
+        skin(bm, ribbon, 44, 4, thickness=0.0015, inward=(0, 0, -1))
     return bm

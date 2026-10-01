@@ -21,7 +21,8 @@ def _ctx(dims, side):
     """Geometry parameters for one wheel end."""
     return {
         "R": dims["wheelOuterDiameter"] / 2,
-        "hw": dims["wheelSectionWidth"] / 2,
+        "hw": dims.get("frontWheelSectionWidth" if side == "Front" else "rearWheelSectionWidth",
+                       dims["wheelSectionWidth"]) / 2,
         "hub_r": dims["hubVoidDiameter"] / 2,
         "bead_r": dims["hubVoidDiameter"] / 2 + 0.085,
         "webs": 20 if side == "Front" else 24,
@@ -83,7 +84,7 @@ def handled(name: str) -> bool:
     )
 
 
-# World position of the reactor centre; must match EMPTY_AT in build_lightcycle.
+# Legacy fallback only. Current builds derive the reactor centre from dimensions_m.
 REACTOR_AT = (0.30, 0.0, 0.40)
 
 
@@ -188,7 +189,8 @@ def build_node(name: str, dims: dict, x_of):
 
     # --- reactor ----------------------------------------------------------
     if name.startswith(("LC_Reactor", "LC_Gyro")):
-        rc = REACTOR_AT
+        rc = (dims.get("reactorCenterX", REACTOR_AT[0]), 0.0,
+              dims.get("reactorCenterZ", REACTOR_AT[2]))
         if name == "LC_Reactor_Core":
             bm = reactor.core()
         elif name.startswith("LC_Reactor_Ring_"):

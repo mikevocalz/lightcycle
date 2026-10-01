@@ -19,6 +19,7 @@ from mathutils import Vector
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import geo  # noqa: E402 - real hard-surface builders, dispatched per node name
+from rest_pose import capture_rest_pose, restore_rest_pose
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = json.loads((ROOT / "spec/lightcycle.spec.json").read_text())
@@ -151,6 +152,7 @@ def build_materials() -> dict:
             put("Emission Strength", 0.0)
             mat["lc_mat_role"] = "physical"
 
+        attach_texture_maps(mat, name, b)
         mats[name] = mat
     return mats
 
@@ -163,6 +165,10 @@ WHEEL_R = D["wheelOuterDiameter"] / 2
 HUB_R = D["hubVoidDiameter"] / 2
 AXLE_Z = WHEEL_R + D["groundClearance"] - WHEEL_R  # hub sits at wheel radius above ground
 AXLE_Z = WHEEL_R
+REACTOR_X = D.get("reactorCenterX", 0.30)
+REACTOR_Z = D.get("reactorCenterZ", AXLE_Z - 0.06)
+FRONT_WHEEL_W = D.get("frontWheelSectionWidth", D["wheelSectionWidth"])
+REAR_WHEEL_W = D.get("rearWheelSectionWidth", D["wheelSectionWidth"])
 
 
 def wheel_x(name: str) -> float:
@@ -172,7 +178,7 @@ def wheel_x(name: str) -> float:
 def placement(entry: dict):
     """-> (primitive, location, rotation_euler, size) for one blockout proxy."""
     n = entry["name"]
-    half_w = D["width"] / 2
+    half_w = D.get("mechanicalWidth", D["width"]) / 2
 
     if "_Wheel_" in n or n.endswith(("_BrakeDisc",)):
         x, z = wheel_x(n), AXLE_Z
@@ -202,7 +208,7 @@ def placement(entry: dict):
         return ("cyl", (HALF_WB * 0.66, 0, AXLE_Z - 0.04), (0, math.pi / 2, 0), {"r": 0.09, "d": 0.16})
 
     if n.startswith("LC_Reactor") or n.startswith("LC_Gyro"):
-        rx, rz = 0.30, AXLE_Z - 0.06
+        rx, rz = REACTOR_X, REACTOR_Z
         if n == "LC_Reactor_Core":
             return ("sphere", (rx, 0, rz), (0, 0, 0), {"r": 0.055})
         if n.startswith("LC_Reactor_Ring_"):
@@ -278,9 +284,9 @@ def placement(entry: dict):
 
 
 COL_PROXY = {
-    "COL_LC_Body": ((0, 0, 0.50), (0.95, 0.24, 0.26)),
-    "COL_LC_FrontWheel": ((-HALF_WB, 0, AXLE_Z), (WHEEL_R, D["wheelSectionWidth"] / 2, WHEEL_R)),
-    "COL_LC_RearWheel": ((HALF_WB, 0, AXLE_Z), (WHEEL_R, D["wheelSectionWidth"] / 2, WHEEL_R)),
+    "COL_LC_Body": ((0, 0, 0.50), (D["wheelbase"] * .53, D["width"] * .40, 0.30)),
+    "COL_LC_FrontWheel": ((-HALF_WB, 0, AXLE_Z), (WHEEL_R, FRONT_WHEEL_W / 2, WHEEL_R)),
+    "COL_LC_RearWheel": ((HALF_WB, 0, AXLE_Z), (WHEEL_R, REAR_WHEEL_W / 2, WHEEL_R)),
     "COL_LC_RiderZone": ((0.05, 0, 0.70), (0.55, 0.20, 0.16)),
 }
 
@@ -291,9 +297,11 @@ def production_pivot(name: str):
     data back around the physical pivot and placing the object origin there, a
     perfectly named reactor ring or canopy panel rotates around world (0,0,0).
     """
-    half_w = D["width"] / 2
+    half_w = D.get("mechanicalWidth", D["width"]) / 2
+    if name == "LC_SteeringYoke":
+        return (-HALF_WB, 0.0, AXLE_Z + HUB_R + 0.09)
     if name == "LC_Reactor_Core" or name.startswith(("LC_Reactor_Ring_", "LC_Gyro_")):
-        return (0.30, 0.0, AXLE_Z - 0.06)
+        return (REACTOR_X, 0.0, REACTOR_Z)
     if name.startswith("LC_Canopy_") and name in {"LC_Canopy_L", "LC_Canopy_R"}:
         side = 1 if name.endswith("_L") else -1
         y = side * half_w * 0.86 * 0.62
@@ -311,7 +319,7 @@ def production_pivot(name: str):
         "LC_Damage_Panel_R2": (0.155, -half_w * 0.86 * 1.10, 0.49),
         "LC_Damage_Rear_L": (0.610, half_w * 0.86 * 1.10, 0.49),
         "LC_Damage_Rear_R": (0.610, -half_w * 0.86 * 1.10, 0.49),
-        "LC_Damage_ReactorCover": (0.30, half_w * 0.82, 0.40),
+        "LC_Damage_ReactorCover": (REACTOR_X, half_w * 0.82, REACTOR_Z),
     }
     return damage.get(name)
 
@@ -330,9 +338,10 @@ EMPTY_AT = {
     # Pivots that must sit on real hardware, not the world origin: wheel spin
     # happens about the axle and the reactor rings counter-rotate about the core.
     "LC_Wheel_Front": (-HALF_WB, 0, AXLE_Z), "LC_Wheel_Rear": (HALF_WB, 0, AXLE_Z),
-    "LC_Reactor": (0.30, 0, AXLE_Z - 0.06),
-    "LC_FX_TrailOrigin": (0.92, 0, 0.46), "LC_FX_Boost": (0.95, 0, 0.55),
-    "LC_FX_Reactor": (0.30, 0, 0.44), "LC_FX_FrontWheel": (-HALF_WB, 0, AXLE_Z),
+    "LC_Reactor": (REACTOR_X, 0, REACTOR_Z),
+    "LC_FX_TrailOrigin": (D["length"] * .5 - .025, 0, 0.46),
+    "LC_FX_Boost": (D["length"] * .5 - .10, 0, 0.55),
+    "LC_FX_Reactor": (REACTOR_X, 0, REACTOR_Z + .04), "LC_FX_FrontWheel": (-HALF_WB, 0, AXLE_Z),
     "LC_FX_RearWheel": (HALF_WB, 0, AXLE_Z),
     "LC_FX_Spark_FL": (-HALF_WB, 0.14, 0.06), "LC_FX_Spark_FR": (-HALF_WB, -0.14, 0.06),
     "LC_FX_Spark_RL": (HALF_WB, 0.14, 0.06), "LC_FX_Spark_RR": (HALF_WB, -0.14, 0.06),
@@ -722,7 +731,10 @@ def export(path: Path):
 
 if __name__ == "__main__":
     made, tris = build()
+    capture_rest_pose(made.values())
     author_clips(made)
+    restore_rest_pose(made.values())
+    bpy.context.view_layer.update()
     blend = ROOT / "assets/source/lightcycle_blockout.blend"
     blend.parent.mkdir(parents=True, exist_ok=True)
     bpy.ops.wm.save_as_mainfile(filepath=str(blend))
