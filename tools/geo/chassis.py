@@ -308,8 +308,10 @@ def nose_shell(dims,side):
         along=.55+.45*u
         x,outer,z=nose_surface(dims,side,1,along)
         inner=.125*(1-u)**2
-        # Recess the hood around the rider rather than spanning the torso.
-        for capsule in rider_capsules()[:2]:
+        # Recess the hood around the complete solved rider envelope. The crown
+        # crosses the forearm height as it peels into the rider channel, so
+        # torso/head-only clearance can still clip the arms near the grips.
+        for capsule in rider_capsules():
             interval=capsule_axis_interval(capsule,1,(x,0,z),margin=.018)
             if interval:
                 inner=max(inner,max(abs(q) for q in interval))
