@@ -6,14 +6,14 @@
   "forwardAxis": "-X",
   "unit": "meter",
   "dimensions_m": {
-    "_note": "Locked against a 50th-percentile prone rider proxy by tools/rider_proxy.py, not eyeballed. All four contact points solve with reachable two-link IK and the canopy clears. Re-run rider_proxy.py after moving any contact point. Body width follows reference shoulder proportions. mechanicalWidth preserves solved contact/actuator/pivot placement; wheel geometry and centers unchanged.",
-    "length": 2.95,
-    "width": 0.66,
+    "_note": "Reference-corrective dimensions measured from the user's exact 2026-09-30 side/front/rear images. Wheel architecture/names/animations remain modular, but the previous exact vertex baseline is intentionally superseded where visible proportions were wrong.",
+    "length": 3.1,
+    "width": 0.74,
     "height": 0.98,
-    "wheelbase": 1.92,
+    "wheelbase": 2.16,
     "wheelOuterDiameter": 0.92,
-    "wheelSectionWidth": 0.3,
-    "hubVoidDiameter": 0.54,
+    "wheelSectionWidth": 0.48,
+    "hubVoidDiameter": 0.35,
     "groundClearance": 0.085,
     "chestSupportHeight": 0.62,
     "tolerance": 0.06,
@@ -40,10 +40,16 @@
           0.28
         ]
       },
-      "legOutboardY": 0.21,
-      "legOutboardWhy": "Shin centreline must clear the rear wheel's 0.30 m section width; at hip breadth (0.175) the shin passes through the tyre."
+      "legOutboardY": 0.27,
+      "legOutboardWhy": "Reference-corrective wheel sections are wider; shin centreline is moved outboard to preserve real clearance while keeping the solved X/Z rider contacts."
     },
-    "mechanicalWidth": 0.46
+    "mechanicalWidth": 0.46,
+    "frontWheelSectionWidth": 0.42,
+    "rearWheelSectionWidth": 0.48,
+    "handlebarHalfSpan": 0.36,
+    "reactorCenterX": 0.27,
+    "reactorCenterZ": 0.4,
+    "wheelReferenceRevision": "2026-09-30-exact-three-view"
   },
   "materials": {
     "MAT_LC_GRAPHITE": {

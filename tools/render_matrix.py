@@ -32,6 +32,10 @@ sys.path.insert(0, str(ROOT / "tools"))
 from rest_pose import restore_rest_pose
 
 SPEC = json.loads((ROOT / "spec/lightcycle.spec.json").read_text())
+DIMS = SPEC["dimensions_m"]
+WB2 = DIMS["wheelbase"] * .5
+RX = DIMS.get("reactorCenterX", .30)
+RZ = DIMS.get("reactorCenterZ", .40)
 
 VIEWS = {
     "side":     ((0.0, -5.4, 0.52), (0.0, 0, 0.52)),
@@ -40,10 +44,10 @@ VIEWS = {
     "front":    ((-4.4, 0.0, 0.52), (0.0, 0, 0.52)),
     "rear":     ((4.4, 0.0, 0.52), (0.0, 0, 0.52)),
     "top":      ((0.0, 0.0, 4.6), (0.0, 0, 0.5)),
-    "reactor":  ((0.16, -1.42, 0.60), (0.30, 0, 0.42)),
-    "wheel":    ((-1.62, -1.72, 0.86), (-0.96, 0, 0.46)),
-    "front-wheel": ((-1.62, -1.72, 0.86), (-0.96, 0, 0.46)),
-    "rear-wheel":  ((1.62, -1.72, 0.86), (0.96, 0, 0.46)),
+    "reactor":  ((RX-.14, -1.42, RZ+.20), (RX, 0, RZ+.02)),
+    "wheel":    ((-WB2-.66, -1.72, 0.86), (-WB2, 0, DIMS["wheelOuterDiameter"]*.5)),
+    "front-wheel": ((-WB2-.66, -1.72, 0.86), (-WB2, 0, DIMS["wheelOuterDiameter"]*.5)),
+    "rear-wheel":  ((WB2+.66, -1.72, 0.86), (WB2, 0, DIMS["wheelOuterDiameter"]*.5)),
 }
 ORTHOGRAPHIC_VIEWS = {"side", "front", "rear", "top"}
 CLAY_VIEWS = ("side", "front", "rear", "top", "front34", "rear34")

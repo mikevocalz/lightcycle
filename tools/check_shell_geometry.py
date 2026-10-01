@@ -46,8 +46,9 @@ def main():
         for p in points:
             # Only points inside the tire's lateral slab can collide with its
             # radial envelope. A fairing outside that slab may embrace its side.
-            if abs(p.y) < D["wheelSectionWidth"] / 2 + .003:
-                for sign in (-1, 1):
+            for sign, width_key in ((-1, "frontWheelSectionWidth"), (1, "rearWheelSectionWidth")):
+                wheel_half = D.get(width_key, D["wheelSectionWidth"]) / 2
+                if abs(p.y) < wheel_half + .003:
                     radius = math.hypot(p.x - sign * D["wheelbase"] / 2, p.z - D["wheelOuterDiameter"] / 2)
                     if D["hubVoidDiameter"] / 2 < radius < D["wheelOuterDiameter"] / 2 + .003:
                         tire_hits += 1
@@ -55,7 +56,8 @@ def main():
                             tire_points.append(list(p))
             # Reactor has nested rings/gyros. Keep fixed chassis out of its
             # conservative central swept envelope, including the hidden core.
-            if abs(p.y) < .155 and math.hypot(p.x - .30, p.z - .40) < .208:
+            rx, rz = D.get("reactorCenterX", .30), D.get("reactorCenterZ", .40)
+            if abs(p.y) < .155 and math.hypot(p.x - rx, p.z - rz) < .208:
                 reactor_hits += 1
         evaluated.to_mesh_clear()
         result[name] = {"bounds": bounds, "vertices": len(points), "tireEnvelopeHits": tire_hits, "tireExamples": tire_points, "reactorEnvelopeHits": reactor_hits}

@@ -1,20 +1,19 @@
 {
   "specVersion": "1.0.0",
   "date": "2026-09-30",
-  "phase": "body-pass8 review candidate",
-  "overall": "awaiting_visual_review",
+  "phase": "body-pass9 exact-three-view corrective pass",
+  "overall": "revision_in_progress",
   "branch": "art/reference-body-redesign",
   "productionBase": "c5d0039fcbaafa0d77f37c97525ca0f8be079f13",
-  "primaryReference": "docs/references/00_generated_hybrid_concept.png.png",
-  "userDecision": "Match visible reference shape; preserve current wheels",
-  "visualAcceptance": "pending; no human approval; blocking final completion/merge",
-  "localTechnical": "pass",
+  "primaryReference": "2026-09-30 exact uploaded side + handlebar/front + tail/rear images",
+  "userDecision": "Pass8 rejected: it does not resemble the exact references closely enough. Match the three uploaded views; visual fidelity overrides the old pass8 proportions while runtime architecture stays intact.",
+  "visualAcceptance": "rejected for pass8; pass9 awaiting fresh CI renders and human review; merge blocked",
+  "localTechnical": "not run in this chat environment (Blender/game-dev unavailable); CI required",
   "remoteCI": {
-    "status": "pass",
-    "testedCommit": "58ac572a23cee1239e8d3a2c8c8ff9d58430a22e",
-    "run": "https://github.com/mikevocalz/lightcycle/actions/runs/36754410085",
-    "receipt": "docs/review/ci-run.json",
-    "scope": "Full production verification; subsequent handoff-only commit does not change model/runtime/check sources. Inspect latest PR checks before merge."
+    "status": "pending",
+    "testedCommit": null,
+    "run": null,
+    "scope": "Pass9 changes wheel proportions and major shell forms; previous pass8 CI is no longer sufficient."
   },
   "pullRequest": "https://github.com/mikevocalz/lightcycle/pull/2",
   "handoff": "docs/HANDOFF.md",
@@ -37,15 +36,15 @@
     "Full remote production CI passed, including 20 renders and artifact upload"
   ],
   "remaining": [
-    "Human reference-fidelity review and any requested primary-body revisions",
-    "Wheel UV/normal shading review",
-    "Conditional merge only with human visual approval and green technical checks"
+    "Run pass9 production CI and inspect fresh side/front/rear/clay/lights-off evidence",
+    "Human reference-fidelity review against the three exact 2026-09-30 uploads",
+    "Conditional merge only after fresh green technical checks and explicit visual approval"
   ],
   "limitations": [
-    "No hardware FPS/native Viro host verification",
-    "Sampled collision guards are not continuous body/canopy self-collision proof",
-    "Reference surface fidelity and wheel shading await visual review",
-    "Runtime browser renders extra transmission passes; static triangles are not total GPU workload"
+    "Current chat runtime has no Blender/game-dev CLI; pass9 visual/technical verification must come from GitHub Actions artifacts",
+    "Pass8 was explicitly rejected by the user and must not be cited as visual evidence for pass9",
+    "Wheel coordinates intentionally changed to match exact references; old vertex-preservation baseline is diagnostic only during this reference revision",
+    "No hardware FPS/native Viro host verification"
   ],
   "activeProcesses": []
 }

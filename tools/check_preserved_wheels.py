@@ -28,6 +28,7 @@ import zlib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+DIMS = json.loads((ROOT / "spec/lightcycle.spec.json").read_text())["dimensions_m"]
 PARTS = ("OuterRing", "InnerRing", "Bearing", "EnergyRing", "BrakeDisc",
          "Caliper_L", "Caliper_R", "Suspension")
 PROTECTED = tuple(sorted([f"LC_Wheel_{end}_{part}" for end in ("Front", "Rear")
@@ -273,6 +274,24 @@ def contract_view(nodes):
     return result
 
 
+def architecture_view(nodes):
+    """Preserve wheel assembly ownership/topology while allowing approved dimensions to move."""
+    result = {}
+    for name, node in nodes.items():
+        item = {"parent": node["parent"]}
+        if "mesh" in node:
+            item["mesh"] = {
+                "weights": node["mesh"]["weights"],
+                "primitives": [{
+                    "mode": p["mode"], "material": p["material"],
+                    "attribute_names": sorted(p["attributes"]), "targets": p["targets"],
+                    "triangle_count": p["triangle_evidence"]["triangle_count"],
+                } for p in node["mesh"]["primitives"]],
+            }
+        result[name] = item
+    return result
+
+
 def raw_view(nodes):
     return {name: {**node, "mesh": {**node["mesh"], "primitives": [
         {k: v for k, v in p.items() if k != "triangle_evidence"}
@@ -376,7 +395,19 @@ def main():
         baseline = json.loads(args.baseline.read_text())
         if baseline.get("schema_version") != 2 or baseline.get("protected_mesh_nodes") != list(PROTECTED):
             raise ValueError("Unrecognized baseline schema or protected mesh roster")
-        errors = list(differences(contract_view(baseline["nodes"]), contract_view(current)))
+        reference_revision = DIMS.get("wheelReferenceRevision")
+        if reference_revision:
+            # The user rejected the old visible wheel proportions against exact references.
+            # Keep topology/material/parent architecture stable while allowing coordinates,
+            # section width, hub void and axle spacing to change deliberately.
+            errors = list(differences(architecture_view(baseline["nodes"]), architecture_view(current)))
+            for name, sign in (("LC_Wheel_Front", -1), ("LC_Wheel_Rear", 1)):
+                tr = current[name]["transform"].get("translation")
+                expected = [sign * DIMS["wheelbase"] / 2, DIMS["wheelOuterDiameter"] / 2, 0]
+                if tr is None or any(abs(float(a)-float(b)) > 1e-5 for a,b in zip(tr, expected)):
+                    errors.append(f"{name}: axle pivot {tr!r} does not match reference dimensions {expected!r}")
+        else:
+            errors = list(differences(contract_view(baseline["nodes"]), contract_view(current)))
         raw_differences = list(differences(raw_view(baseline["nodes"]), raw_view(current)))
         measurements = {}
         for name in PROTECTED:
@@ -386,12 +417,16 @@ def main():
                 measurement = geometric_comparison(left["triangle_evidence"], right["triangle_evidence"],
                                                    args.position_tolerance, args.normal_tolerance)
                 measurements[f"{name}.primitive[{i}]"] = measurement
-                if not measurement["geometry_passed"]:
+                if not measurement["geometry_passed"] and not reference_revision:
                     errors.append(f"{name}.primitive[{i}]: position/topology preservation failed")
         shading_review = any(not m["normals_within_diagnostic_tolerance"] or not m["uv_unchanged"]
                              for m in measurements.values())
         report = {"passed": not errors, "candidate_glb": str(args.glb.resolve()),
-                  "pass_scope": "Triangle surfaces/topology, material slot ownership, parent and pivot contracts only",
+                  "reference_shape_revision": reference_revision,
+                  "pass_scope": ("Topology/triangle counts, material ownership, parent architecture and axle pivots; "
+                                 "coordinate deltas are diagnostic during the explicit reference-shape revision"
+                                 if reference_revision else
+                                 "Triangle surfaces/topology, material slot ownership, parent and pivot contracts only"),
                   "shading_review_required": shading_review,
                   "candidate_glb_sha256": glb.sha256, "baseline": str(args.baseline.resolve()),
                   "baseline_source_commit": baseline["source_commit"],
@@ -422,6 +457,8 @@ def main():
               f"normal component {max(m['max_normal_component_delta'] for m in measurements.values()):.9g}")
         if shading_review:
             print("SHADING REVIEW PENDING: geometry preservation does not certify unchanged normals or UVs")
+        if reference_revision:
+            print(f"REFERENCE WHEEL REVISION: {reference_revision}; coordinate deltas are expected and reported")
         print(f"WHEEL GEOMETRY/CONTRACT {'PASS' if not errors else 'FAIL'}: {len(PROTECTED)} meshes, "
               f"{len(current)} nodes, {len(errors)} differences")
         return 1 if errors else 0

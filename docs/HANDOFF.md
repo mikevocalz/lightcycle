@@ -1,3 +1,9 @@
+# PASS9 OVERRIDE — EXACT THREE-VIEW REFERENCES REJECTED PASS8
+
+The user explicitly rejected pass8 on 2026-09-30: it does not resemble the newly supplied exact side/front/rear references closely enough. Do not cite pass8 visual evidence as approval. The exact uploaded views now override the older generated collage wherever they disagree. See `docs/handoff/REFERENCE_MEASUREMENTS_2026-09-30.md`.
+
+Pass9 changes the visible proportion contract: longer wheelbase, much smaller hub void, wider wheel sections, broader front/rear body masses, exact front cowl/twin energy rails, rear structural hoop and central rear blade. Runtime node names, one-GLB/six-color behavior, animation ownership, adapters and damage modularity remain constraints. Keep PR #2 draft until fresh CI and explicit human visual approval.
+
 # Light Cycle — resumable reference-body redesign
 
 Updated 2026-09-30. Branch: `art/reference-body-redesign`.

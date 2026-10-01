@@ -8,7 +8,7 @@ import math
 from mathutils import Matrix
 
 from . import _lib as L
-from .chassis import _box, _interp, nose_surface, rear_surface, sill_surface, coaming_surface, skin
+from .chassis import _box, _interp, _tail_end, nose_surface, rear_surface, sill_surface, coaming_surface, skin
 
 
 def _nose_energy_u(dims, v):
@@ -46,6 +46,16 @@ def body_primary(dims: dict):
             x, y, z = nose_surface(dims, side, u, v)
             return x, y + side * 0.0045, z
         skin(bm, shape, 64, 4, 0.003, (0, -side, 0))
+    # Twin front-facing energy rails are a dominant feature of the exact front view.
+    cx = -dims["wheelbase"] / 2
+    for side in (-1, 1):
+        def front_bar(u, v, side=side):
+            z=.755+.190*u
+            offset=_interp([(0,.390),(.55,.292),(1,.145)],u)
+            x=cx+offset-.004
+            y=side*(.137+.024*(2*v-1))
+            return x,y,z
+        skin(bm, front_bar, 30, 4, .0025, (1,0,0))
     return bm
 
 
@@ -79,11 +89,12 @@ def wheel_marker(dims: dict, front: bool):
 def reactor(dims: dict):
     bm = L.new_bm()
     # Perimeter energy rings emphasize the housing; no strip crosses the core.
+    rx, rz = dims.get("reactorCenterX", .30), dims.get("reactorCenterZ", .40)
     for side in (-1, 1):
         y = side * 0.184
         L.revolve(bm, [(y - 0.002, 0.205), (y + 0.002, 0.205),
                        (y + 0.002, 0.213), (y - 0.002, 0.213)],
-                  segments=96, axis="y", center=(0.30, 0.0, 0.40))
+                  segments=96, axis="y", center=(rx, 0.0, rz))
     return bm
 
 
@@ -99,6 +110,8 @@ def cockpit(dims: dict):
 
 def rear(dims: dict):
     bm = L.new_bm()
+    # Central vertical rear blade from the exact tail/rear view.
+    _box(bm, (_tail_end(dims)+.004, 0.0, .842), (.0035, .027, .090))
     for side in (-1, 1):
         def shape(u, v, side=side):
             x, y, z = rear_surface(dims, side, 0.40 + 0.55 * u, 0.72 + 0.10 * v)
@@ -109,7 +122,8 @@ def rear(dims: dict):
 
 def trail_port(dims: dict):
     bm = L.new_bm()
-    _box(bm, (0.895, 0.0, 0.460), (0.008, 0.055, 0.034))
+    x = _tail_end(dims) - .045
+    _box(bm, (x, 0.0, 0.460), (0.008, 0.055, 0.034))
     for side in (-1, 1):
-        _box(bm, (0.888, side * 0.060, 0.460), (0.016, 0.004, 0.040))
+        _box(bm, (x-.007, side * 0.060, 0.460), (0.016, 0.004, 0.040))
     return bm

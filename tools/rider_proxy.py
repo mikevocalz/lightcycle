@@ -86,9 +86,9 @@ def solve_rider(hip, targets):
 
 
 ARM_Y = ANTHRO["shoulder_breadth"] / 2 * 0.8
-# Legs splay outboard of the hips so the shin clears the rear wheel: the wheel is
-# 0.30 m wide, so a shin centreline at hip width would pass through it.
-LEG_Y = 0.21
+# Legs splay outboard according to the active reference-corrective wheel section.
+# X/Z contact points stay solved; only lateral clearance moves with the machine.
+LEG_Y = SPEC["dimensions_m"]["riderEnvelope"].get("legOutboardY", 0.21)
 
 
 def limb(name, a, b, radius, y=0.0):
@@ -142,7 +142,7 @@ def wheel_clear(j):
     Side-view clearance alone is not enough - the wheel has real width."""
     D = SPEC["dimensions_m"]
     cx, cz, r = D["wheelbase"] / 2, D["wheelOuterDiameter"] / 2, D["wheelOuterDiameter"] / 2
-    half_w = D["wheelSectionWidth"] / 2
+    half_w = D.get("rearWheelSectionWidth", D["wheelSectionWidth"]) / 2
     out = []
     for label, (px, pz) in (("foot", j["ball"]), ("ankle", j["ankle"])):
         inside = math.hypot(px - cx, pz - cz) < r

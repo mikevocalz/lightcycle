@@ -43,7 +43,8 @@ def reactor_cover(dims: dict):
     aperture. The core and all concentric machinery stay visible through it.
     """
     bm = L.new_bm()
+    rx, rz = dims.get("reactorCenterX", .30), dims.get("reactorCenterZ", .40)
     L.revolve(bm, [(0.184, 0.216), (0.191, 0.216),
                    (0.191, 0.232), (0.184, 0.232)],
-              segments=96, axis="y", center=(0.30, 0.0, 0.40))
+              segments=96, axis="y", center=(rx, 0.0, rz))
     return bm

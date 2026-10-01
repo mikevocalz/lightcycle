@@ -90,6 +90,20 @@ def _interp(points, t):
     return points[-1][1]
 
 
+def _reactor_center(dims):
+    return dims.get("reactorCenterX", .30), dims.get("reactorCenterZ", .40)
+
+
+def _rear_wheel_x(dims):
+    return dims["wheelbase"] * .5
+
+
+def _tail_end(dims):
+    # Rear body terminates near the outer wheel envelope like the approved side/rear refs.
+    return min(dims["length"] * .5 - .035,
+               _rear_wheel_x(dims) + dims["wheelOuterDiameter"] * .44)
+
+
 def skin(bm, surface, nu=40, nv=20, thickness=0.008, inward=(0,-1,0)):
     """Closed sampled compound patch, with real backing and capped perimeter.
 
@@ -132,11 +146,11 @@ def nose_surface(dims, side, u, v):
     r=dims['wheelOuterDiameter']/2+.012
     # The real wheel circle sets the front termination, not its lateral width.
     arch=cx+math.sqrt(max(.0001,r*r-(z-.46)**2))+.006-.12*(1-v)**.65
-    rear=_interp([(0,-.025),(.32,-.055),(.65,-.10),(.82,-.26),(1,-.69)],v)
+    rear=_interp([(0,-.030),(.32,-.080),(.65,-.160),(.82,-.350),(1,-.740)],v)
     x=arch+(rear-arch)*u
     # Deliberate broad shoulder behind the wheel, tapering into the waist.
-    shoulder=_interp([(-1.25,.148),(-.92,.180),(-.62,.324),
-                      (-.36,.304),(-.10,.286),(.08,.296)],x)
+    shoulder=_interp([(-1.50,.255),(-1.18,.300),(-.88,.360),
+                      (-.55,.342),(-.18,.305),(.08,.300)],x)
     y=shoulder+.004*math.sin(math.pi*u)*math.sin(math.pi*v)
     return (x,side*y,z)
 
@@ -145,7 +159,8 @@ def mid_surface(dims,side,u,v):
     """Front shell continuation stopping at the reactor's swept circular opening."""
     z=.145+.658*v
     front=nose_surface(dims,side,1,(z-.125)/.815)[0]+.004
-    rear=.30-math.sqrt(max(.0004,.238**2-(z-.40)**2))
+    rx, rz = _reactor_center(dims)
+    rear=rx-math.sqrt(max(.0004,.238**2-(z-rz)**2))
     x=front+(rear-front)*u
     # Deep compound waist: tuck beneath the rider's thighs, then flare into
     # the coaming above them. The forward seam matches the nose exactly.
@@ -159,29 +174,32 @@ def mid_surface(dims,side,u,v):
     return (x,side*y,z)
 
 
-def tail_floor(x):
-    u=(x-.495)/.620
-    return _interp([(0,.748),(.15,.785),(.38,.876),(.70,.938),(1,.923)],u)
+def tail_floor(x, dims=None):
+    end = _tail_end(dims) if dims is not None else 1.485
+    u=(x-.495)/max(.001,end-.495)
+    return _interp([(0,.748),(.15,.792),(.38,.882),(.70,.958),(1,.918)],u)
 
 
-def tail_outer(x):
-    u=(x-.495)/.620
-    return _interp([(0,.173),(.30,.190),(.65,.172),(1,.108)],u)
+def tail_outer(x, dims=None):
+    end = _tail_end(dims) if dims is not None else 1.485
+    u=(x-.495)/max(.001,end-.495)
+    return _interp([(0,.180),(.35,.260),(.62,.320),(.82,.300),(1,.220)],u)
 
 
 def rear_surface(dims,side,u,v):
     """Fixed shoulder meets the independently hinged canopy at a 4 mm seam."""
-    x=.535+.58*u
+    x=.535+(_tail_end(dims)-.535)*u
     lower=_interp([(0,.57),(.24,.69),(.58,.85),(1,.905)],u)
-    upper=tail_floor(x)-.004
+    upper=tail_floor(x,dims)-.004
     z=lower+(upper-lower)*v
-    outer=.184+.025*math.sin(math.pi*u)
-    y=outer+(tail_outer(x)-outer)*v**4
+    outer=.285+.025*math.sin(math.pi*u)
+    y=outer+(tail_outer(x,dims)-outer)*v**4
     return (x,side*y,z)
 
 
 def sill_surface(dims,side,u,v):
-    x=-.55+1.28*u
+    x0, x1 = -.740, _rear_wheel_x(dims) - .100
+    x=x0+(x1-x0)*u
     z=.130+.055*u**5+.020*(1-u)**6+.033*v+.008*math.sin(math.pi*u)
     return x,side*(.170+.012*math.sin(math.pi*u)+.011*v),z
 
@@ -263,7 +281,7 @@ def nose_shell(dims,side):
     # Inner wheel-well bridges tire-side clearance to the broad fairing face.
     def wheelwell(u,v):
         x,outer,z=nose_surface(dims,side,0,u)
-        inner=.162
+        inner=dims.get("frontWheelSectionWidth",dims["wheelSectionWidth"])/2+.018
         for capsule in rider_capsules()[2:]:
             interval=capsule_axis_interval(capsule,1,(x,0,z),margin=.018)
             if interval:
@@ -272,10 +290,13 @@ def nose_shell(dims,side):
     skin(bm,wheelwell,40,12,.004,(1,0,0))
     # Partial upper wheel well rolls from side shoulder across the tire crown.
     def fender(u,v):
-        a=math.radians(50+74*u)
-        r=dims['wheelOuterDiameter']/2+.018+.010*math.sin(math.pi*v)
-        return (-dims['wheelbase']/2+r*math.cos(a),side*(.004+.174*v),.46+r*math.sin(a))
-    skin(bm,fender,40,18,.007,(0,0,-1))
+        a=math.radians(24+132*u)
+        r=dims['wheelOuterDiameter']/2+.024+.008*math.sin(math.pi*v)
+        half=dims.get("frontWheelSectionWidth",dims["wheelSectionWidth"])/2
+        y0=half+.016
+        return (-dims['wheelbase']/2+r*math.cos(a),side*(y0+(.350-y0)*v),
+                dims['wheelOuterDiameter']/2+r*math.sin(a))
+    skin(bm,fender,48,18,.008,(0,-side,0))
     # Close the crown across the front wheel/hood, then peel apart into the
     # rider channel. The outer edge uses the same wedge termination exactly.
     def crown(u,v):
@@ -290,6 +311,16 @@ def nose_shell(dims,side):
         y=side*(inner+(abs(outer)-inner)*v)
         return x,y,z+.012*math.sin(math.pi*v)
     skin(bm,crown,34,18,.009,(0,0,-1))
+    # Broad faceted front cowl visible in the exact handlebar/front reference.
+    # Two mirrored halves meet on centerline; the tire remains physically clear.
+    def front_cowl(u,v):
+        z=.735+.245*u
+        width=.350-.065*u
+        y=side*(.006+width*v)
+        offset=_interp([(0,.415),(.52,.315),(1,.120)],u)
+        x=-dims['wheelbase']/2+offset+.012*(1-v)
+        return x,y,z
+    skin(bm,front_cowl,30,18,.009,(1,0,0))
     return bm
 
 
@@ -328,6 +359,15 @@ def mid_shell(dims,side):
 def rear_shell(dims,side):
     bm=L.new_bm()
     skin(bm,lambda u,v:rear_surface(dims,side,u,v),40,18,.009,(0,-side,0))
+    # Outer rear fender follows the wheel crown instead of ending at the axle.
+    def rear_fender(u,v):
+        a=math.radians(28+124*u)
+        r=dims['wheelOuterDiameter']/2+.026+.007*math.sin(math.pi*v)
+        half=dims.get("rearWheelSectionWidth",dims["wheelSectionWidth"])/2
+        y0=half+.016
+        return (_rear_wheel_x(dims)+r*math.cos(a),side*(y0+(.365-y0)*v),
+                dims['wheelOuterDiameter']/2+r*math.sin(a))
+    skin(bm,rear_fender,48,18,.008,(0,-side,0))
     # A tapered lower haunch makes the rear wheel part of the body volume.
     # Keep its face and backing outside the protected tire/gyro envelopes.
     def lower_haunch(u,v):
@@ -335,7 +375,7 @@ def rear_shell(dims,side):
         front=.540+.010*math.sin(math.pi*v)
         back=_interp([(0,.765),(.45,.666),(1,.614)],v)
         x=front+(back-front)*u
-        y=.286+.014*math.sin(math.pi*u)*math.sin(math.pi*v)
+        y=.335+.016*math.sin(math.pi*u)*math.sin(math.pi*v)
         return x,side*y,z
     skin(bm,lower_haunch,14,24,.008,(0,-side,0))
     return bm

@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "updated": "2026-09-30",
+  "updated": "2026-09-30 pass9 exact-three-view correction",
   "objective": "Fix current Light Cycle body to approved reference while preserving engineering; keep durable per-part handoffs.",
   "branch": "art/reference-body-redesign",
   "productionBase": "c5d0039fcbaafa0d77f37c97525ca0f8be079f13",
-  "primaryReference": "docs/references/00_generated_hybrid_concept.png.png",
+  "primaryReference": "2026-09-30 exact uploaded side/front/rear views; measurements in docs/handoff/REFERENCE_MEASUREMENTS_2026-09-30.md",
   "visualApproval": {
-    "status": "pending",
+    "status": "pass8_rejected_pass9_pending",
     "blockingForMerge": true,
-    "evidence": "docs/review/reference-comparison.png"
+    "evidence": "Fresh pass9 CI renders required"
   },
   "tasks": [
     {
@@ -75,7 +75,7 @@
     },
     {
       "id": "primary_body",
-      "status": "awaiting_visual_review",
+      "status": "needs_fresh_pass9_verification",
       "owner": "parent",
       "files": [
         "tools/geo/chassis.py"
@@ -83,18 +83,18 @@
       "dependsOn": [
         "baseline"
       ],
-      "next": "Pass8 built and six clay/full matrix/comparison inspected. Reference fidelity, panel continuity and final art quality remain unapproved."
+      "next": "Pass8 was rejected. Rebuild pass9 from the exact three-view proportion contract, then regenerate and inspect fresh evidence."
     },
     {
       "id": "clay_gate",
-      "status": "awaiting_visual_review",
+      "status": "needs_fresh_pass9_verification",
       "owner": "parent",
       "files": [],
       "dependsOn": [
         "primary_body",
         "qa_tools"
       ],
-      "next": "Pass8 built and six clay/full matrix/comparison inspected. Reference fidelity, panel continuity and final art quality remain unapproved."
+      "next": "Pass8 was rejected. Rebuild pass9 from the exact three-view proportion contract, then regenerate and inspect fresh evidence."
     },
     {
       "id": "cockpit_tail",
@@ -123,7 +123,7 @@
     },
     {
       "id": "materials_lights_off",
-      "status": "awaiting_visual_review",
+      "status": "needs_fresh_pass9_verification",
       "owner": null,
       "files": [],
       "dependsOn": [
@@ -132,68 +132,67 @@
         "cockpit_tail",
         "energy_damage"
       ],
-      "next": "Pass8 built and six clay/full matrix/comparison inspected. Reference fidelity, panel continuity and final art quality remain unapproved."
+      "next": "Pass8 was rejected. Rebuild pass9 from the exact three-view proportion contract, then regenerate and inspect fresh evidence."
     },
     {
       "id": "canonical_lods",
-      "status": "complete",
+      "status": "needs_fresh_pass9_verification",
       "owner": "parent",
       "files": [],
       "dependsOn": [
         "materials_lights_off"
       ],
-      "next": "Pass8 implemented and locally verified; see docs/review/verification.json. Recheck after relevant source changes."
+      "next": "Pass8 was rejected. Rebuild pass9 from the exact three-view proportion contract, then regenerate and inspect fresh evidence."
     },
     {
       "id": "runtime_regression",
-      "status": "complete",
+      "status": "needs_fresh_pass9_verification",
       "owner": null,
       "files": [],
       "dependsOn": [
         "canonical_lods"
       ],
-      "next": "Pass8 implemented and locally verified; see docs/review/verification.json. Recheck after relevant source changes."
+      "next": "Pass8 was rejected. Rebuild pass9 from the exact three-view proportion contract, then regenerate and inspect fresh evidence."
     },
     {
       "id": "final_matrix",
-      "status": "complete",
+      "status": "needs_fresh_pass9_verification",
       "owner": "parent",
       "files": [],
       "dependsOn": [
         "canonical_lods",
         "comparison_tools"
       ],
-      "next": "Pass8 implemented and locally verified; see docs/review/verification.json. Recheck after relevant source changes."
+      "next": "Pass8 was rejected. Rebuild pass9 from the exact three-view proportion contract, then regenerate and inspect fresh evidence."
     },
     {
       "id": "human_visual_review",
-      "status": "pending",
+      "status": "pending_pass9",
       "owner": "user",
       "files": [],
       "dependsOn": [
         "final_matrix"
       ],
-      "next": "Explicit human confirmation of reference fidelity; blocking final merge."
+      "next": "User explicitly rejected pass8. Review only fresh pass9 renders against the exact three uploaded views."
     },
     {
       "id": "publish_pr",
-      "status": "complete",
+      "status": "open_draft_revision",
       "owner": "parent",
       "files": [],
       "dependsOn": [
         "runtime_regression",
         "final_matrix"
       ],
-      "next": "Draft PR #2 is pushed. Full production CI passed on 58ac572a23cee1239e8d3a2c8c8ff9d58430a22e. Final handoff update only changes documentation/evidence. Explicit human visual approval and latest green PR checks remain required before merge."
+      "next": "Keep PR #2 draft. Pass9 source revision is being pushed; do not merge until fresh CI is green and user approves the fresh visuals."
     }
   ],
   "activeProcesses": [],
   "pullRequest": "https://github.com/mikevocalz/lightcycle/pull/2",
   "remoteCI": {
-    "status": "pass",
-    "testedCommit": "58ac572a23cee1239e8d3a2c8c8ff9d58430a22e",
-    "run": "https://github.com/mikevocalz/lightcycle/actions/runs/36754410085",
-    "receipt": "docs/review/ci-run.json",
-    "scope": "Full production verification; subsequent handoff-only commit does not change model/runtime/check sources. Inspect latest PR checks before merge."
+    "status": "pending_pass9",
+    "testedCommit": null,
+    "run": null,
+    "scope": "Previous pass8 CI is stale after exact-reference corrective geometry changes."
   }
 }
