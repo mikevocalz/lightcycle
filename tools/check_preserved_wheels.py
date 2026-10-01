@@ -285,7 +285,6 @@ def architecture_view(nodes):
                 "primitives": [{
                     "mode": p["mode"], "material": p["material"],
                     "attribute_names": sorted(p["attributes"]), "targets": p["targets"],
-                    "triangle_count": p["triangle_evidence"]["triangle_count"],
                 } for p in node["mesh"]["primitives"]],
             }
         result[name] = item
