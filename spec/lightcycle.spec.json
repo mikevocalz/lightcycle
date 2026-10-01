@@ -47,9 +47,10 @@
     "frontWheelSectionWidth": 0.42,
     "rearWheelSectionWidth": 0.48,
     "handlebarHalfSpan": 0.36,
-    "reactorCenterX": 0.27,
+    "reactorCenterX": 0.3,
     "reactorCenterZ": 0.4,
-    "wheelReferenceRevision": "2026-09-30-exact-three-view"
+    "wheelReferenceRevision": "2026-09-30-exact-three-view",
+    "reactorCenterNote": "Pass9 geometry gate: 0.30 m keeps the full gyro envelope clear of the solved rider spine while remaining near the reference center. Revisit only from fresh side overlay."
   },
   "materials": {
     "MAT_LC_GRAPHITE": {
