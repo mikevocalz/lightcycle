@@ -321,7 +321,10 @@ def nose_shell(dims,side):
     def front_cowl(u,v):
         z=.735+.245*u
         width=.350-.065*u
-        y=side*(.006+width*v)
+        # Leave the solved head/rider channel open; the reference cowl is a pair of
+        # outboard faceted shoulders, not a plate through the rider's helmet volume.
+        inner_y=.120
+        y=side*(inner_y+(width-inner_y)*v)
         offset=_interp([(0,.415),(.52,.315),(1,.120)],u)
         x=-dims['wheelbase']/2+offset+.012*(1-v)
         return x,y,z
@@ -345,7 +348,8 @@ def mid_shell(dims,side):
     def brow(u,v):
         a=math.radians(25+132*u)
         r=.238+.037*v
-        return .30+r*math.cos(a),side*(.304+.008*math.sin(math.pi*v)),.40+r*math.sin(a)
+        brow_y=max(.365,dims["riderEnvelope"].get("legOutboardY",.21)+.090)
+        return .30+r*math.cos(a),side*(brow_y+.008*math.sin(math.pi*v)),.40+r*math.sin(a)
     skin(bm,brow,48,10,.010,(0,-side,0))
     # Raised continuous coaming surrounds, rather than fills, the rider channel.
     skin(bm,lambda u,v:coaming_surface(dims,side,u,v),48,14,.007,(0,0,-1))
