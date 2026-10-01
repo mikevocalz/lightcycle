@@ -201,7 +201,12 @@ def sill_surface(dims,side,u,v):
     x0, x1 = -.740, _rear_wheel_x(dims) - .100
     x=x0+(x1-x0)*u
     z=.130+.055*u**5+.020*(1-u)**6+.033*v+.008*math.sin(math.pi*u)
-    return x,side*(.170+.012*math.sin(math.pi*u)+.011*v),z
+    # The reference-corrective wheels are substantially wider than pass8.
+    # Keep this carbon sill outside both tire slabs instead of piercing the rear tire.
+    wheel_half=max(dims.get("frontWheelSectionWidth",dims["wheelSectionWidth"]),
+                   dims.get("rearWheelSectionWidth",dims["wheelSectionWidth"]))*.5
+    base_y=max(.170,wheel_half+.022)
+    return x,side*(base_y+.012*math.sin(math.pi*u)+.011*v),z
 
 
 def saddle_surface(u,v):
