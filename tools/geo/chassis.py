@@ -299,8 +299,17 @@ def nose_shell(dims,side):
         r=dims['wheelOuterDiameter']/2+.024+.008*math.sin(math.pi*v)
         half=dims.get("frontWheelSectionWidth",dims["wheelSectionWidth"])/2
         y0=half+.016
-        return (-dims['wheelbase']/2+r*math.cos(a),side*(y0+(.350-y0)*v),
-                dims['wheelOuterDiameter']/2+r*math.sin(a))
+        x=-dims['wheelbase']/2+r*math.cos(a)
+        z=dims['wheelOuterDiameter']/2+r*math.sin(a)
+        ymag=y0+(.350-y0)*v
+        # The upper wheel shoulder passes beside the solved forearms. Push only
+        # the affected samples outboard of the complete rider envelope instead
+        # of weakening the 2 mm body/rider acceptance gate.
+        for capsule in rider_capsules():
+            interval=capsule_axis_interval(capsule,1,(x,0,z),margin=.018)
+            if interval:
+                ymag=max(ymag,max(abs(q) for q in interval))
+        return (x,side*ymag,z)
     skin(bm,fender,48,18,.008,(0,-side,0))
     # Close the crown across the front wheel/hood, then peel apart into the
     # rider channel. The outer edge uses the same wedge termination exactly.
